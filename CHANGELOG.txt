@@ -1,0 +1,12 @@
+SmartenIT v1.1 - 26/08/2014
+==========================
+
+* Fixed reference vector calculation in Economic Analyzer.
+* Added central dependencies and plugins management.
+* Modified TimeScheduleParameters-related classes, DB table and UI page with 2 new parameters.
+
+
+SmartenIT v1.0 - 15/07/2014
+==========================
+
+* Initial version, implementing DTM mechanism functionalities.

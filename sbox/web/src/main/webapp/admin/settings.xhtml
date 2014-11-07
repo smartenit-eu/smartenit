@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="" />
+	<meta name="author" content="" />
+	<link rel="shortcut icon" href="../../assets/ico/favicon.ico" />
+
+	<title>SBox Settings</title>
+	<link href="../css/bootstrap.css" rel="stylesheet" />
+	<link href="../css/sbox-main.css" rel="stylesheet" />
+	<link href="../css/bootstrap-datetimepicker.css" rel="stylesheet" />
+	<link href="../css/bootstrapValidator.css" rel="stylesheet" />
+
+	<script src="../js/jquery.js"></script>
+	<script src="../js/bootstrap.js"></script>
+</h:head>
+
+<h:body>
+
+	<div class="container">
+		<!-- Static navbar -->
+		<div class="navbar navbar-default" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse"
+						data-target=".navbar-collapse">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#">SmartenIT</a>
+				</div>
+				<div class="navbar-collapse collapse">
+					<h:form>
+						<ul class="nav navbar-nav navbar-right">
+							<li><h:commandLink value="Home"
+									action="#{dashboardBean.gotoIndexPage}" /></li>
+							<li><h:commandLink value="ISP"
+									action="#{dashboardBean.gotoIspPage}" /></li>
+							<li class="dropdown"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">Network <b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Routers"
+											action="#{dashboardBean.gotoRoutersPage}" /></li>
+									<li><h:commandLink value="SDN Controllers"
+											action="#{dashboardBean.gotoSDNControllersPage}" /></li>
+									<li><h:commandLink value="Links"
+											action="#{dashboardBean.gotoLinksPage}" /></li>
+									<li><h:commandLink value="Tunnels"
+											action="#{dashboardBean.gotoTunnelsPage}" /></li>
+								</ul></li>
+							<li class="dropdown"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">Datacenters <b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Local Clouds"
+											action="#{dashboardBean.gotoLocalCloudsPage}" /></li>
+									<li><h:commandLink value="Remote Clouds"
+											action="#{dashboardBean.gotoRemoteCloudsPage}" /></li>
+									<li><h:commandLink value="Inter-Datacenter"
+											action="#{dashboardBean.gotoInterDatacenterPage}" /></li>
+								</ul></li>
+							<li class="active dropdown"><a href="#"
+								class="dropdown-toggle" data-toggle="dropdown">SBox <b
+									class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Settings"
+											action="#{dashboardBean.gotoSettingsPage}" /></li>
+									<li><a href="#">Reports</a></li>
+									<li><a href="#">Analytics</a></li>
+									<li class="divider"></li>
+									<li><a href="#">Demo</a></li>
+								</ul></li>
+						</ul>
+					</h:form>
+				</div>
+				<!--/.nav-collapse -->
+			</div>
+			<!--/.container-fluid -->
+		</div>
+
+
+		<div class="row marketing">
+			<h2 class="page-header">DTM Settings</h2>
+			<h:form class="form-horizontal" role="form" id="settings">
+
+				<div class="form-group">
+					<label for="startDate" class="col-xs-4 control-label">Start
+						Date</label>
+					<div class="col-xs-6">
+						<div class='input-group date' id='datetimepicker1'>
+							<h:inputText type="text" class="form-control"
+								placeholder="Start Date"
+								value="#{dashboardBean.timeParams.startDate}">
+								<f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" type="date" />
+							</h:inputText>
+							<span class="input-group-addon"><span
+								class="glyphicon glyphicon-calendar"></span> </span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="accountingPeriod" class="col-xs-4 control-label">Accounting
+						Period</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control"
+							id="accountingPeriod" placeholder="Accounting Period"
+							value="#{dashboardBean.timeParams.accountingPeriod}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="reportingPeriod" class="col-xs-4 control-label">Reporting
+						Period</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="reportingPeriod"
+							placeholder="Reporting Period"
+							value="#{dashboardBean.timeParams.reportingPeriod}" />
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="tol1" class="col-xs-4 control-label">Weight #1</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="tol1"
+							value="#{dashboardBean.timeParams.tol1}" />
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="tol2" class="col-xs-4 control-label">Weight #2</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="tol2"
+							value="#{dashboardBean.timeParams.tol2}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="btn-group col-xs-6 col-xs-offset-4">
+						<h:commandButton type="submit" class="btn btn-primary"
+							action="#{dashboardBean.updateTimeParams}" value="Submit" />
+						<h:commandButton type="reset" class="btn btn-default"
+							value="Cancel" />
+					</div>
+				</div>
+			</h:form>
+		</div>
+
+		<div class="footer">
+			<p>&copy; The SmartenIT Consortium 2014</p>
+		</div>
+
+	</div>
+	<!-- /container -->
+
+	<script>
+		$('.dropdown-toggle').dropdown()
+	</script>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="../js/bootstrap-dropdown.js"></script>
+	<script src="../js/moment.js"></script>
+	<script src="../js/bootstrap-datetimepicker.js"></script>
+	<script src="../js/bootstrapValidator.js"></script>
+	<script src="../js/validator/between.js"></script>
+	<script src="../js/validator/greaterThan.js"></script>
+	<script>
+		$(document)
+				.ready(
+						function() {
+							$('#settings')
+									.bootstrapValidator(
+											{
+												feedbackIcons : {
+													valid : 'glyphicon glyphicon-ok',
+													invalid : 'glyphicon glyphicon-remove',
+													validating : 'glyphicon glyphicon-refresh'
+												},
+												fields : {
+													'settings:accountingPeriod' : {
+														validators : {
+															between : {
+																min : 300,
+																max : 90000,
+																message : 'The accounting period must be between 300 and 90000 (sec).'
+															}
+														}
+													},
+													'settings:reportingPeriod' : {
+														validators : {
+															between : {
+																min : 30,
+																max : 60,
+																message : 'The reporting period must be between 30 and 60 (sec).'
+															}
+														}
+													},
+													'settings:tol1' : {
+														validators : {
+															greaterThan : {
+																value : 0,
+																message : 'The weight #1 must be greater or equal than 0.0.'
+															}
+														}
+													},
+													'settings:tol2' : {
+														validators : {
+															greaterThan : {
+																value : 0,
+																message : 'The weight #2 must be greater or equal than 0.0.'
+															}
+														}
+													}
+												}
+											});
+						});
+	</script>
+
+	<script type="text/javascript">
+		$(function() {
+			$('#datetimepicker1').datetimepicker({
+				format : 'MM/DD/YYYY HH:mm:ss',
+				pick12HourFormat : false
+			});
+		});
+	</script>
+
+</h:body>
+</html>

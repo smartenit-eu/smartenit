@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="" />
+	<meta name="author" content="" />
+	<link rel="shortcut icon" href="../../assets/ico/favicon.ico" />
+
+	<title>SBox Administration Page</title>
+	<link href="../css/bootstrap.min.css" rel="stylesheet" />
+	<link href="../css/sbox-main.css" rel="stylesheet" />
+</h:head>
+
+<h:body>
+
+	<div class="container">
+		<!-- Static navbar -->
+		<div class="navbar navbar-default" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse"
+						data-target=".navbar-collapse">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#">SmartenIT</a>
+				</div>
+				<div class="navbar-collapse collapse">
+					<h:form>
+						<ul class="nav navbar-nav navbar-right">
+							<li class="active"><h:commandLink value="Home"
+									action="#{dashboardBean.gotoIndexPage}" /></li>
+							<li><h:commandLink value="ISP"
+									action="#{dashboardBean.gotoIspPage}" /></li>
+							<li class="dropdown"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">Network <b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Routers"
+											action="#{dashboardBean.gotoRoutersPage}" /></li>
+									<li><h:commandLink value="SDN Controllers"
+											action="#{dashboardBean.gotoSDNControllersPage}" /></li>
+									<li><h:commandLink value="Links"
+											action="#{dashboardBean.gotoLinksPage}" /></li>
+									<li><h:commandLink value="Tunnels"
+											action="#{dashboardBean.gotoTunnelsPage}" /></li>
+								</ul></li>
+							<li class="dropdown"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">Datacenters <b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Local Clouds"
+											action="#{dashboardBean.gotoLocalCloudsPage}" /></li>
+									<li><h:commandLink value="Remote Clouds"
+											action="#{dashboardBean.gotoRemoteCloudsPage}" /></li>
+									<li><h:commandLink value="Inter-Datacenter"
+											action="#{dashboardBean.gotoInterDatacenterPage}" /></li>
+								</ul></li>
+							<li class="dropdown"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">SBox <b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Settings"
+											action="#{dashboardBean.gotoSettingsPage}" /></li>
+									<li><a href="#">Reports</a></li>
+									<li><a href="#">Analytics</a></li>
+									<li class="divider"></li>
+									<li><a href="#">Demo</a></li>
+								</ul></li>
+						</ul>
+					</h:form>
+				</div>
+				<!--/.nav-collapse -->
+			</div>
+			<!--/.container-fluid -->
+		</div>
+
+		<div class="jumbotron">
+			<h1>Welcome to SBox</h1>
+			<p class="lead">The SBox is the central entity of the SmartenIT
+				architecture, hosting the Dynamic Traffic Management mechanism.</p>
+			<p>You will be able to configure relevant ISP, network,
+				datacenters and SBox parameters.</p>
+			<p>
+				<a class="btn btn-lg btn-success" href="http://www.smartenit.eu/"
+					role="button">Learn more</a>
+			</p>
+		</div>
+
+		<div class="row marketing">
+			<div class="col-lg-6">
+				<h4>ISP</h4>
+				<p>Configure general ISP information and Autonomous systems.</p>
+
+				<h4>Network</h4>
+				<p>Configure the ISP's internal network entities and parameters.
+					Specifically, provide information for the SDN controllers, BG and
+					DA routers, links and tunnels.</p>
+			</div>
+
+			<div class="col-lg-6">
+				<h4>Datacenters</h4>
+				<p>Configure local and remote clouds, and all inter-datacenter
+					communication sets.</p>
+
+				<h4>SBox</h4>
+				<p>Configure SBox parameters, get reports and analytics, as well
+					as navigate to the demonstration page.</p>
+			</div>
+		</div>
+
+		<div class="footer">
+			<p>&copy; The SmartenIT Consortium 2014</p>
+		</div>
+
+	</div>
+	<!-- /container -->
+
+	<script>
+		$('.dropdown-toggle').dropdown()
+	</script>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="../js/jquery.js"></script>
+	<script src="../js/bootstrap-dropdown.js"></script>
+</h:body>
+</html>

@@ -1,0 +1,105 @@
+<!--
+
+    Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+  
+  <id>dtm-distribution</id>
+  <includeBaseDirectory>false</includeBaseDirectory>
+
+  <formats>
+    <format>zip</format>
+  </formats>
+
+  <fileSets>
+    <fileSet>
+      <directory>..</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>INSTALL.txt</include>
+        <include>CHANGELOG.txt</include>
+	<include>LICENSE.txt</include>
+      </includes>
+    </fileSet>
+
+    <fileSet>
+      <directory>../sbox/main/target</directory>
+      <outputDirectory>/sbox/main</outputDirectory>
+      <includes>
+        <include>sbox.jar</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>../sbox/main/src/main/resources</directory>
+      <outputDirectory>/sbox/main</outputDirectory>
+      <includes>
+        <include>sbox.properties</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>../sbox/commons/src/main/resources</directory>
+      <outputDirectory>/sbox/main</outputDirectory>
+      <includes>
+        <include>logback.xml</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>../sbox/db/dao/src/main/resources</directory>
+      <outputDirectory>/sbox</outputDirectory>
+      <includes>
+        <include>smartenit.db</include>
+        <include>upgrade.sql</include>
+      </includes>
+    </fileSet>
+
+    <fileSet>
+      <directory>../sbox/web/target</directory>
+      <outputDirectory>/sbox/web</outputDirectory>
+      <includes>
+        <include>sbox.war</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>../sbox/web/src/main/resources</directory>
+      <outputDirectory>/sbox/web/jetty-conf</outputDirectory>
+      <includes>
+        <include>jetty.xml</include>
+        <include>realm.properties</include>
+      </includes>
+    </fileSet>
+
+    <fileSet>
+      <directory>../sdn/floodlight-0.90/target</directory>
+      <outputDirectory>/sdn</outputDirectory>
+      <includes>
+        <include>sdn.jar</include>
+      </includes>
+    </fileSet>
+
+    <fileSet>
+      <directory>../enduser/app/target</directory>
+      <outputDirectory>/enduser</outputDirectory>
+      <includes>
+        <include>*.apk</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+
+  <!-- TODO Add uNaDa executable and configuration files! -->
+
+</assembly>

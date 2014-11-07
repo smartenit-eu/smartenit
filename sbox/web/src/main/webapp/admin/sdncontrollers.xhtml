@@ -1,0 +1,274 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="" />
+	<meta name="author" content="" />
+	<link rel="shortcut icon" href="../../assets/ico/favicon.ico" />
+
+	<title>SBox SDN Controllers</title>
+	<link href="../css/bootstrap.css" rel="stylesheet" />
+	<link href="../css/sbox-main.css" rel="stylesheet" />
+	<link href="../css/bootstrapValidator.css" rel="stylesheet" />
+
+	<script src="../js/jquery.js"></script>
+	<script src="../js/bootstrap.js"></script>
+</h:head>
+
+<h:body>
+
+	<div class="container">
+		<!-- Static navbar -->
+		<div class="navbar navbar-default" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse"
+						data-target=".navbar-collapse">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#">SmartenIT</a>
+				</div>
+				<div class="navbar-collapse collapse">
+					<h:form>
+						<ul class="nav navbar-nav navbar-right">
+							<li><h:commandLink value="Home"
+									action="#{dashboardBean.gotoIndexPage}" /></li>
+							<li><h:commandLink value="ISP"
+									action="#{dashboardBean.gotoIspPage}" /></li>
+							<li class="active dropdown"><a href="#"
+								class="dropdown-toggle" data-toggle="dropdown">Network <b
+									class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Routers"
+											action="#{dashboardBean.gotoRoutersPage}" /></li>
+									<li><h:commandLink value="SDN Controllers"
+											action="#{dashboardBean.gotoSDNControllersPage}" /></li>
+									<li><h:commandLink value="Links"
+											action="#{dashboardBean.gotoLinksPage}" /></li>
+									<li><h:commandLink value="Tunnels"
+											action="#{dashboardBean.gotoTunnelsPage}" /></li>
+								</ul></li>
+							<li class="dropdown"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">Datacenters <b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Local Clouds"
+											action="#{dashboardBean.gotoLocalCloudsPage}" /></li>
+									<li><h:commandLink value="Remote Clouds"
+											action="#{dashboardBean.gotoRemoteCloudsPage}" /></li>
+									<li><h:commandLink value="Inter-Datacenter"
+											action="#{dashboardBean.gotoInterDatacenterPage}" /></li>
+								</ul></li>
+							<li class="dropdown"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">SBox <b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Settings"
+											action="#{dashboardBean.gotoSettingsPage}" /></li>
+									<li><a href="#">Reports</a></li>
+									<li><a href="#">Analytics</a></li>
+									<li class="divider"></li>
+									<li><a href="#">Demo</a></li>
+								</ul></li>
+						</ul>
+					</h:form>
+				</div>
+				<!--/.nav-collapse -->
+			</div>
+			<!--/.container-fluid -->
+		</div>
+
+		<div class="row marketing">
+			<h2 class="page-header">SDN Controllers</h2>
+			<h:form class="form-horizontal" role="form" id="sdns">
+				<div class="form-group">
+					<label for="managementAddress" class="col-xs-4 control-label">SDN
+						Controller Address</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control"
+							id="managementAddress" placeholder="SDN Controller IP Address"
+							value="#{dashboardBean.sdn.managementAddress.prefix}" 
+							rendered="#{dashboardBean.editable}"/>
+						<h:outputText type="text" class="form-control"
+							value="#{dashboardBean.sdn.managementAddress.prefix}" 
+							rendered="#{not dashboardBean.editable}"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="restHost" class="col-xs-4 control-label">Rest
+						Host Address</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="restHost"
+							placeholder="Rest Host Address"
+							value="#{dashboardBean.sdn.restHost.prefix}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="restPort" class="col-xs-4 control-label">Rest
+						Port</label>
+					<div class="col-xs-3">
+						<h:inputText type="text" class="form-control" id="restPort"
+							placeholder="Rest Port" value="#{dashboardBean.sdn.restPort}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="openflowHost" class="col-xs-4 control-label">OpenFlow
+						Host Address</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="openflowHost"
+							placeholder="OpenFlow Host Address"
+							value="#{dashboardBean.sdn.openflowHost.prefix}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="openflowPort" class="col-xs-4 control-label">OpenFlow
+						Port</label>
+					<div class="col-xs-3">
+						<h:inputText type="text" class="form-control" id="openflowPort"
+							placeholder="OpenFlow Port"
+							value="#{dashboardBean.sdn.openflowPort}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="daRouters" class="col-xs-4 control-label">Attached
+						DA Routers</label>
+					<div class="col-xs-6">
+						<h:selectManyListbox value="#{dashboardBean.selectedDARouters}"
+							id="daRouters" class="form-control">
+							<f:selectItems value="#{dashboardBean.daRoutersArray}" var="d"
+								itemLabel="#{d.managementAddress.prefix}"
+								itemValue="#{d.managementAddress.prefix}" />
+						</h:selectManyListbox>
+					</div>
+				</div>
+
+
+				<div class="form-group">
+					<div class="btn-group col-xs-6 col-xs-offset-4">
+						<h:commandButton type="submit" class="btn btn-primary"
+							action="#{dashboardBean.updateSDNController}" value="Submit" />
+						<h:commandButton type="reset" class="btn btn-default"
+							value="Cancel" />
+					</div>
+				</div>
+			</h:form>
+			<h:form>
+				<div class="table-responsive">
+					<h:dataTable value="#{dashboardBean.sdnList}" var="s"
+						class="table table-striped">
+						<h:column>
+							<f:facet name="header">SDN Controller Address</f:facet>
+								#{s.managementAddress.prefix}
+							</h:column>
+						<h:column>
+							<f:facet name="header">Rest Host Address</f:facet>
+								#{s.restHost.prefix}
+							</h:column>
+						<h:column>
+							<f:facet name="header">Rest Port</f:facet>
+								#{s.restPort}
+							</h:column>
+						<h:column>
+							<f:facet name="header">OpenFlow Host Address</f:facet>
+								#{s.openflowHost.prefix}
+							</h:column>
+						<h:column>
+							<f:facet name="header">OpenFlow Port</f:facet>
+								#{s.openflowPort}
+							</h:column>
+						<h:column>
+							<f:facet name="header">Actions</f:facet>
+							<div class="btn-group">
+								<h:commandLink type="button" class="btn btn-warning btn-sm"
+									action="#{dashboardBean.editSDNController(s)}">
+									<span class="glyphicon glyphicon-pencil"/></h:commandLink>
+								<h:commandLink type="button" class="btn btn-danger btn-sm"
+									action="#{dashboardBean.deleteSDNController(s)}">
+									<span class="glyphicon glyphicon-remove"/></h:commandLink>
+							</div>
+						</h:column>
+					</h:dataTable>
+				</div>
+			</h:form>
+		</div>
+
+		<div class="footer">
+			<p>&copy; The SmartenIT Consortium 2014</p>
+		</div>
+
+	</div>
+	<!-- /container -->
+
+	<script>
+		$('.dropdown-toggle').dropdown()
+	</script>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="../js/jquery.js"></script>
+	<script src="../js/bootstrap-dropdown.js"></script>
+	<script src="../js/bootstrapValidator.js"></script>
+	<script src="../js/validator/ip.js"></script>
+	<script src="../js/validator/notEmpty.js"></script>
+
+	<script>
+		$(document)
+				.ready(
+						function() {
+							$('#sdns')
+									.bootstrapValidator(
+											{
+												feedbackIcons : {
+													valid : 'glyphicon glyphicon-ok',
+													invalid : 'glyphicon glyphicon-remove',
+													validating : 'glyphicon glyphicon-refresh'
+												},
+												fields : {
+													'sdns:managementAddress' : {
+														validators : {
+															ip : {
+																message : 'The SDN Controller address is not an IPv4 address.'
+															},
+															notEmpty : {
+																message : 'The SDN Controller address must not be empty.'
+															}
+														}
+													},
+													'sdns:restHost' : {
+														validators : {
+															ip : {
+																message : 'The Rest host address is not an IPv4 address.'
+															},
+															notEmpty : {
+																message : 'The Rest host address must not be empty.'
+															}
+														}
+													},
+													'sdns:openflowHost' : {
+														validators : {
+															ip : {
+																message : 'The Openflow host address is not an IPv4 address.'
+															},
+															notEmpty : {
+																message : 'The Openflow host address must not be empty.'
+															}
+														}
+													}
+												}
+											});
+						});
+	</script>
+</h:body>
+</html>

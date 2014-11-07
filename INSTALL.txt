@@ -1,0 +1,43 @@
+Prerequisites
+==========================
+
+* Any Linux distribution 
+* Oracle JDK 7 update 51 (Configure JAVA_HOME and PATH)
+* Jetty 9.1.5.v20140505 (Configure JETTY_HOME and PATH)
+* Sqlite 3
+
+
+SBox Instructions
+==========================
+
+Unzip and extract the generated smartenit-${project.version}.zip file and do the following (sbox/ directory):
+
+1. Copy the smartenit.db file to the machine's home directory: cp sbox/smartenit.db $HOME/smartenit.db
+
+2. Copy (and replace) the jetty.xml and realm.properties included in jetty-conf folderto the $JETTY_HOME/etc directory: cp sbox/web/jetty-conf/jetty.xml $JETTY_HOME/etc/jetty.xml; cp sbox/web/jetty-conf/realm.properties $JETTY_HOME/etc/realm.properties
+
+3. Copy the provided sbox.war file to the $JETTY_HOME/webapps directory: cp sbox/web/sbox.war $JETTY_HOME/webapps/sbox.war
+
+4. Initialize jetty ($JETTY_HOME/ directory): java -jar start.jar --module=https 
+
+5. Open a web browser and browse at https://<machine-ip-address>/sbox/admin or http://<machine-ip-address>:8080/sbox/admin,
+where <machine-ip-address> is the SBox's ip address (or localhost). Signin with admin/admin credentials and fill the database.
+
+6. Edit the sbox.properties file with the correct path to the smartenit.db file, and the rest of required parameters. 
+
+7. To run the main SBox application: java -jar sbox.jar
+
+
+Note #1: Steps 1-2 are only required once and during the first installation of the SmartenIT software. 
+
+Note #2: In case you have already installed the previous release of the SmartenIT software (currently v1.0), then to adjust the existing smartenit.db file, extract the modify.sql in the same directory as the smartenit.db and execute: sqlite3 smartenit.db < upgrade.sql. 
+
+Note #3: If you want to change the modify the logging level, edit the logback.xml, change the line <logger name="eu.smartenit.sbox" level="X">, with X the required logging level, e.g. DEBUG, ALL, etc. and rerun the SBox main application: java -Dlogback.configurationFile=./logback.xml -jar sbox.jar
+
+
+SDN Controller Instructions
+==========================
+
+From the previously extracted folder, do the following (sdn/ directory):
+
+1. To run the extended SDN Controller: java -jar sdn.jar

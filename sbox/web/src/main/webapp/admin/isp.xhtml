@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="" />
+	<meta name="author" content="" />
+	<link rel="shortcut icon" href="../../assets/ico/favicon.ico" />
+
+	<title>SBox ASes</title>
+	<link href="../css/bootstrap.css" rel="stylesheet" />
+	<link href="../css/sbox-main.css" rel="stylesheet" />
+	<link href="../css/bootstrapValidator.css" rel="stylesheet" />
+
+	<script src="../js/jquery.js"></script>
+	<script src="../js/bootstrap.js"></script>
+</h:head>
+
+<h:body>
+
+	<div class="container">
+		<!-- Static navbar -->
+		<div class="navbar navbar-default" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse"
+						data-target=".navbar-collapse">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#">SmartenIT</a>
+				</div>
+				<div class="navbar-collapse collapse">
+					<h:form>
+						<ul class="nav navbar-nav navbar-right">
+							<li><h:commandLink value="Home"
+									action="#{dashboardBean.gotoIndexPage}" /></li>
+							<li class="active"><h:commandLink value="ISP"
+									action="#{dashboardBean.gotoIspPage}" /></li>
+							<li class="dropdown"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">Network <b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Routers"
+											action="#{dashboardBean.gotoRoutersPage}" /></li>
+									<li><h:commandLink value="SDN Controllers"
+											action="#{dashboardBean.gotoSDNControllersPage}" /></li>
+									<li><h:commandLink value="Links"
+											action="#{dashboardBean.gotoLinksPage}" /></li>
+									<li><h:commandLink value="Tunnels"
+											action="#{dashboardBean.gotoTunnelsPage}" /></li>
+								</ul></li>
+							<li class="dropdown"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">Datacenters <b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Local Clouds"
+											action="#{dashboardBean.gotoLocalCloudsPage}" /></li>
+									<li><h:commandLink value="Remote Clouds"
+											action="#{dashboardBean.gotoRemoteCloudsPage}" /></li>
+									<li><h:commandLink value="Inter-Datacenter"
+											action="#{dashboardBean.gotoInterDatacenterPage}" /></li>
+								</ul></li>
+							<li class="dropdown"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">SBox <b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><h:commandLink value="Settings"
+											action="#{dashboardBean.gotoSettingsPage}" /></li>
+									<li><a href="#">Reports</a></li>
+									<li><a href="#">Analytics</a></li>
+									<li class="divider"></li>
+									<li><a href="#">Demo</a></li>
+								</ul></li>
+						</ul>
+					</h:form>
+				</div>
+				<!--/.nav-collapse -->
+			</div>
+			<!--/.container-fluid -->
+		</div>
+
+
+		<div class="row marketing">
+			<h2 class="page-header">ISP information</h2>
+			<h:form class="form-horizontal" role="form" id="isp">
+				<div class="form-group">
+					<label for="ispName" class="col-xs-4 control-label">ISP
+						Name</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="ispName"
+							placeholder="ISP Name" value="#{dashboardBean.isp.ispName}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="btn-group col-xs-6 col-xs-offset-4">
+						<h:commandButton type="submit" class="btn btn-primary"
+							action="#{dashboardBean.updateIspName}" value="Submit" />
+						<h:commandButton type="reset" class="btn btn-default"
+							value="Cancel" />
+					</div>
+				</div>
+			</h:form>
+
+			<h2 class="page-header">Autonomous Systems</h2>
+			<h:form class="form-horizontal" role="form" id="asform">
+				<div class="form-group">
+					<label for="asNumber" class="col-xs-4 control-label">AS
+						Number</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="asNumber"
+							placeholder="AS Number" value="#{dashboardBean.as.asNumber}" 
+							rendered="#{dashboardBean.editable}"/>
+						<h:outputText type="text" class="form-control"
+							value="#{dashboardBean.as.asNumber}" 
+							rendered="#{not dashboardBean.editable}"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="sboxIpAddress" class="col-xs-4 control-label">SBox
+						IP Address</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="sboxIpAddress"
+							placeholder="AS Number"
+							value="#{dashboardBean.as.sbox.managementAddress.prefix}" />
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="local" class="col-xs-4 control-label">Local</label>
+					<div class="col-xs-6">
+						<h:selectOneMenu value="#{dashboardBean.as.local}"
+							id="local" class="form-control">
+							<f:selectItem itemValue="true"/>
+							<f:selectItem itemValue="false"/>
+						</h:selectOneMenu>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="btn-group col-xs-6 col-xs-offset-4">
+						<h:commandButton type="submit" class="btn btn-primary"
+							action="#{dashboardBean.updateAS}" value="Submit" />
+						<h:commandButton type="reset" class="btn btn-default"
+							value="Cancel" />
+					</div>
+				</div>
+			</h:form>
+			<h:form>
+				<div class="table-responsive">
+					<h:dataTable value="#{dashboardBean.asList}" var="a"
+						class="table table-striped">
+
+						<h:column>
+							<f:facet name="header">AS Number</f:facet>
+								#{a.asNumber}
+							</h:column>
+
+						<h:column>
+							<f:facet name="header">SBox IP Address</f:facet>
+								#{a.sbox.managementAddress.prefix}
+							</h:column>
+							
+						<h:column>
+							<f:facet name="header">Local</f:facet>
+								#{a.local}
+							</h:column>
+
+						<h:column>
+							<f:facet name="header">Actions</f:facet>
+							<div class="btn-group">
+								<h:commandLink type="button" class="btn btn-warning btn-sm"
+									action="#{dashboardBean.editAS(a)}"> 
+									<span class="glyphicon glyphicon-pencil"/></h:commandLink>
+								<h:commandLink type="button" class="btn btn-danger btn-sm"
+									action="#{dashboardBean.deleteAS(a)}">
+									<span class="glyphicon glyphicon-remove"/></h:commandLink>
+							</div>
+						</h:column>
+					</h:dataTable>
+				</div>
+			</h:form>
+		</div>
+
+		<div class="footer">
+			<p>&copy; The SmartenIT Consortium 2014</p>
+		</div>
+
+	</div>
+	<!-- /container -->
+
+	<script>
+		$('.dropdown-toggle').dropdown()
+	</script>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="../js/bootstrap-dropdown.js"></script>
+	<script src="../js/bootstrapValidator.js"></script>
+	<script src="../js/validator/between.js"></script>
+	<script src="../js/validator/notEmpty.js"></script>
+	<script src="../js/validator/ip.js"></script>
+
+	<script>
+		$(document)
+				.ready(
+						function() {
+							$('#asform')
+									.bootstrapValidator(
+											{
+												feedbackIcons : {
+													valid : 'glyphicon glyphicon-ok',
+													invalid : 'glyphicon glyphicon-remove',
+													validating : 'glyphicon glyphicon-refresh'
+												},
+												fields : {
+													'asform:asNumber' : {
+														validators : {
+															between : {
+																min : 1,
+																max : 65534,
+																message : 'The AS number must be between 1 and 65534.'
+															}
+														}
+													},
+													'asform:sboxIpAddress' : {
+														validators : {
+															ip : {
+																message : 'The SBox address is not an IP address.'
+															},
+															notEmpty : {
+																message : 'The SBox address must not be empty.'
+															}
+														}
+													}
+												}
+											});
+						});
+	</script>
+	<script>
+		$(document)
+				.ready(
+						function() {
+							$('#isp')
+									.bootstrapValidator(
+											{
+												feedbackIcons : {
+													valid : 'glyphicon glyphicon-ok',
+													invalid : 'glyphicon glyphicon-remove',
+													validating : 'glyphicon glyphicon-refresh'
+												},
+												fields : {
+													'isp:ispName' : {
+														validators : {
+															notEmpty : {
+																message : 'The ISP Name must not be empty.'
+															}
+														}
+													}
+												}
+											});
+						});
+	</script>
+</h:body>
+</html>
