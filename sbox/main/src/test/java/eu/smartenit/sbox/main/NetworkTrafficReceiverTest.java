@@ -15,7 +15,7 @@
  */
 package eu.smartenit.sbox.main;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.Executors;
 
@@ -32,8 +32,8 @@ import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.DbConstants;
 import eu.smartenit.sbox.db.dto.AS;
+import eu.smartenit.sbox.db.dto.LocalRVector;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
-import eu.smartenit.sbox.db.dto.RVector;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.interfaces.intersbox.server.InterSBoxServer;
@@ -55,7 +55,7 @@ public class NetworkTrafficReceiverTest {
 		
 		//modifying remote sbox address, to be 127.0.0.1
 		asdao = new ASDAO();
-		remoteAS = asdao.findByAsNumber(2);
+		remoteAS = asdao.findByAsNumber(200);
 		remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("127.0.0.1", 0));
 		asdao.update(remoteAS);
 		
@@ -82,17 +82,17 @@ public class NetworkTrafficReceiverTest {
 		ntm.initialize(NetworkTrafficManagerDTMMode.TRAFFIC_RECEIVER);
 		assertTrue(true);
 		
-		RVector rVector = new RVector();
-    	rVector.setSourceAsNumber(1);
-    	rVector.addVectorValueForLink(new SimpleLinkID("link1", "isp"), 1500L);
-    	rVector.addVectorValueForLink(new SimpleLinkID("link2", "isp"), 2100L);
+		LocalRVector rVector = new LocalRVector();
+    	rVector.setSourceAsNumber(100);
+    	rVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 1500L);
+    	rVector.addVectorValueForLink(new SimpleLinkID("2", "ISP-A"), 2100L);
     	ntm.getDtmTrafficManager().updateRVector(rVector);
     	assertTrue(true);
     	
     	XVector xVector = new XVector();
-    	xVector.setSourceAsNumber(1);
-    	xVector.addVectorValueForLink(new SimpleLinkID("link1", "isp"), 500L);
-    	xVector.addVectorValueForLink(new SimpleLinkID("link2", "isp"), 800L);
+    	xVector.setSourceAsNumber(100);
+    	xVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 500L);
+    	xVector.addVectorValueForLink(new SimpleLinkID("2", "ISP-A"), 800L);
     	ntm.getDtmTrafficManager().updateXVector(xVector);
     	assertTrue(true);
     	
@@ -106,7 +106,7 @@ public class NetworkTrafficReceiverTest {
 	 * inter-sbox server multiple times. 
 	 * 
 	 */
-	@Test @Ignore
+	@Test
 	public void shouldInitializeTrafficReceiverAndSendToInterSboxMultipleTimes() throws InterruptedException {
 		logger.info("--Testing traffic receiver initialize. --");
 		NetworkTrafficManager ntm = new NetworkTrafficManager();
@@ -114,21 +114,17 @@ public class NetworkTrafficReceiverTest {
 		assertTrue(true);
 		
 		for (int i = 0; i < 10; i++) {
-			RVector rVector = new RVector();
-			rVector.setSourceAsNumber(1);
-			rVector.addVectorValueForLink(new SimpleLinkID("link1",
-					"isp"), 1500L);
-			rVector.addVectorValueForLink(new SimpleLinkID("link2",
-					"isp"), 2100L);
+			LocalRVector rVector = new LocalRVector();
+			rVector.setSourceAsNumber(100);
+			rVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 1500L);
+			rVector.addVectorValueForLink(new SimpleLinkID("2", "ISP-A"), 2100L);
 			ntm.getDtmTrafficManager().updateRVector(rVector);
 			assertTrue(true);
 
 			XVector xVector = new XVector();
-			xVector.setSourceAsNumber(1);
-			xVector.addVectorValueForLink(new SimpleLinkID("link1",
-					"isp"), 500L);
-			xVector.addVectorValueForLink(new SimpleLinkID("link2",
-					"isp"), 800L);
+			xVector.setSourceAsNumber(100);
+			xVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 500L);
+			xVector.addVectorValueForLink(new SimpleLinkID("2",	"ISP-A"), 800L);
 			ntm.getDtmTrafficManager().updateXVector(xVector);
 			assertTrue(true);
 
@@ -139,15 +135,13 @@ public class NetworkTrafficReceiverTest {
 	
 	@AfterClass
 	public static void cleanTests() {
-		remoteAS = asdao.findByAsNumber(2);
-		remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("146.124.2.178", 0));
+		remoteAS = asdao.findByAsNumber(200);
+		remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("150.254.160.143", 0));
 		asdao.update(remoteAS);
 		
 		DbConstants.DBI_URL = "jdbc:sqlite:smartenit.db";
 		SBoxThreadHandler.shutdownNowThreads();
 	}
-	
-	
 	
 
 }

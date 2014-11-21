@@ -23,7 +23,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +45,7 @@ import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
 import eu.smartenit.sbox.db.dao.DbConstants;
+import eu.smartenit.sbox.db.dao.LinkDAO;
 import eu.smartenit.sbox.db.dao.SDNControllerDAO;
 import eu.smartenit.sbox.db.dto.AS;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
@@ -94,7 +95,7 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
         
         //Modifying sdn controller address and port, to point to the mock
         sdao = new SDNControllerDAO();
-        sdn = sdao.findById("146.124.2.178");
+        sdn = sdao.findById("192.168.122.105");
         sdn.setRestPort(8888);
         sdn.setRestHost(new NetworkAddressIPv4("127.0.0.1", 0));
         sdao.update(sdn);
@@ -121,6 +122,7 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 		NetworkTrafficManager ntm = new NetworkTrafficManager();
 		ntm.initialize(NetworkTrafficManagerDTMMode.TRAFFIC_SENDER);
 		
+		SBoxProperties.INTER_SBOX_PORT++;
 		new InterSBoxServer(SBoxProperties.INTER_SBOX_PORT, ntm);
 		Thread.sleep(2000);
 		
@@ -136,16 +138,16 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 				+ "for configuration data.");
 		Thread.sleep(2000);
 		
-		
 		logger.info("Initializing NTM at RECEIVER domain, #1.");
 		DbConstants.DBI_URL = "jdbc:sqlite:src/test/resources/local.db";
 		//Modifying daofactory instances to get different db file.
 		DAOFactory.setASDAOInstance(new ASDAO());
 		DAOFactory.setDC2DCCommunicationDAO(new DC2DCCommunicationDAO());
+		DAOFactory.setLinkDAO(new LinkDAO());
 		
 		//modifying remote sbox address, to be 127.0.0.1
       	asdao = new ASDAO();
-      	remoteAS = asdao.findByAsNumber(2);
+      	remoteAS = asdao.findByAsNumber(200);
       	remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("127.0.0.1", 0));
       	asdao.update(remoteAS);
 		
@@ -156,18 +158,18 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 
 		EconomicAnalyzer eca = new EconomicAnalyzer(ntm2.getDtmTrafficManager());
 
-		for (int i = 0; i < 12; i++) {
+		for (int i = 0; i < 10; i++) {
 			XVector xVector = new XVector();
-			xVector.setSourceAsNumber(1);
-			xVector.addVectorValueForLink(new SimpleLinkID("link1", "isp"), 500L);
-			xVector.addVectorValueForLink(new SimpleLinkID("link2", "isp"), 800L);
+			xVector.setSourceAsNumber(100);
+			xVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 500L);
+			xVector.addVectorValueForLink(new SimpleLinkID("2", "ISP-A"), 800L);
 			ntm2.getDtmTrafficManager().updateXVector(xVector);
 
 			List<ZVector> zVectorList = new ArrayList<ZVector>();
 			ZVector zVector = new ZVector();
-			zVector.setSourceAsNumber(1);
-			zVector.addVectorValueForLink(new SimpleLinkID("link1", "isp"), 100L);
-			zVector.addVectorValueForLink(new SimpleLinkID("link2", "isp"), 100L);
+			zVector.setSourceAsNumber(100);
+			zVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 100L);
+			zVector.addVectorValueForLink(new SimpleLinkID("2", "ISP-A"), 100L);
 			zVectorList.add(zVector);
 			eca.updateXZVectors(xVector, zVectorList);
 		}
@@ -183,8 +185,8 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 		
 		logger.info("--------------------------");
 		
-		remoteAS = asdao.findByAsNumber(2);
-		remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("146.124.2.178", 0));
+		remoteAS = asdao.findByAsNumber(200);
+		remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("150.254.160.143", 0));
 		asdao.update(remoteAS);
 	}
 		
@@ -194,15 +196,12 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 		DbConstants.DBI_URL = "jdbc:sqlite:src/test/resources/remote.db";
 		
 		sdao = new SDNControllerDAO();
-		sdn = sdao.findById("146.124.2.178");
+		sdn = sdao.findById("192.168.122.105");
         sdn.setRestPort(8080);
-        sdn.setRestHost(new NetworkAddressIPv4("146.124.2.178", 0));
+        sdn.setRestHost(new NetworkAddressIPv4("192.168.122.105", 0));
         sdao.update(sdn);
 		
 		SBoxThreadHandler.shutdownNowThreads();
 	}
-	
-	
-	
 
 }

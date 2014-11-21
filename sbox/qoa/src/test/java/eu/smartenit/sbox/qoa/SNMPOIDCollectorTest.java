@@ -72,12 +72,12 @@ public class SNMPOIDCollectorTest {
 	
 	@Test
 	public void shouldSetOutboundInterfaceCounterOID() throws IOException {
-		assertEquals(IF_HC_OUT_OCTETS_OID + ".2", snmpOidCollector.getOutboundInterfaceCounterOID(PHY_INF_NAME, walkResponse));
+		assertEquals(IF_HC_OUT_OCTETS_OID + ".2", snmpOidCollector.getInterfaceCounterOID(IF_HC_OUT_OCTETS_OID, PHY_INF_NAME, walkResponse));
 	}
 	
 	@Test
 	public void shouldSetInboundInterfaceCounterOID() throws IOException {
-		assertEquals(IF_HC_IN_OCTETS_OID + ".2", snmpOidCollector.getInboundInterfaceCounterOID(PHY_INF_NAME, walkResponse));
+		assertEquals(IF_HC_IN_OCTETS_OID + ".2", snmpOidCollector.getInterfaceCounterOID(IF_HC_IN_OCTETS_OID, PHY_INF_NAME, walkResponse));
 	}
 	
 	@Test

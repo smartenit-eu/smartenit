@@ -15,12 +15,11 @@
  */
 package eu.smartenit.sdn.floodlight090.dtm;
 
-import eu.smartenit.sdn.interfaces.sboxsdn.SimpleTunnelIDToPortConverter;
 import net.floodlightcontroller.core.FloodlightContext;
 import net.floodlightcontroller.core.IFloodlightProviderService;
-import net.floodlightcontroller.core.IListener.Command;
 import net.floodlightcontroller.core.IOFMessageListener;
 import net.floodlightcontroller.core.IOFSwitch;
+
 import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFPacketIn;
 import org.openflow.protocol.OFType;
@@ -33,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Grzegorz Rzym
  * @author Piotr Wydrych
- * @version 1.0
+ * @version 1.2
  */
 public class DTMMessageListener implements IOFMessageListener {
 
@@ -60,7 +59,7 @@ public class DTMMessageListener implements IOFMessageListener {
      * @param cntx Floodlight context
      * @return {@link Command#STOP} - the packet should not be processed by next
      * listeners
-     * @see DTM#getTunnel()
+     * @see DTM#getOfPortNumber()
      * @see Flows#add(net.floodlightcontroller.core.IOFSwitch,
      * net.floodlightcontroller.core.IFloodlightProviderService,
      * net.floodlightcontroller.core.FloodlightContext, short,
@@ -69,7 +68,14 @@ public class DTMMessageListener implements IOFMessageListener {
     @Override
     public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
         logger.debug("receive(IOFSwitch,OFMessage,FloodlightContext) begin");
-        Flows.add(sw, floodlightProvider, cntx, SimpleTunnelIDToPortConverter.toPort(DTM.getInstance().getTunnel()), (OFPacketIn) msg);
+        DTM.getInstance().setOFPacketIn((OFPacketIn) msg);
+        short outPort = DTM.getInstance().getOutOfPortNumber();
+        if (outPort != 0) {
+            Flows.add(sw, floodlightProvider, cntx, DTM.getInstance().getOutOfPortNumber(), (OFPacketIn) msg);
+        }
+        else{
+            logger.debug("receive(IOFSwitch,OFMessage,FloodlightContext) DTM not configured");
+        }
         logger.debug("receive(IOFSwitch,OFMessage,FloodlightContext) end");
         return Command.STOP; // do not process the packet by next listeners
     }

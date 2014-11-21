@@ -35,7 +35,7 @@ import eu.smartenit.sbox.db.dto.SimpleTunnelID;
  * into Tunnel parameters.
  *
  * @authors George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 @BindingAnnotation(BindTunnel.TunnelBinderFactory.class)
@@ -48,13 +48,15 @@ public @interface BindTunnel {
 		public Binder build(Annotation annotation) {
 			return new Binder<BindTunnel, Tunnel>() {
 				public void bind(SQLStatement q, BindTunnel bind, Tunnel arg) {
-					q.bind(bind.value() + ".tunnelName", ((SimpleTunnelID) arg.getTunnelID()).getTunnelName());
-					q.bind(bind.value() + ".tunnelNumber", ((SimpleTunnelID) arg.getTunnelID()).getTunnelNumber());
-					q.bind(bind.value() + ".sourcePrefix", arg.getSourceEndAddress().getPrefix());
-					q.bind(bind.value() + ".destinationPrefix", arg.getDestinationEndAddress().getPrefix());
+					q.bind(bind.value() + ".tunnelName", arg.getTunnelID().getTunnelName());
+                    q.bind(bind.value() + ".localTunnelEndAddress", arg.getTunnelID().getLocalTunnelEndAddress()
+                            .getPrefix());
+                    q.bind(bind.value() + ".remoteTunnelEndAddress", arg.getTunnelID().getRemoteTunnelEndAddress()
+                            .getPrefix());
 					q.bind(bind.value() + ".physicalLocalInterfaceName", arg.getPhysicalLocalInterfaceName());
 					q.bind(bind.value() + ".inboundInterfaceCounterOID", arg.getInboundInterfaceCounterOID());
-					q.bind(bind.value() + ".outboundInterfaceCounterOID", arg.getOutboundInterfaceCounterOID());	
+					q.bind(bind.value() + ".outboundInterfaceCounterOID", arg.getOutboundInterfaceCounterOID());
+                    q.bind(bind.value() + ".ofSwitchPortNumber", arg.getOfSwitchPortNumber());
 					q.bind(bind.value() + ".localLinkID", ((SimpleLinkID)arg.getLink().getLinkID()).getLocalLinkID());
 					q.bind(bind.value() + ".localIspName", ((SimpleLinkID)arg.getLink().getLinkID()).getLocalIspName());
 				}

@@ -17,6 +17,7 @@ package eu.smartenit.sbox.qoa;
 
 import java.util.List;
 
+import eu.smartenit.sbox.db.dto.LocalVectorValue;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
 
@@ -77,6 +78,24 @@ public class MonitoringDataProcessor {
 	 */
 	public List<ZVector> calculateZVectors(int asNumber, CounterValues values) {
 		return zVectorCalculator.calculateZVectors(asNumber, values);
+	}
+
+	/**
+	 * Aggregates vector values from given tunnel traffic vectors and returns a
+	 * single Z vector.
+	 * 
+	 * @param zVectors
+	 *            list of Z vectors to be aggregated
+	 * @return new Z vector
+	 */
+	public ZVector aggregateZVectors(List<ZVector> zVectors) {
+		CounterValues counterValues = new CounterValues();
+		for(ZVector zVector : zVectors) {
+			for (LocalVectorValue vectorValue : zVector.getVectorValues()) {
+				counterValues.addCounterValue(vectorValue.getLinkID(), vectorValue.getValue());
+			}
+		}
+		return new ZVector(counterValues.toLocalVectorValues(), zVectors.get(0).getSourceAsNumber());
 	}
 	
 }

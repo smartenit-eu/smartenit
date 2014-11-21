@@ -46,7 +46,7 @@ public class TrafficCollectorTask implements Runnable {
 	
 	private SNMPTrafficCollector trafficCollector;
 	private int asNumber;
-	private CounterValues collectedCounterValues = new CounterValues();
+	protected CounterValues collectedCounterValues = new CounterValues();
 
 	/**
 	 * The constructor with arguments.
@@ -72,8 +72,8 @@ public class TrafficCollectorTask implements Runnable {
 	public void run() {
 		try {
 			logger.debug("Running traffic collector task for AS {}", asNumber);
-			List<ScheduledFuture<CounterValues>> routersCounterFutures = createThreadsForBGRouters();
-			routersCounterFutures.addAll(createThreadsForDARouters());
+			List<ScheduledFuture<CounterValues>> routersCounterFutures = createThreadsForDARouters();
+			routersCounterFutures.addAll(createThreadsForBGRouters());
 		
 			final long startTime = DateTime.now().getMillis();
 			while(!areAllThreadsCompleted(routersCounterFutures)) {
@@ -129,7 +129,7 @@ public class TrafficCollectorTask implements Runnable {
 		}
 	}
 
-	private boolean areAllThreadsCompleted(List<ScheduledFuture<CounterValues>> futures) {
+	protected boolean areAllThreadsCompleted(List<ScheduledFuture<CounterValues>> futures) {
 		for(ScheduledFuture<CounterValues> future : futures) {
 			if (future.isDone() == false) {
 				return false;
@@ -138,7 +138,7 @@ public class TrafficCollectorTask implements Runnable {
 		return true;
 	}
 
-	private void collectResultsFromAllThreads(List<ScheduledFuture<CounterValues>> futures) throws InterruptedException, ExecutionException {
+	protected void collectResultsFromAllThreads(List<ScheduledFuture<CounterValues>> futures) throws InterruptedException, ExecutionException {
 		for(ScheduledFuture<CounterValues> future : futures) {
 			if(future.isDone()) {
 				collectedCounterValues.addLinksAndTunnels(future.get());
@@ -146,23 +146,23 @@ public class TrafficCollectorTask implements Runnable {
 		}
 	}
 	
-	private ScheduledExecutorService getThreadService() {
+	protected ScheduledExecutorService getThreadService() {
 		return SBoxThreadHandler.getThreadService();
 	}
 	
-	private List<BGRouter> getBGRoutersByAsNumber() {
+	protected List<BGRouter> getBGRoutersByAsNumber() {
 		return trafficCollector.getMonitoredLinks().getBGRoutersByAsNumber(asNumber);
 	}
 	
-	private List<DARouter> getDARoutersByAsNumber() {
+	protected List<DARouter> getDARoutersByAsNumber() {
 		return trafficCollector.getMonitoredTunnels().getDARoutersByAsNumber(asNumber);
 	}
 	
-	private List<Link> getLinksByBGRouter(BGRouter bgRouter) {
+	protected List<Link> getLinksByBGRouter(BGRouter bgRouter) {
 		return trafficCollector.getMonitoredLinks().getLinks(bgRouter);
 	}
 	
-	private List<Tunnel> getTunnelsByDARouter(DARouter daRouter) {
+	protected List<Tunnel> getTunnelsByDARouter(DARouter daRouter) {
 		return trafficCollector.getMonitoredTunnels().getTunnels(daRouter);
 	}
 }

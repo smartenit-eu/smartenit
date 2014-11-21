@@ -1,0 +1,36 @@
+**************************************************
+Timestamp : Fri Nov 21 17:02:14 EET 2014
+AS : 2
+New reporting period
+  BG router : 1.2.1.1
+    Link : 211
+      IF_IN_OCTETS : 987654321 / 987654321
+      IF_IN_PKTS_S : 2962962963 / 2962962963
+      IF_IN_PKTS_U : 987654321 / 987654321
+      IF_IN_PKTS_M : 987654321 / 987654321
+      IF_IN_PKTS_B : 987654321 / 987654321
+  DA router : 3.1.1.1
+    Tunnel : tunnel2111
+      IF_IN_OCTETS : 987654321 / 987654321
+      IF_IN_PKTS_S : 2962962963 / 2962962963
+      IF_IN_PKTS_U : 987654321 / 987654321
+      IF_IN_PKTS_M : 987654321 / 987654321
+      IF_IN_PKTS_B : 987654321 / 987654321
+**************************************************
+Timestamp : Fri Nov 21 17:02:16 EET 2014
+AS : 2
+New reporting period
+  BG router : 1.2.1.1
+    Link : 211
+      IF_IN_OCTETS : 987654321 / 0
+      IF_IN_PKTS_S : 2962962963 / 0
+      IF_IN_PKTS_U : 987654321 / 0
+      IF_IN_PKTS_M : 987654321 / 0
+      IF_IN_PKTS_B : 987654321 / 0
+  DA router : 3.1.1.1
+    Tunnel : tunnel2111
+      IF_IN_OCTETS : 987654321 / 0
+      IF_IN_PKTS_S : 2962962963 / 0
+      IF_IN_PKTS_U : 987654321 / 0
+      IF_IN_PKTS_M : 987654321 / 0
+      IF_IN_PKTS_B : 987654321 / 0

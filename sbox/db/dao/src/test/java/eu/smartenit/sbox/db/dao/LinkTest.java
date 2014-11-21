@@ -88,7 +88,8 @@ public class LinkTest {
 		address.setPrefix("1.2.3.4");
 		address.setPrefixLength(2);
 		l.setAddress(address);
-		l.setVlan(3);		
+		l.setVlan(3);
+		l.setTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.0", 16));
 		CostFunction c = new CostFunction("cost", "subtype", "bw", "cost", null);
 		List<Segment> segments = new ArrayList<Segment>();
 		segments.add(new Segment(242, 4242, (float)0.5, (float)0.6));
@@ -101,8 +102,11 @@ public class LinkTest {
 		assertEquals(list.size(), 1);
 		Link stored = list.get(0);
 		assertEquals(stored.getAddress().getPrefix(), "1.2.3.4");
+		assertEquals(stored.getAddress().getPrefixLength(), 32);
 		assertEquals(((SimpleLinkID) stored.getLinkID()).getLocalIspName(), "ote");
 		assertEquals(stored.getVlan(), 3);
+		assertEquals(stored.getTunnelEndPrefix().getPrefix(), "1.1.1.0");
+		assertEquals(stored.getTunnelEndPrefix().getPrefixLength(), 16);
 		assertEquals(stored.getCostFunction().getInputUnit(), "bw");
 		assertEquals(stored.getCostFunction().getSegments().size(), 2);
 		assertEquals(stored.getCostFunction().getSegments().get(0).getA(), 0.5, 0.01);
@@ -115,7 +119,8 @@ public class LinkTest {
 		address.setPrefix("1.2.3.54");
 		address.setPrefixLength(2);
 		l.setAddress(address);
-		l.setVlan(4);		
+		l.setVlan(4);
+		l.setTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.0", 16));
 		c = new CostFunction("cost", "subtype", "bw", "cost", null);
 		segments = new ArrayList<Segment>();
 		segments.add(new Segment(343, 5555, (float)5.5, (float)8.4));
@@ -132,15 +137,20 @@ public class LinkTest {
 		l = ldao.findById(new SimpleLinkID("link2", "ote"));
 		assertNotNull(l);
 		assertEquals(l.getVlan(), 4);
+		assertEquals(l.getTunnelEndPrefix().getPrefix(), "2.2.2.0");
+		assertEquals(l.getTunnelEndPrefix().getPrefixLength(), 16);
 		assertEquals(l.getCostFunction().getInputUnit(), "bw");
 		assertEquals(l.getCostFunction().getSegments().size(), 1);
 		assertEquals(l.getCostFunction().getSegments().get(0).getA(), 5.5, 0.01);
 		
 		l.setVlan(4242);
+		l.setTunnelEndPrefix(new NetworkAddressIPv4("2.2.0.0", 16));
 		ldao.update(l);
 		l = ldao.findById(new SimpleLinkID("link2", "ote"));
 		assertNotNull(l);
 		assertEquals(l.getVlan(), 4242);
+		assertEquals(l.getTunnelEndPrefix().getPrefix(), "2.2.0.0");
+		assertEquals(l.getTunnelEndPrefix().getPrefixLength(), 16);
 		
 		ldao.deleteById(new SimpleLinkID("link2", "ote"));
 		list = ldao.findAll();

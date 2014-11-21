@@ -15,7 +15,7 @@
  */
 package eu.smartenit.sbox.main;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,11 +64,12 @@ public class EconomicAnalyzerNetworkTrafficReceiverTest {
 		
 		//modifying remote sbox address, to be 127.0.0.1
       	asdao = new ASDAO();
-      	remoteAS = asdao.findByAsNumber(2);
+      	remoteAS = asdao.findByAsNumber(200);
       	remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("127.0.0.1", 0));
       	asdao.update(remoteAS);
 
 		logger.info("Initializing inter-sbox-server.");
+		SBoxProperties.INTER_SBOX_PORT++;
 		new InterSBoxServer(SBoxProperties.INTER_SBOX_PORT);
 	}
 
@@ -90,16 +91,16 @@ public class EconomicAnalyzerNetworkTrafficReceiverTest {
 
 		for (int i = 0; i < 23; i++) {
 			XVector xVector = new XVector();
-			xVector.setSourceAsNumber(1);
-			xVector.addVectorValueForLink(new SimpleLinkID("link1", "isp"), 500L);
-			xVector.addVectorValueForLink(new SimpleLinkID("link2", "isp"), 800L);
+			xVector.setSourceAsNumber(100);
+			xVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 500L);
+			xVector.addVectorValueForLink(new SimpleLinkID("2", "ISP-A"), 800L);
 			ntm.getDtmTrafficManager().updateXVector(xVector);
 
 			List<ZVector> zVectorList = new ArrayList<ZVector>();
 			ZVector zVector = new ZVector();
-			zVector.setSourceAsNumber(1);
-			zVector.addVectorValueForLink(new SimpleLinkID("link1", "isp"), 100L);
-			zVector.addVectorValueForLink(new SimpleLinkID("link2", "isp"), 100L);
+			zVector.setSourceAsNumber(100);
+			zVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 100L);
+			zVector.addVectorValueForLink(new SimpleLinkID("2", "ISP-A"), 100L);
 			zVectorList.add(zVector);
 			eca.updateXZVectors(xVector, zVectorList);
 		}
@@ -112,8 +113,8 @@ public class EconomicAnalyzerNetworkTrafficReceiverTest {
 	public static void cleanTests() {
 		DbConstants.DBI_URL = "jdbc:sqlite:smartenit.db";
 		
-		remoteAS = asdao.findByAsNumber(2);
-		remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("146.124.2.178", 0));
+		remoteAS = asdao.findByAsNumber(200);
+		remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("150.254.160.143", 0));
 		asdao.update(remoteAS);
 		
 		SBoxThreadHandler.shutdownNowThreads();

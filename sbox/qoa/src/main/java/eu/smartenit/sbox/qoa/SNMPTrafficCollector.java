@@ -15,6 +15,7 @@
  */
 package eu.smartenit.sbox.qoa;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -46,10 +47,10 @@ import eu.smartenit.sbox.db.dto.ZVector;
 public class SNMPTrafficCollector {
 	private static final Logger logger = LoggerFactory.getLogger(SNMPTrafficCollector.class);
 	
-	private MonitoredLinksInventory monitoredLinks = new MonitoredLinksInventory();
-	private MonitoredTunnelsInventory monitoredTunnels = new MonitoredTunnelsInventory();
+	protected MonitoredLinksInventory monitoredLinks = new MonitoredLinksInventory();
+	protected MonitoredTunnelsInventory monitoredTunnels = new MonitoredTunnelsInventory();
 	private DTMQosAnalyzer analyzer;
-	private MonitoringDataProcessor monitoringDataProcessor;
+	protected MonitoringDataProcessor monitoringDataProcessor;
 	
 	/**
 	 * The constructor with arguments.
@@ -143,12 +144,16 @@ public class SNMPTrafficCollector {
 	public void notifyNewCounterValues(int asNumber, CounterValues counterValues) {
 		XVector xVector = monitoringDataProcessor.calculateXVector(asNumber, counterValues);
 		List<ZVector> zVectors = monitoringDataProcessor.calculateZVectors(asNumber, counterValues);
+		
+		// Aggregating all Z vectors (prepared one per DC2DCCommunication) into one.
+		// This is required by current implementation of Economic Analyzer.
+		ZVector aggregatedZVector = monitoringDataProcessor.aggregateZVectors(zVectors);
 		logCalculatedVectors(xVector, zVectors);
 		analyzer.updateXVector(xVector);
-		analyzer.updateXZVectors(xVector, zVectors);
+		analyzer.updateXZVectors(xVector, Arrays.asList(aggregatedZVector));
 	}
 	
-	protected void logCalculatedVectors(XVector xVector, List<ZVector> zVectors) {
+	void logCalculatedVectors(XVector xVector, List<ZVector> zVectors) {
 		logger.info("Updating DTMQosAnalyzer with vectors:");
 		
 		if (xVector != null)
@@ -208,7 +213,7 @@ public class SNMPTrafficCollector {
 		return log.toString();
 	}
 	
-	protected String prepareErrorForAsNumbersValidation(Set<Integer> asNumbersForLinks, Set<Integer> asNumbersForTunnels) {
+	String prepareErrorForAsNumbersValidation(Set<Integer> asNumbersForLinks, Set<Integer> asNumbersForTunnels) {
 		final StringBuilder error = new StringBuilder();
 		error.append("The lists of Autonomus Systems for links and tunnels are not equal:\n");
 		error.append("\tAS numbers for links: ").append(asNumbersForLinks.toString());

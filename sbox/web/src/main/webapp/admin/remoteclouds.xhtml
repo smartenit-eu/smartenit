@@ -39,42 +39,33 @@
 				<div class="navbar-collapse collapse">
 					<h:form>
 						<ul class="nav navbar-nav navbar-right">
-							<li><h:commandLink value="Home"
-									action="#{dashboardBean.gotoIndexPage}" /></li>
-							<li><h:commandLink value="ISP"
-									action="#{dashboardBean.gotoIspPage}" /></li>
+							<li><a href="index.xhtml">Home</a></li>
+							<li><a href="isp.xhtml">ISP</a></li>
 							<li class="dropdown"><a href="#" class="dropdown-toggle"
 								data-toggle="dropdown">Network <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><h:commandLink value="Routers"
-											action="#{dashboardBean.gotoRoutersPage}" /></li>
-									<li><h:commandLink value="SDN Controllers"
-											action="#{dashboardBean.gotoSDNControllersPage}" /></li>
-									<li><h:commandLink value="Links"
-											action="#{dashboardBean.gotoLinksPage}" /></li>
-									<li><h:commandLink value="Tunnels"
-											action="#{dashboardBean.gotoTunnelsPage}" /></li>
+									<li><a href="routers.xhtml">Routers</a></li>
+									<li><a href="sdncontrollers.xhtml">SDN Controllers</a></li>
+									<li><a href="links.xhtml">Links</a></li>
+									<li><a href="tunnels.xhtml">Tunnels</a></li>
 								</ul></li>
-							<li class="active dropdown"><a href="#"
-								class="dropdown-toggle" data-toggle="dropdown">Datacenters <b
-									class="caret"></b></a>
+							<li class="dropdown active"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">Datacenters <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><h:commandLink value="Local Clouds"
-											action="#{dashboardBean.gotoLocalCloudsPage}" /></li>
-									<li><h:commandLink value="Remote Clouds"
-											action="#{dashboardBean.gotoRemoteCloudsPage}" /></li>
-									<li><h:commandLink value="Inter-Datacenter"
-											action="#{dashboardBean.gotoInterDatacenterPage}" /></li>
+									<li><a href="localclouds.xhtml">Local Clouds</a></li>
+									<li><a href="remoteclouds.xhtml">Remote Clouds</a></li>
+									<li><a href="interdatacenter.xhtml">Inter-Datacenter</a></li>
 								</ul></li>
 							<li class="dropdown"><a href="#" class="dropdown-toggle"
 								data-toggle="dropdown">SBox <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><h:commandLink value="Settings"
-											action="#{dashboardBean.gotoSettingsPage}" /></li>
+									<li><a href="settings.xhtml">Settings</a></li>
 									<li><a href="#">Reports</a></li>
 									<li><a href="#">Analytics</a></li>
-									<li class="divider"></li>
 									<li><a href="#">Demo</a></li>
+									<li class="divider"></li>
+									<li><h:commandLink value="Logout"
+											action="#{dashboardBean.logout}" /></li>
 								</ul></li>
 						</ul>
 					</h:form>
@@ -93,11 +84,11 @@
 					<div class="col-xs-6">
 						<h:inputText type="text" class="form-control" id="cloudDcName"
 							placeholder="Cloud Name"
-							value="#{dashboardBean.remoteCloud.cloudDcName}" 
-							rendered="#{dashboardBean.editable}"/>
+							value="#{remoteCloudsBean.remoteCloud.cloudDcName}" 
+							rendered="#{remoteCloudsBean.editable}"/>
 						<h:outputText type="text" class="form-control"
-							value="#{dashboardBean.remoteCloud.cloudDcName}" 
-							rendered="#{not dashboardBean.editable}"/>
+							value="#{remoteCloudsBean.remoteCloud.cloudDcName}" 
+							rendered="#{not remoteCloudsBean.editable}"/>
 					</div>
 				</div>
 
@@ -105,9 +96,9 @@
 				<div class="form-group">
 					<label for="ases" class="col-xs-4 control-label">Remote AS</label>
 					<div class="col-xs-4">
-						<h:selectOneMenu value="#{dashboardBean.remoteCloud.as.asNumber}" id="ases"
+						<h:selectOneMenu value="#{remoteCloudsBean.remoteCloud.as.asNumber}" id="ases"
 							class="form-control">
-							<f:selectItems value="#{dashboardBean.asArray}" var="a"
+							<f:selectItems value="#{remoteCloudsBean.asArray}" var="a"
 								itemLabel="#{a.asNumber}" itemValue="#{a.asNumber}" />
 						</h:selectOneMenu>
 					</div>
@@ -118,18 +109,18 @@
 					<label class="col-xs-4 control-label">Prefix/Prefix Length</label>
 					<div class="col-xs-4">
 						<h:inputText type="text" class="col-md-4 form-control" id="prefix"
-							placeholder="Prefix" value="#{dashboardBean.network.prefix}" />
+							placeholder="Prefix" value="#{remoteCloudsBean.network.prefix}" />
 					</div>
 					<div class="col-xs-2">
 						<h:inputText type="text" class="form-control" id="prefixLength"
 							placeholder="Length"
-							value="#{dashboardBean.network.prefixLength}" />
+							value="#{remoteCloudsBean.network.prefixLength}" />
 					</div>
 					<div class="col-xs-2">
 						<h:commandLink class="btn btn-primary btn-sm">
 							<span class="glyphicon glyphicon-plus"> <f:ajax
 									execute="prefix prefixLength"
-									listener="#{dashboardBean.addRemoteNetwork}"
+									listener="#{remoteCloudsBean.addRemoteNetwork}"
 									render="prefixesTable prefix prefixLength" />
 							</span>
 						</h:commandLink>
@@ -139,7 +130,7 @@
 				<center>
 				<div class="form-group" id="tableGroup">
 					<div class="table-responsive">
-						<h:dataTable value="#{dashboardBean.remoteCloud.dcNetworks}" var="net"
+						<h:dataTable value="#{remoteCloudsBean.remoteCloud.dcNetworks}" var="net"
 							class="table table-striped table-condensed table-nonfluid" 
 							id="prefixesTable">
 							<h:column class="col-xs-4">
@@ -157,7 +148,7 @@
 											<span class="glyphicon glyphicon-remove">
 											<f:ajax execute="@this" 
 												render="prefixesTable tableGroup rclouds" 
-												listener="#{dashboardBean.deleteRemoteNetwork(net)}"/>
+												listener="#{remoteCloudsBean.deleteRemoteNetwork(net)}"/>
 												</span>
 										</h:commandLink>
 							</h:column>
@@ -169,7 +160,7 @@
 				<div class="form-group">
 					<div class="btn-group col-xs-6 col-xs-offset-4">
 						<h:commandButton type="submit" class="btn btn-primary"
-							action="#{dashboardBean.updateRemoteCloud}" value="Submit" />
+							action="#{remoteCloudsBean.updateRemoteCloud}" value="Submit" />
 						<h:commandButton type="reset" class="btn btn-default"
 							value="Cancel" />
 					</div>
@@ -178,7 +169,7 @@
 			
 			<h:form>
 				<div class="table-responsive">
-					<h:dataTable value="#{dashboardBean.remoteCloudsList}" var="rc"
+					<h:dataTable value="#{remoteCloudsBean.remoteCloudsList}" var="rc"
 						class="table table-striped">
 						<h:column>
 							<f:facet name="header">Cloud Name</f:facet>
@@ -196,10 +187,10 @@
 							<f:facet name="header">Actions</f:facet>
 							<div class="btn-group">
 								<h:commandLink type="button" class="btn btn-warning btn-sm"
-									action="#{dashboardBean.editRemoteCloud(rc)}"> 
+									action="#{remoteCloudsBean.editRemoteCloud(rc)}"> 
 									<span class="glyphicon glyphicon-pencil"/></h:commandLink>
 								<h:commandLink type="button" class="btn btn-danger btn-sm"
-									action="#{dashboardBean.deleteRemoteCloud(rc)}">
+									action="#{remoteCloudsBean.deleteRemoteCloud(rc)}">
 									<span class="glyphicon glyphicon-remove"/></h:commandLink>
 							</div>
 						</h:column>

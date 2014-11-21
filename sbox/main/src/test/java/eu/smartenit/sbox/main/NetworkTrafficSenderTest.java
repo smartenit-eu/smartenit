@@ -23,7 +23,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.Executors;
 
@@ -46,7 +46,6 @@ import eu.smartenit.sbox.db.dto.CVector;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.RVector;
 import eu.smartenit.sbox.db.dto.SDNController;
-import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.interfaces.intersbox.client.InterSBoxClient;
 import eu.smartenit.sbox.interfaces.intersbox.server.InterSBoxServer;
 import eu.smartenit.sbox.ntm.NetworkTrafficManager;
@@ -84,7 +83,7 @@ public class NetworkTrafficSenderTest {
         
         //Modifying sdn controller address and port, to point to the mock
         sdao = new SDNControllerDAO();
-        sdn = sdao.findById("146.124.2.178");
+        sdn = sdao.findById("192.168.122.105");
         sdn.setRestPort(8888);
         sdn.setRestHost(new NetworkAddressIPv4("127.0.0.1", 0));
         sdao.update(sdn);
@@ -97,8 +96,8 @@ public class NetworkTrafficSenderTest {
 	}
 	
 	/**
-	 * This method initializes NTM as traffic sender, sends config data
-	 * to mock SDN Controller.
+	 * This method initializes NTM as traffic sender, sends config data to mock
+	 * SDN Controller.
 	 * 
 	 */
 	@Test @Ignore
@@ -145,13 +144,11 @@ public class NetworkTrafficSenderTest {
 		Thread.sleep(2000);
 		
 		CVector cVector = new CVector();
-		cVector.setSourceAsNumber(1);
-		cVector.addVectorValueForLink(
-				new SimpleLinkID("link1", "isp"), 500L);
+		cVector.setSourceAsNumber(100);
+		cVector.addVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("10.1.1.0", 24), 500L);
 		RVector rVector = new RVector();
-		rVector.setSourceAsNumber(1);
-    	rVector.addVectorValueForLink(
-    			new SimpleLinkID("link1", "isp"), 1000L);
+		rVector.setSourceAsNumber(100);
+    	rVector.addVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("10.1.1.0", 24), 1000L);
 		
 		logger.info("Sending r and c vectors through inter-sbox client.");		
 		InterSBoxClient client = new InterSBoxClient();
@@ -193,13 +190,11 @@ public class NetworkTrafficSenderTest {
 		Thread.sleep(2000);
 		
 		CVector cVector = new CVector();
-		cVector.setSourceAsNumber(1);
-		cVector.addVectorValueForLink(
-				new SimpleLinkID("link1", "isp"), 500L);
+		cVector.setSourceAsNumber(100);
+		cVector.addVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("10.1.1.0", 24), 500L);
 		RVector rVector = new RVector();
-		rVector.setSourceAsNumber(1);
-    	rVector.addVectorValueForLink(
-    			new SimpleLinkID("link1", "isp"), 1000L);
+		rVector.setSourceAsNumber(100);
+    	rVector.addVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("10.1.1.0", 24), 1000L);
 		
 		logger.info("Sending r and c vectors through inter-sbox client.");		
 		
@@ -224,20 +219,16 @@ public class NetworkTrafficSenderTest {
 		logger.info("--------------------------");
 	}
 		
-	
 	@AfterClass
 	public static void cleanTests() {
 		DbConstants.DBI_URL = "jdbc:sqlite:smartenit.db";
 		
-		sdn = sdao.findById("146.124.2.178");
+		sdn = sdao.findById("192.168.122.105");
         sdn.setRestPort(8080);
-        sdn.setRestHost(new NetworkAddressIPv4("146.124.2.178", 0));
+        sdn.setRestHost(new NetworkAddressIPv4("192.168.122.105", 0));
         sdao.update(sdn);
         
 		SBoxThreadHandler.shutdownNowThreads();
 	}
-	
-	
-	
 
 }

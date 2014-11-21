@@ -25,7 +25,7 @@ import java.util.List;
  * @version 1.0
  * 
  */
-public final class ZVector extends Vector implements Serializable {
+public final class ZVector extends LocalVector implements Serializable {
 
 	/**
 	 * 
@@ -46,14 +46,11 @@ public final class ZVector extends Vector implements Serializable {
 	 * 
 	 * @param vectorValues
 	 * @param sourceAsNumber
-	 * @param communicationID
 	 */
-	public ZVector(List<VectorValue> vectorValues, int sourceAsNumber,
-			DC2DCCommunicationID communicationID) {
+	public ZVector(List<LocalVectorValue> vectorValues, int sourceAsNumber) {
 		super(vectorValues, sourceAsNumber);
-		this.communicationID = communicationID;
 	}
-
+	
 
 	private DC2DCCommunicationID communicationID;
 

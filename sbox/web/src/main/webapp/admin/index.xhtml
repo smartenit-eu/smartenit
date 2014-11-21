@@ -35,41 +35,33 @@
 				<div class="navbar-collapse collapse">
 					<h:form>
 						<ul class="nav navbar-nav navbar-right">
-							<li class="active"><h:commandLink value="Home"
-									action="#{dashboardBean.gotoIndexPage}" /></li>
-							<li><h:commandLink value="ISP"
-									action="#{dashboardBean.gotoIspPage}" /></li>
+							<li class="active"><a href="index.xhtml">Home</a></li>
+							<li><a href="isp.xhtml">ISP</a></li>
 							<li class="dropdown"><a href="#" class="dropdown-toggle"
 								data-toggle="dropdown">Network <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><h:commandLink value="Routers"
-											action="#{dashboardBean.gotoRoutersPage}" /></li>
-									<li><h:commandLink value="SDN Controllers"
-											action="#{dashboardBean.gotoSDNControllersPage}" /></li>
-									<li><h:commandLink value="Links"
-											action="#{dashboardBean.gotoLinksPage}" /></li>
-									<li><h:commandLink value="Tunnels"
-											action="#{dashboardBean.gotoTunnelsPage}" /></li>
+									<li><a href="routers.xhtml">Routers</a></li>
+									<li><a href="sdncontrollers.xhtml">SDN Controllers</a></li>
+									<li><a href="links.xhtml">Links</a></li>
+									<li><a href="tunnels.xhtml">Tunnels</a></li>
 								</ul></li>
 							<li class="dropdown"><a href="#" class="dropdown-toggle"
 								data-toggle="dropdown">Datacenters <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><h:commandLink value="Local Clouds"
-											action="#{dashboardBean.gotoLocalCloudsPage}" /></li>
-									<li><h:commandLink value="Remote Clouds"
-											action="#{dashboardBean.gotoRemoteCloudsPage}" /></li>
-									<li><h:commandLink value="Inter-Datacenter"
-											action="#{dashboardBean.gotoInterDatacenterPage}" /></li>
+									<li><a href="localclouds.xhtml">Local Clouds</a></li>
+									<li><a href="remoteclouds.xhtml">Remote Clouds</a></li>
+									<li><a href="interdatacenter.xhtml">Inter-Datacenter</a></li>
 								</ul></li>
 							<li class="dropdown"><a href="#" class="dropdown-toggle"
 								data-toggle="dropdown">SBox <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><h:commandLink value="Settings"
-											action="#{dashboardBean.gotoSettingsPage}" /></li>
+									<li><a href="settings.xhtml">Settings</a></li>
 									<li><a href="#">Reports</a></li>
 									<li><a href="#">Analytics</a></li>
-									<li class="divider"></li>
 									<li><a href="#">Demo</a></li>
+									<li class="divider"></li>
+									<li><h:commandLink value="Logout"
+											action="#{dashboardBean.logout}" /></li>
 								</ul></li>
 						</ul>
 					</h:form>

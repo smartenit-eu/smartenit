@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import eu.smartenit.sbox.db.dto.LinkID;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
-import eu.smartenit.sbox.db.dto.Vector;
+import eu.smartenit.sbox.db.dto.XVector;
 
 /**
  * Includes methods that test X vector calculation logic implemented by
@@ -64,7 +64,7 @@ public class XVectorCalculationTest {
 	@Test
 	public void shouldCalculateFirstXVector() {
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, null);
-		Vector result = processor.calculateXVector(1, values1);
+		XVector result = processor.calculateXVector(1, values1);
 		
 		assertEquals(3, result.getVectorValues().size());
 		assertEquals(1, result.getVectorValueForLink(linkID1));
@@ -76,7 +76,7 @@ public class XVectorCalculationTest {
 	public void shouldCalculateSecondXVector() {
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, null);
 		processor.calculateXVector(1, values1);
-		Vector result = processor.calculateXVector(1, values2);
+		XVector result = processor.calculateXVector(1, values2);
 		
 		assertEquals(3, result.getVectorValues().size());
 		assertEquals(9, result.getVectorValueForLink(linkID1));
@@ -89,7 +89,7 @@ public class XVectorCalculationTest {
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, null);
 		processor.calculateXVector(1, values1);
 		processor.calculateXVector(1, values2);
-		Vector result = processor.calculateXVector(1, values3);
+		XVector result = processor.calculateXVector(1, values3);
 		
 		assertEquals(3, result.getVectorValues().size());
 		assertEquals(18, result.getVectorValueForLink(linkID1));
@@ -110,7 +110,7 @@ public class XVectorCalculationTest {
 		
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, null);
 		processor.calculateXVector(1, values1);
-		Vector result = processor.calculateXVector(1, values2);
+		XVector result = processor.calculateXVector(1, values2);
 		
 		assertEquals(2, result.getVectorValues().size());
 		assertEquals(10, result.getVectorValueForLink(linkID1));

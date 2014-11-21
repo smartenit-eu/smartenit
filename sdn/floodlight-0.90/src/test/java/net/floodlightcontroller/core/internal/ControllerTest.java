@@ -66,6 +66,7 @@ import net.floodlightcontroller.threadpool.IThreadPoolService;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.jboss.netty.channel.Channel;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openflow.protocol.OFError;
 import org.openflow.protocol.OFError.OFBadRequestCode;
@@ -594,6 +595,8 @@ public class ControllerTest extends FloodlightTestCase {
      * 
      * @throws Exception
      */
+    
+    @Ignore
     @Test
     public void testControllerNodeIPChanges() throws Exception {
         class DummyHAListener implements IHAListener {

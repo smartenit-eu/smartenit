@@ -21,7 +21,7 @@ import java.io.Serializable;
  * The DARouter class.
  *
  * @author George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public final class DARouter implements Serializable{
@@ -39,20 +39,23 @@ public final class DARouter implements Serializable{
 	}
 
 	/**
-	 * The constructor with arguments.
-	 * 
 	 * @param managementAddress
 	 * @param snmpCommunity
+	 * @param ofSwitchDPID
 	 */
-	public DARouter(NetworkAddressIPv4 managementAddress, String snmpCommunity) {
-		
+	public DARouter(NetworkAddressIPv4 managementAddress, String snmpCommunity,
+			String ofSwitchDPID) {
+		super();
 		this.managementAddress = managementAddress;
 		this.snmpCommunity = snmpCommunity;
+		this.ofSwitchDPID = ofSwitchDPID;
 	}
 
 	private NetworkAddressIPv4 managementAddress;
 	
 	private String snmpCommunity;
+	
+	private String ofSwitchDPID;
 
 	public NetworkAddressIPv4 getManagementAddress() {
 		return managementAddress;
@@ -70,10 +73,19 @@ public final class DARouter implements Serializable{
 		this.snmpCommunity = snmpCommunity;
 	}
 
+	public String getOfSwitchDPID() {
+		return ofSwitchDPID;
+	}
+
+	public void setOfSwitchDPID(String ofSwitchDPID) {
+		this.ofSwitchDPID = ofSwitchDPID;
+	}
+
 	@Override
 	public String toString() {
 		return "DARouter [managementAddress=" + managementAddress
-				+ ", snmpCommunity=" + snmpCommunity + "]";
+				+ ", snmpCommunity=" + snmpCommunity + ", ofSwitchDPID="
+				+ ofSwitchDPID + "]";
 	}
 	
 	

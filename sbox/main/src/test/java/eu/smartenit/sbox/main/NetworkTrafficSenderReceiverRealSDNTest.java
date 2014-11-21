@@ -15,7 +15,7 @@
  */
 package eu.smartenit.sbox.main;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.Executors;
 
@@ -32,9 +32,10 @@ import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
 import eu.smartenit.sbox.db.dao.DbConstants;
+import eu.smartenit.sbox.db.dao.LinkDAO;
 import eu.smartenit.sbox.db.dto.AS;
+import eu.smartenit.sbox.db.dto.LocalRVector;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
-import eu.smartenit.sbox.db.dto.RVector;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.interfaces.intersbox.server.InterSBoxServer;
@@ -64,9 +65,9 @@ public class NetworkTrafficSenderReceiverRealSDNTest {
 	
 
 	/**
-	 * This method initializes NTMs at sending and receiving domains,
-	 * NTM at receiving gets updated with X and R vectors and sends them to 
-	 * the sending NTM, which updates the real SDN Controller. 
+	 * This method initializes NTMs at sending and receiving domains, NTM at
+	 * receiving gets updated with X and R vectors and sends C and R vectors to
+	 * the sending NTM, which updates the real SDN Controller.
 	 * 
 	 */
 	@Test @Ignore
@@ -92,10 +93,11 @@ public class NetworkTrafficSenderReceiverRealSDNTest {
 		//Modifying daofactory instances to get different db file.
 		DAOFactory.setASDAOInstance(new ASDAO());
 		DAOFactory.setDC2DCCommunicationDAO(new DC2DCCommunicationDAO());
+		DAOFactory.setLinkDAO(new LinkDAO());
 		
 		//modifying remote sbox address, to be 127.0.0.1
       	asdao = new ASDAO();
-      	remoteAS = asdao.findByAsNumber(2);
+      	remoteAS = asdao.findByAsNumber(200);
       	remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("127.0.0.1", 0));
       	asdao.update(remoteAS);
 		
@@ -103,20 +105,20 @@ public class NetworkTrafficSenderReceiverRealSDNTest {
 		ntm2.initialize(NetworkTrafficManagerDTMMode.TRAFFIC_RECEIVER);
 		
 		logger.info("Updating NTM at RECEIVER domain, #1 with R and X vectors.");
-		RVector rVector = new RVector();
-    	rVector.setSourceAsNumber(1);
-    	rVector.addVectorValueForLink(new SimpleLinkID("link1", "isp"), 1500L);
-    	rVector.addVectorValueForLink(new SimpleLinkID("link2", "isp"), 2100L);
-    	ntm2.getDtmTrafficManager().updateRVector(rVector);
-    	assertTrue(true);
-    	    	
     	XVector xVector = new XVector();
-    	xVector.setSourceAsNumber(1);
-    	xVector.addVectorValueForLink(new SimpleLinkID("link1", "isp"), 500L);
-    	xVector.addVectorValueForLink(new SimpleLinkID("link2", "isp"), 800L);
+    	xVector.setSourceAsNumber(100);
+    	xVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 500L);
+    	xVector.addVectorValueForLink(new SimpleLinkID("2", "ISP-A"), 800L);
     	ntm2.getDtmTrafficManager().updateXVector(xVector);
     	assertTrue(true);
-		
+
+    	LocalRVector rVector = new LocalRVector();
+    	rVector.setSourceAsNumber(100);
+    	rVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 1500L);
+    	rVector.addVectorValueForLink(new SimpleLinkID("2", "ISP-A"), 2100L);
+    	ntm2.getDtmTrafficManager().updateRVector(rVector);
+    	assertTrue(true);
+    	
 		Thread.sleep(2000);
 		
 		logger.info("Verified that SDN controller at sending domain #2, "
@@ -125,8 +127,8 @@ public class NetworkTrafficSenderReceiverRealSDNTest {
 		
 		logger.info("--------------------------");
 		
-		remoteAS = asdao.findByAsNumber(2);
-		remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("146.124.2.178", 0));
+		remoteAS = asdao.findByAsNumber(200);
+		remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("150.254.160.143", 0));
 		asdao.update(remoteAS);
 	}
 		

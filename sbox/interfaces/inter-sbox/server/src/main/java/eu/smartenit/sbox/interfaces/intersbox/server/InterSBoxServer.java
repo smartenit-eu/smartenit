@@ -15,30 +15,26 @@
  */
 package eu.smartenit.sbox.interfaces.intersbox.server;
 
-import java.util.Enumeration;
-import java.net.InetSocketAddress;
-
-import eu.smartenit.sbox.db.dto.CVector;
-import eu.smartenit.sbox.db.dto.RVector;
-import eu.smartenit.sbox.ntm.NetworkTrafficManager;
-import eu.smartenit.sbox.ntm.dtm.DTMRemoteVectorsReceiver;
-import eu.smartenit.sbox.interfaces.intersbox.client.InterSBoxObject;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
 
-import org.slf4j.Logger;                                                                                                                       
-import org.slf4j.LoggerFactory;    
+import java.net.InetSocketAddress;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.smartenit.sbox.db.dto.CVector;
+import eu.smartenit.sbox.db.dto.RVector;
+import eu.smartenit.sbox.interfaces.intersbox.client.InterSBoxObject;
+import eu.smartenit.sbox.ntm.NetworkTrafficManager;
+import eu.smartenit.sbox.ntm.dtm.sender.DTMRemoteVectorsReceiver;
 
 
 

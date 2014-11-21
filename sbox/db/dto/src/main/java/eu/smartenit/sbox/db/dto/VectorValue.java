@@ -17,15 +17,11 @@ package eu.smartenit.sbox.db.dto;
 
 import java.io.Serializable;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-
 /**
  * The VectorValue class.
  *
  * @author George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public final class VectorValue implements Serializable{
@@ -43,22 +39,22 @@ public final class VectorValue implements Serializable{
 		
 	}
 
+	
 	/**
 	 * The constructor with arguments.
 	 * 
 	 * @param value
-	 * @param linkID
+	 * @param tunnelEndPrefix
 	 */
-	public VectorValue(long value, LinkID linkID) {
+	public VectorValue(long value, NetworkAddressIPv4 tunnelEndPrefix) {
 		super();
 		this.value = value;
-		this.linkID = linkID;
+		this.tunnelEndPrefix = tunnelEndPrefix;
 	}
 
 	private long value;
 	
-	@JsonTypeInfo(use=Id.CLASS, include=As.PROPERTY, property="class")
-	private LinkID linkID;
+	private NetworkAddressIPv4 tunnelEndPrefix;
 
 	public long getValue() {
 		return value;
@@ -68,19 +64,21 @@ public final class VectorValue implements Serializable{
 		this.value = value;
 	}
 
-	public LinkID getLinkID() {
-		return linkID;
+	public NetworkAddressIPv4 getTunnelEndPrefix() {
+		return tunnelEndPrefix;
 	}
 
-	public void setLinkID(LinkID linkID) {
-		this.linkID = linkID;
+	public void setTunnelEndPrefix(NetworkAddressIPv4 tunnelEndPrefix) {
+		this.tunnelEndPrefix = tunnelEndPrefix;
 	}
+
 
 	@Override
 	public String toString() {
-		return "VectorValue [value=" + value + ", linkID=" + linkID + "]";
+		return "VectorValue [value=" + value + ", tunnelEndPrefix="
+				+ tunnelEndPrefix + "]";
 	}
-	
+
 	
 
 }

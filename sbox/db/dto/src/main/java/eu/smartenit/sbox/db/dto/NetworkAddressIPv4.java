@@ -21,7 +21,7 @@ import java.io.Serializable;
  * The NetworkAddressIPv4 class.
  *
  * @author George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public final class NetworkAddressIPv4 implements Serializable{
@@ -75,6 +75,35 @@ public final class NetworkAddressIPv4 implements Serializable{
 		return "NetworkAddressIPv4 [prefix=" + prefix + ", prefixLength="
 				+ prefixLength + "]";
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((prefix == null) ? 0 : prefix.hashCode());
+		result = prime * result + prefixLength;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof NetworkAddressIPv4))
+			return false;
+		NetworkAddressIPv4 other = (NetworkAddressIPv4) obj;
+		if (prefix == null) {
+			if (other.prefix != null)
+				return false;
+		} else if (!prefix.equals(other.prefix))
+			return false;
+		if (prefixLength != other.prefixLength)
+			return false;
+		return true;
+	}
+	
 	
 	
 

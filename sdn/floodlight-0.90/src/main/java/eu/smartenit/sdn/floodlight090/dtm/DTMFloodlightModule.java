@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Grzegorz Rzym
  * @author Piotr Wydrych
- * @version 1.0
+ * @version 1.2
  */
 public class DTMFloodlightModule implements IFloodlightModule {
 

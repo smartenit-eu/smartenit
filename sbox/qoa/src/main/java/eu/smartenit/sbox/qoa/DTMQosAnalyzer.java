@@ -21,13 +21,15 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.smartenit.sbox.commons.SBoxProperties;
 import eu.smartenit.sbox.db.dto.AS;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.eca.EconomicAnalyzer;
-import eu.smartenit.sbox.ntm.dtm.DTMTrafficManager;
+import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
+import eu.smartenit.sbox.qoa.experiment.ExtendedSNMPTrafficCollector;
 
 /**
  * Manages the lifecycle of DTM related modules of QoE/QoS Analyzer component.
@@ -72,7 +74,10 @@ public class DTMQosAnalyzer {
 	 */
 	public boolean initialize() {
 		logger.info("Initialising QOA component ...");
-		trafficCollector = new SNMPTrafficCollector(this); 
+		if(SBoxProperties.LOG_TRAFFIC_DETAILS)
+			trafficCollector = new ExtendedSNMPTrafficCollector(this);
+		else
+			trafficCollector = new SNMPTrafficCollector(this);
 		if(trafficCollector.configure(loadAllLocalASsFromDB(), loadAllDCCommunicationsFromDB())) {
 			trafficCollector.scheduleMonitoringTasks(loadTimeScheduleParametersFromDB());
 			logger.info("... QOA component initialization complete.");

@@ -17,37 +17,35 @@ package eu.smartenit.sbox.db.dao.gen;
 
 import java.util.List;
 
+import eu.smartenit.sbox.db.dto.*;
 import org.skife.jdbi.v2.sqlobject.BindBean;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 import org.skife.jdbi.v2.sqlobject.customizers.Mapper;
 
 import eu.smartenit.sbox.db.dao.binders.BindTunnel;
+import eu.smartenit.sbox.db.dao.binders.BindEndAddressPairTunnelID;
 import eu.smartenit.sbox.db.dao.mappers.TunnelMapper;
-import eu.smartenit.sbox.db.dto.DC2DCCommunicationID;
-import eu.smartenit.sbox.db.dto.SimpleLinkID;
-import eu.smartenit.sbox.db.dto.SimpleTunnelID;
-import eu.smartenit.sbox.db.dto.Tunnel;
 
 /**
  * The abstract TunnelDAO class, including all SQL queries.
  *
  * @authors Antonis Makris, George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public abstract class AbstractTunnelDAO {
 
 	@SqlUpdate("CREATE TABLE IF NOT EXISTS TUNNEL "
 			+ "(TUNNELNAME STRING, "
-			+ "TUNNELNUMBER INTEGER, "
-			+ "SOURCEPREFIX STRING, "
-			+ "DESTINATIONPREFIX STRING, "
+			+ "LOCALTUNNELENDADDRESS STRING, "
+			+ "REMOTETUNNELENDADDRESS STRING, "
 			+ "PHYSICALLOCALINTERFACENAME STRING, "
 			+ "INBOUNDINTERFACECOUNTEROID STRING, "
 			+ "OUTBOUNDINTERFACECOUNTEROID STRING, "
 			+ "LOCALLINKID STRING, "
 			+ "LOCALISPNAME STRING, "
+            + "OFSWITCHPORTNUMBER INTEGER, "
 			+ "COMMUNICATIONNUMBER INTEGER, " 
 			+ "COMMUNICATIONSYMBOL STRING, "
 			+ "TRAFFICDIRECTION STRING, " 
@@ -55,7 +53,7 @@ public abstract class AbstractTunnelDAO {
 			+ "REMOTEASNUMBER INTEGER, " 
 			+ "LOCALCLOUDNAME STRING, "
 			+ "LOCALASNUMBER INTEGER, "
-			+ "PRIMARY KEY (TUNNELNAME, TUNNELNUMBER), "
+			+ "PRIMARY KEY (TUNNELNAME, LOCALTUNNELENDADDRESS, REMOTETUNNELENDADDRESS), "
 			+ "FOREIGN KEY (LOCALLINKID, LOCALISPNAME) "
 			+ "REFERENCES LINK (LOCALLINKID, LOCALISPNAME) "
 			+ "ON DELETE CASCADE) ")
@@ -65,45 +63,46 @@ public abstract class AbstractTunnelDAO {
 	public abstract void deleteTable();
 	
 	@SqlUpdate("INSERT INTO TUNNEL "
-			+ "(TUNNELNAME, TUNNELNUMBER, SOURCEPREFIX, DESTINATIONPREFIX, "
+			+ "(TUNNELNAME, LOCALTUNNELENDADDRESS, REMOTETUNNELENDADDRESS, "
 			+ "PHYSICALLOCALINTERFACENAME, INBOUNDINTERFACECOUNTEROID, "
-			+ "OUTBOUNDINTERFACECOUNTEROID, LOCALLINKID, LOCALISPNAME) "
-			+ "VALUES (:t.tunnelName, :t.tunnelNumber, :t.sourcePrefix, "
-			+ ":t.destinationPrefix, :t.physicalLocalInterfaceName, "
-			+ ":t.inboundInterfaceCounterOID, :t.outboundInterfaceCounterOID, :t.localLinkID,"
-			+ ":t.localIspName)")
+			+ "OUTBOUNDINTERFACECOUNTEROID, LOCALLINKID, LOCALISPNAME, OFSWITCHPORTNUMBER) "
+			+ "VALUES (:t.tunnelName, :t.localTunnelEndAddress, :t.remoteTunnelEndAddress, "
+			+ ":t.physicalLocalInterfaceName, :t.inboundInterfaceCounterOID, "
+            + ":t.outboundInterfaceCounterOID, :t.localLinkID, :t.localIspName, :t.ofSwitchPortNumber)")
 	public abstract void insert(@BindTunnel("t") Tunnel tunnel);
 	
 	@SqlUpdate("UPDATE TUNNEL "
-			+ "SET SOURCEPREFIX = :t.sourcePrefix, "
-			+ "DESTINATIONPREFIX = :t.destinationPrefix, "
+			+ "SET OFSWITCHPORTNUMBER = :t.ofSwitchPortNumber, "
 			+ "PHYSICALLOCALINTERFACENAME = :t.physicalLocalInterfaceName, "
 			+ "INBOUNDINTERFACECOUNTEROID = :t.inboundInterfaceCounterOID, "
+            + "OUTBOUNDINTERFACECOUNTEROID = :t.outboundInterfaceCounterOID, "
 			+ "LOCALLINKID = :t.localLinkID, "
 			+ "LOCALISPNAME = :t.localIspName "
-			+ "WHERE TUNNELNAME = :t.tunnelName AND TUNNELNUMBER = :t.tunnelNumber")
+			+ "WHERE TUNNELNAME = :t.tunnelName AND LOCALTUNNELENDADDRESS = :t.localTunnelEndAddress "
+            + "AND REMOTETUNNELENDADDRESS = :t.remoteTunnelEndAddress")
 	public abstract void update(@BindTunnel("t") Tunnel tunnel);
 	
 	
-	@SqlQuery("SELECT TUNNELNAME, TUNNELNUMBER, SOURCEPREFIX, DESTINATIONPREFIX, "
-			+ "PHYSICALLOCALINTERFACENAME, INBOUNDINTERFACECOUNTEROID, "
-			+ "OUTBOUNDINTERFACECOUNTEROID, LOCALLINKID, LOCALISPNAME "
-			+ "FROM TUNNEL WHERE TUNNELNAME = :tunnelName AND TUNNELNUMBER = :tunnelNumber")
+	@SqlQuery("SELECT TUNNELNAME, LOCALTUNNELENDADDRESS, REMOTETUNNELENDADDRESS, "
+            + "PHYSICALLOCALINTERFACENAME, INBOUNDINTERFACECOUNTEROID, "
+            + "OUTBOUNDINTERFACECOUNTEROID, LOCALLINKID, LOCALISPNAME, OFSWITCHPORTNUMBER "
+			+ "FROM TUNNEL WHERE TUNNELNAME = :t.tunnelName AND LOCALTUNNELENDADDRESS = :t.localTunnelEndAddress "
+            + "AND REMOTETUNNELENDADDRESS = :t.remoteTunnelEndAddress")
 	@Mapper(TunnelMapper.class)
-	public abstract Tunnel findById(@BindBean SimpleTunnelID tunnelID);
+	public abstract Tunnel findById(@BindEndAddressPairTunnelID("t") EndAddressPairTunnelID tunnelID);
 	
 	
-	@SqlQuery("SELECT TUNNELNAME, TUNNELNUMBER, SOURCEPREFIX, DESTINATIONPREFIX, "
-			+ "PHYSICALLOCALINTERFACENAME, INBOUNDINTERFACECOUNTEROID, "
-			+ "OUTBOUNDINTERFACECOUNTEROID, LOCALLINKID, LOCALISPNAME "
-			+ "FROM TUNNEL")
+	@SqlQuery("SELECT TUNNELNAME, LOCALTUNNELENDADDRESS, REMOTETUNNELENDADDRESS, "
+            + "PHYSICALLOCALINTERFACENAME, INBOUNDINTERFACECOUNTEROID, "
+            + "OUTBOUNDINTERFACECOUNTEROID, LOCALLINKID, LOCALISPNAME, OFSWITCHPORTNUMBER "
+            + "FROM TUNNEL")
 	@Mapper(TunnelMapper.class)
 	public abstract List<Tunnel> findAll();
 	
-	@SqlQuery("SELECT TUNNELNAME, TUNNELNUMBER, SOURCEPREFIX, DESTINATIONPREFIX, "
-			+ "PHYSICALLOCALINTERFACENAME, INBOUNDINTERFACECOUNTEROID, "
-			+ "OUTBOUNDINTERFACECOUNTEROID, LOCALLINKID, LOCALISPNAME "
-			+ "FROM TUNNEL WHERE LOCALLINKID = :localLinkID AND LOCALISPNAME = :localIspName")
+	@SqlQuery("SELECT TUNNELNAME, LOCALTUNNELENDADDRESS, REMOTETUNNELENDADDRESS, "
+            + "PHYSICALLOCALINTERFACENAME, INBOUNDINTERFACECOUNTEROID, "
+            + "OUTBOUNDINTERFACECOUNTEROID, LOCALLINKID, LOCALISPNAME, OFSWITCHPORTNUMBER "
+            + "FROM TUNNEL WHERE LOCALLINKID = :localLinkID AND LOCALISPNAME = :localIspName")
 	@Mapper(TunnelMapper.class)
 	public abstract List<Tunnel> findAllByLinkID(@BindBean SimpleLinkID linkID);
 	
@@ -111,13 +110,14 @@ public abstract class AbstractTunnelDAO {
 	public abstract void deleteAll();
 	
 	@SqlUpdate("DELETE FROM TUNNEL "
-			+ "WHERE TUNNELNAME = :tunnelName AND TUNNELNUMBER = :tunnelNumber")
-	public abstract void deleteById(@BindBean SimpleTunnelID linkID);
+			+ "WHERE TUNNELNAME = :t.tunnelName AND LOCALTUNNELENDADDRESS = :t.localTunnelEndAddress "
+            + "AND REMOTETUNNELENDADDRESS = :t.remoteTunnelEndAddress")
+	public abstract void deleteById(@BindEndAddressPairTunnelID("t") EndAddressPairTunnelID tunnelID);
 	
 	
-	@SqlQuery("SELECT TUNNELNAME, TUNNELNUMBER, SOURCEPREFIX, DESTINATIONPREFIX, "
-			+ "PHYSICALLOCALINTERFACENAME, INBOUNDINTERFACECOUNTEROID, "
-			+ "OUTBOUNDINTERFACECOUNTEROID, LOCALLINKID, LOCALISPNAME "
+	@SqlQuery("SELECT TUNNELNAME, LOCALTUNNELENDADDRESS, REMOTETUNNELENDADDRESS, "
+            + "PHYSICALLOCALINTERFACENAME, INBOUNDINTERFACECOUNTEROID, "
+            + "OUTBOUNDINTERFACECOUNTEROID, LOCALLINKID, LOCALISPNAME, OFSWITCHPORTNUMBER "
 			+ "FROM TUNNEL WHERE COMMUNICATIONNUMBER = :d.communicationNumber AND "
 			+ "COMMUNICATIONSYMBOL = :d.communicationSymbol AND "
 			+ "LOCALCLOUDNAME = :d.localCloudDCName AND "
@@ -141,7 +141,8 @@ public abstract class AbstractTunnelDAO {
 			+ "LOCALASNUMBER = :d.localAsNumber, "
 			+ "REMOTECLOUDNAME = :d.remoteCloudDCName, "
 			+ "REMOTEASNUMBER = :d.remoteAsNumber "
-			+ "WHERE TUNNELNAME = :t.tunnelName AND TUNNELNUMBER = :t.tunnelNumber")
-	public abstract void updateByDC2DCCommunicationID(@BindBean("t") SimpleTunnelID tunnelID, 
+            + "WHERE TUNNELNAME = :t.tunnelName AND LOCALTUNNELENDADDRESS = :t.localTunnelEndAddress "
+            + "AND REMOTETUNNELENDADDRESS = :t.remoteTunnelEndAddress")
+	public abstract void updateByDC2DCCommunicationID(@BindEndAddressPairTunnelID("t") EndAddressPairTunnelID tunnelID,
 			@BindBean("d") DC2DCCommunicationID dcID);
 }

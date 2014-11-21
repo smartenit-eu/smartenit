@@ -31,18 +31,14 @@ import eu.smartenit.sbox.db.dto.Tunnel;
  * 
  * @author <a href="mailto:jgutkow@man.poznan.pl">Jakub Gutkowski</a> (<a
  *         href="http://psnc.pl">PSNC</a>)
- * @version 1.0
+ * @version 1.2
  * 
  */
 public class SNMPOIDCollector {
 	private static final Logger logger = LoggerFactory.getLogger(SNMPOIDCollector.class);
-	private static final String IF_NAME_OID = "1.3.6.1.2.1.31.1.1.1.1";
-	private static final String IF_HC_IN_OCTETS_OID = "1.3.6.1.2.1.31.1.1.1.6";
-	private static final String IF_HC_OUT_OCTETS_OID = "1.3.6.1.2.1.31.1.1.1.10";
-	
 	private SNMPWrapper snmpWrapper;
-	private MonitoredLinksInventory links;
-	private MonitoredTunnelsInventory tunnels;
+	protected MonitoredLinksInventory links;
+	protected MonitoredTunnelsInventory tunnels;
 	
 	/**
 	 * The constructor with arguments.
@@ -86,49 +82,43 @@ public class SNMPOIDCollector {
 		}
 	}
 
-	private void setOIDsForTunnels(DARouter daRouter) throws IOException {
+	protected void setOIDsForTunnels(DARouter daRouter) throws IOException {
 		final List<String> interfaces = getIntrefacesForDARouter(daRouter);
 		for (Tunnel tunnel : tunnels.getTunnels(daRouter)) {
-			tunnel.setInboundInterfaceCounterOID(getInboundInterfaceCounterOID(tunnel.getPhysicalLocalInterfaceName(), interfaces));
-			tunnel.setOutboundInterfaceCounterOID(getOutboundInterfaceCounterOID(tunnel.getPhysicalLocalInterfaceName(), interfaces));
+			tunnel.setInboundInterfaceCounterOID(getInterfaceCounterOID(OIDValues.IF_HC_IN_OCTETS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
+			tunnel.setOutboundInterfaceCounterOID(getInterfaceCounterOID(OIDValues.IF_HC_OUT_OCTETS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
 		}
 	}
 	
-	private void setOIDsForLinks(BGRouter bgRouter) throws IOException {
+	protected void setOIDsForLinks(BGRouter bgRouter) throws IOException {
 		final List<String> interfaces = getIntrefacesForBGRouter(bgRouter);
 		for (Link link : links.getLinks(bgRouter)) {
-			link.setInboundInterfaceCounterOID(getInboundInterfaceCounterOID(link.getPhysicalInterfaceName(), interfaces));
-			link.setOutboundInterfaceCounterOID(getOutboundInterfaceCounterOID(link.getPhysicalInterfaceName(), interfaces));
+			link.setInboundInterfaceCounterOID(getInterfaceCounterOID(OIDValues.IF_HC_IN_OCTETS_OID.getValue(), link.getPhysicalInterfaceName(), interfaces));
+			link.setOutboundInterfaceCounterOID(getInterfaceCounterOID(OIDValues.IF_HC_OUT_OCTETS_OID.getValue(), link.getPhysicalInterfaceName(), interfaces));
 		}		
 	}
 	
-	private List<String> getIntrefacesForBGRouter(BGRouter bgRouter) throws IOException {
+	protected List<String> getIntrefacesForBGRouter(BGRouter bgRouter) throws IOException {
 		snmpWrapper.startClient();
 		final List<String> interfaces = snmpWrapper.snmpWalk(
-				snmpWrapper.prepareOID(IF_NAME_OID), 
+				snmpWrapper.prepareOID(OIDValues.IF_NAME_OID.getValue()), 
 				snmpWrapper.prepareTarget(bgRouter.getManagementAddress().getPrefix(), bgRouter.getSnmpCommunity()));
 		snmpWrapper.stopClient();
 		return interfaces;
 	}
 	
-	private List<String> getIntrefacesForDARouter(DARouter daRouter) throws IOException {
+	protected List<String> getIntrefacesForDARouter(DARouter daRouter) throws IOException {
 		snmpWrapper.startClient();
 		final List<String> interfaces = snmpWrapper.snmpWalk(
-				snmpWrapper.prepareOID(IF_NAME_OID), 
+				snmpWrapper.prepareOID(OIDValues.IF_NAME_OID.getValue()), 
 				snmpWrapper.prepareTarget(daRouter.getManagementAddress().getPrefix(), daRouter.getSnmpCommunity()));
 		snmpWrapper.stopClient();
 		return interfaces;
 	}
 	
-	protected String getOutboundInterfaceCounterOID(String physicalInterfaceName, List<String> interfaces) throws IOException {
+	protected String getInterfaceCounterOID(String oidPrefix, String physicalInterfaceName, List<String> interfaces) throws IOException {
 		final StringBuilder oid = new StringBuilder();
-		oid.append(IF_HC_OUT_OCTETS_OID).append(".").append(parseInterface(physicalInterfaceName, interfaces));
-		return oid.toString();
-	}
-	
-	protected String getInboundInterfaceCounterOID(String physicalInterfaceName, List<String> interfaces) throws IOException {
-		final StringBuilder oid = new StringBuilder();
-		oid.append(IF_HC_IN_OCTETS_OID).append(".").append(parseInterface(physicalInterfaceName, interfaces));
+		oid.append(oidPrefix).append(".").append(parseInterface(physicalInterfaceName, interfaces));
 		return oid.toString();
 	}
 	

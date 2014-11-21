@@ -17,20 +17,22 @@ package eu.smartenit.sbox.ntm.dtm;
 
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
+import eu.smartenit.sbox.db.dao.LinkDAO;
 
 /**
  * Static factory class used to obtain an instance of specific DAO class.
- * Following DAO classes are supported: {@link DC2DCCommunicationDAO} and
- * {@link ASDAO}
+ * Following DAO classes are supported: {@link DC2DCCommunicationDAO}, 
+ * {@link ASDAO} and {@link LinkDAO}.
  * 
  * @author Lukasz Lopatowski
- * @version 1.0
+ * @version 1.2
  * 
  */
 public class DAOFactory {
 
 	private static ASDAO asDAO = new ASDAO();
 	private static DC2DCCommunicationDAO dc2dcCommunicationDAO = new DC2DCCommunicationDAO();
+	private static LinkDAO linkDAO = new LinkDAO();
 	
 	/**
 	 * Returns locally stored instance of {@link ASDAO}. Specific DAO instance
@@ -50,6 +52,16 @@ public class DAOFactory {
 	 */
 	public static DC2DCCommunicationDAO getDCDC2DCCommunicationDAOInstance() {
 		return dc2dcCommunicationDAO;
+	}
+
+	/**
+	 * Returns locally stored instance of {@link LinkDAO}. Specific DAO instance
+	 * can be set using appropriate static setter method.
+	 * 
+	 * @return locally stored {@link LinkDAO} instance
+	 */
+	public static LinkDAO getLinkDAOInstance() {
+		return linkDAO;
 	}
 	
 	/**
@@ -73,5 +85,16 @@ public class DAOFactory {
 	public static void setDC2DCCommunicationDAO(DC2DCCommunicationDAO dao) {
 		dc2dcCommunicationDAO = dao;
 	}
-	
+
+	/**
+	 * Method used to set a given instance of {@link LinkDAO} to be returned on
+	 * each request.
+	 * 
+	 * @param dao
+	 *            specific instance of {@link LinkDAO}
+	 */
+	public static void setLinkDAO(LinkDAO dao) {
+		linkDAO = dao;
+	}
+
 }

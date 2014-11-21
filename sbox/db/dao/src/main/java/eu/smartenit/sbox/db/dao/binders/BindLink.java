@@ -34,7 +34,7 @@ import eu.smartenit.sbox.db.dto.SimpleLinkID;
  * into Link parameters.
  *
  * @authors George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 @BindingAnnotation(BindLink.LinkBinderFactory.class)
@@ -58,6 +58,8 @@ public @interface BindLink {
 					q.bind("inboundInterfaceCounterOID", arg.getInboundInterfaceCounterOID());
 					q.bind("outboundInterfaceCounterOID", arg.getOutboundInterfaceCounterOID());	
 					q.bind("bgRouterAddress", arg.getBgRouter().getManagementAddress().getPrefix());
+					q.bind("tunnelEndPrefix", arg.getTunnelEndPrefix().getPrefix());
+					q.bind("tunnelEndPrefixLength", arg.getTunnelEndPrefix().getPrefixLength());
 				}
 			};
 		}

@@ -40,7 +40,7 @@ public class MonitoredTunnelsInventoryTest {
 		
 		assertEquals(2, inventory.getDARoutersByAsNumber(1).size());
 		assertEquals(1, inventory.getDARoutersByAsNumber(2).size());
-		assertEquals(2, inventory.getTunnels(new DARouter(new NetworkAddressIPv4("1.1.1.1", 32), "")).size());
+		assertEquals(2, inventory.getTunnels(new DARouter(new NetworkAddressIPv4("1.1.1.1", 32), "", "")).size());
 		assertEquals(7, inventory.getTunnels(1).size());
 		assertEquals(1, inventory.getTunnels(2).size());
 		assertEquals(2, inventory.getAllAsNumbers().size());

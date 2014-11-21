@@ -62,6 +62,7 @@ public class DARouterTest {
 		DARouter d = new DARouter();
 		d.setManagementAddress(new NetworkAddressIPv4("5.5.5.5", 0));
 		d.setSnmpCommunity("snmp");
+        d.setOfSwitchDPID("abcdefg");
 		
 		ddao.insert(d);
 		
@@ -73,6 +74,7 @@ public class DARouterTest {
 		d = ddao.findById("5.5.5.5");
 		assertNotNull(d);
 		assertEquals(d.getSnmpCommunity(), "snmp");
+        assertEquals(d.getOfSwitchDPID(), "abcdefg");
 		
 	}
 
@@ -101,12 +103,15 @@ public class DARouterTest {
 		DARouter d = ddao.findById("5.5.5.5");
 		assertNotNull(d);
 		assertEquals(d.getSnmpCommunity(), "snmp");
+        assertEquals(d.getOfSwitchDPID(), "abcdefg");
 		
 		d.setSnmpCommunity("newsnmp");
+        d.setOfSwitchDPID("asdfg");
 		ddao.update(d);
 		
 		d = ddao.findById("5.5.5.5");
 		assertEquals(d.getSnmpCommunity(), "newsnmp");
+        assertEquals(d.getOfSwitchDPID(), "asdfg");
 		
 		ddao.updateBySDNControllerAddress(d.getManagementAddress().getPrefix(), 
 				s.getManagementAddress().getPrefix());
@@ -114,6 +119,7 @@ public class DARouterTest {
 		DARouter d2 = new DARouter();
 		d2.setManagementAddress(new NetworkAddressIPv4("8.8.8.8", 0));
 		d2.setSnmpCommunity("snmp2");
+        d2.setOfSwitchDPID("qwerty");
 		ddao.insertBySDNControllerAddress(d2, s.getManagementAddress().getPrefix());
 		
 		dlist = ddao.findBySDNControllerAddress(s.getManagementAddress().getPrefix());

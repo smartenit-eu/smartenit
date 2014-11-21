@@ -29,7 +29,8 @@ import eu.smartenit.sbox.db.dto.util.ClassNameAndIntSequenceGenerator;
  * The Link class.
  * 
  * @author George Petropoulos
- * @version 1.0
+ * @author Jakub Gutkowski
+ * @version 1.2
  * 
  */
 @JsonIdentityInfo(generator=ClassNameAndIntSequenceGenerator.class, scope=Link.class, property="@id")
@@ -48,11 +49,11 @@ public final class Link implements Serializable {
 		this.address = new NetworkAddressIPv4();
 		this.costFunction = new CostFunction();
 		this.bgRouter = new BGRouter();
+		this.tunnelEndPrefix = new NetworkAddressIPv4();
 	}
 
+
 	/**
-	 * The constructor with arguments.
-	 * 
 	 * @param linkID
 	 * @param address
 	 * @param physicalInterfaceName
@@ -62,13 +63,15 @@ public final class Link implements Serializable {
 	 * @param costFunction
 	 * @param bgRouter
 	 * @param traversingTunnels
+	 * @param tunnelEndPrefix
 	 */
 	public Link(LinkID linkID, NetworkAddressIPv4 address,
 			String physicalInterfaceName, int vlan,
 			String inboundInterfaceCounterOID,
 			String outboundInterfaceCounterOID, CostFunction costFunction,
-			BGRouter bgRouter, List<Tunnel> traversingTunnels) {
-
+			BGRouter bgRouter, List<Tunnel> traversingTunnels,
+			NetworkAddressIPv4 tunnelEndPrefix) {
+		super();
 		this.linkID = linkID;
 		this.address = address;
 		this.physicalInterfaceName = physicalInterfaceName;
@@ -78,7 +81,10 @@ public final class Link implements Serializable {
 		this.costFunction = costFunction;
 		this.bgRouter = bgRouter;
 		this.traversingTunnels = traversingTunnels;
+		this.tunnelEndPrefix = tunnelEndPrefix;
 	}
+
+
 
 	@JsonTypeInfo(use=Id.CLASS, include=As.PROPERTY, property="class")
 	private LinkID linkID;
@@ -98,6 +104,16 @@ public final class Link implements Serializable {
 	private BGRouter bgRouter;
 
 	private List<Tunnel> traversingTunnels;
+	
+	private NetworkAddressIPv4 tunnelEndPrefix;
+	
+	/* Extended to support packet counters*/
+	private String inboundInterfaceCounterOID_UcastPkts;
+	private String outboundInterfaceCounterOID_UcastPkts;
+	private String inboundInterfaceCounterOID_MulticastPkts;
+	private String outboundInterfaceCounterOID_MulticastPkts;
+	private String inboundInterfaceCounterOID_BroadcastPkts;
+	private String outboundInterfaceCounterOID_BroadcastPkts;
 
 	public LinkID getLinkID() {
 		return linkID;
@@ -172,6 +188,68 @@ public final class Link implements Serializable {
 		this.traversingTunnels = traversingTunnels;
 	}
 
+	public NetworkAddressIPv4 getTunnelEndPrefix() {
+		return tunnelEndPrefix;
+	}
+
+	public void setTunnelEndPrefix(NetworkAddressIPv4 tunnelEndPrefix) {
+		this.tunnelEndPrefix = tunnelEndPrefix;
+	}
+	
+	public String getInboundInterfaceCounterOID_UcastPkts() {
+		return inboundInterfaceCounterOID_UcastPkts;
+	}
+
+	public void setInboundInterfaceCounterOID_UcastPkts(
+			String inboundInterfaceCounterOID_UcastPkts) {
+		this.inboundInterfaceCounterOID_UcastPkts = inboundInterfaceCounterOID_UcastPkts;
+	}
+
+	public String getOutboundInterfaceCounterOID_UcastPkts() {
+		return outboundInterfaceCounterOID_UcastPkts;
+	}
+
+	public void setOutboundInterfaceCounterOID_UcastPkts(
+			String outboundInterfaceCounterOID_UcastPkts) {
+		this.outboundInterfaceCounterOID_UcastPkts = outboundInterfaceCounterOID_UcastPkts;
+	}
+
+	public String getInboundInterfaceCounterOID_MulticastPkts() {
+		return inboundInterfaceCounterOID_MulticastPkts;
+	}
+
+	public void setInboundInterfaceCounterOID_MulticastPkts(
+			String inboundInterfaceCounterOID_MulticastPkts) {
+		this.inboundInterfaceCounterOID_MulticastPkts = inboundInterfaceCounterOID_MulticastPkts;
+	}
+
+	public String getOutboundInterfaceCounterOID_MulticastPkts() {
+		return outboundInterfaceCounterOID_MulticastPkts;
+	}
+
+	public void setOutboundInterfaceCounterOID_MulticastPkts(
+			String outboundInterfaceCounterOID_MulticastPkts) {
+		this.outboundInterfaceCounterOID_MulticastPkts = outboundInterfaceCounterOID_MulticastPkts;
+	}
+
+	public String getInboundInterfaceCounterOID_BroadcastPkts() {
+		return inboundInterfaceCounterOID_BroadcastPkts;
+	}
+
+	public void setInboundInterfaceCounterOID_BroadcastPkts(
+			String inboundInterfaceCounterOID_BroadcastPkts) {
+		this.inboundInterfaceCounterOID_BroadcastPkts = inboundInterfaceCounterOID_BroadcastPkts;
+	}
+
+	public String getOutboundInterfaceCounterOID_BroadcastPkts() {
+		return outboundInterfaceCounterOID_BroadcastPkts;
+	}
+
+	public void setOutboundInterfaceCounterOID_BroadcastPkts(
+			String outboundInterfaceCounterOID_BroadcastPkts) {
+		this.outboundInterfaceCounterOID_BroadcastPkts = outboundInterfaceCounterOID_BroadcastPkts;
+	}
+
 	@Override
 	public String toString() {
 		return "Link [linkID=" + linkID + ", address=" + address
@@ -180,7 +258,7 @@ public final class Link implements Serializable {
 				+ inboundInterfaceCounterOID + ", outboundInterfaceCounterOID="
 				+ outboundInterfaceCounterOID + ", costFunction="
 				+ costFunction + ", traversingTunnels=" + traversingTunnels
-				+ "]";
+				+ ", tunnelEndPrefix=" + tunnelEndPrefix + "]";
 	}
 
 }

@@ -18,16 +18,14 @@ package eu.smartenit.sbox.db.dto;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import eu.smartenit.sbox.db.dto.util.ClassNameAndIntSequenceGenerator;
 /**
  * The Tunnel class.
  *
  * @author George Petropoulos
- * @version 1.0
+ * @author Jakub Gutkowski
+ * @version 1.2
  * 
  */
 @JsonIdentityInfo(generator=ClassNameAndIntSequenceGenerator.class, scope=Tunnel.class, property="@id")
@@ -42,59 +40,59 @@ public final class Tunnel implements Serializable{
 	 * The constructor.
 	 */
 	public Tunnel() {
-		this.tunnelID = new TunnelID();
+		this.tunnelID = new EndAddressPairTunnelID();
 		this.link = new Link();
-		this.sourceEndAddress = new NetworkAddressIPv4();
-		this.destinationEndAddress = new NetworkAddressIPv4();
 	}
 
 	/**
 	 * The constructor with arguments.
-	 * 
+	 *
 	 * @param tunnelID
 	 * @param link
-	 * @param sourceEndAddress
-	 * @param destinationEndAddress
 	 * @param physicalLocalInterfaceName
 	 * @param inboundInterfaceCounterOID
 	 * @param outboundInterfaceCounterOID
+	 * @param ofSwitchPortNumber
 	 */
-	public Tunnel(TunnelID tunnelID, Link link,
-			NetworkAddressIPv4 sourceEndAddress,
-			NetworkAddressIPv4 destinationEndAddress,
+	public Tunnel(EndAddressPairTunnelID tunnelID, Link link,
 			String physicalLocalInterfaceName,
 			String inboundInterfaceCounterOID,
-			String outboundInterfaceCounterOID) {
-		
+			String outboundInterfaceCounterOID, int ofSwitchPortNumber) {
+		super();
 		this.tunnelID = tunnelID;
 		this.link = link;
-		this.sourceEndAddress = sourceEndAddress;
-		this.destinationEndAddress = destinationEndAddress;
 		this.physicalLocalInterfaceName = physicalLocalInterfaceName;
 		this.inboundInterfaceCounterOID = inboundInterfaceCounterOID;
 		this.outboundInterfaceCounterOID = outboundInterfaceCounterOID;
+		this.ofSwitchPortNumber = ofSwitchPortNumber;
 	}
+	
 
-	@JsonTypeInfo(use=Id.CLASS, include=As.PROPERTY, property="class")
-	private TunnelID tunnelID;
-	
+	private EndAddressPairTunnelID tunnelID;
+
 	private Link link;
-	
-	private NetworkAddressIPv4 sourceEndAddress;
-	
-	private NetworkAddressIPv4 destinationEndAddress;
-	
+		
 	private String physicalLocalInterfaceName;
 	
 	private String inboundInterfaceCounterOID;
 	
 	private String outboundInterfaceCounterOID;
-
-	public TunnelID getTunnelID() {
+	
+	private int ofSwitchPortNumber;
+	
+	/* Extended to support packet counters*/
+	private String inboundInterfaceCounterOID_UcastPkts;
+	private String outboundInterfaceCounterOID_UcastPkts;
+	private String inboundInterfaceCounterOID_MulticastPkts;
+	private String outboundInterfaceCounterOID_MulticastPkts;
+	private String inboundInterfaceCounterOID_BroadcastPkts;
+	private String outboundInterfaceCounterOID_BroadcastPkts;
+	
+	public EndAddressPairTunnelID getTunnelID() {
 		return tunnelID;
 	}
 
-	public void setTunnelID(TunnelID tunnelID) {
+	public void setTunnelID(EndAddressPairTunnelID tunnelID) {
 		this.tunnelID = tunnelID;
 	}
 
@@ -104,22 +102,6 @@ public final class Tunnel implements Serializable{
 
 	public void setLink(Link link) {
 		this.link = link;
-	}
-
-	public NetworkAddressIPv4 getSourceEndAddress() {
-		return sourceEndAddress;
-	}
-
-	public void setSourceEndAddress(NetworkAddressIPv4 sourceEndAddress) {
-		this.sourceEndAddress = sourceEndAddress;
-	}
-
-	public NetworkAddressIPv4 getDestinationEndAddress() {
-		return destinationEndAddress;
-	}
-
-	public void setDestinationEndAddress(NetworkAddressIPv4 destinationEndAddress) {
-		this.destinationEndAddress = destinationEndAddress;
 	}
 
 	public String getPhysicalLocalInterfaceName() {
@@ -146,15 +128,76 @@ public final class Tunnel implements Serializable{
 		this.outboundInterfaceCounterOID = outboundInterfaceCounterOID;
 	}
 
+	public int getOfSwitchPortNumber() {
+		return ofSwitchPortNumber;
+	}
+
+	public void setOfSwitchPortNumber(int ofSwitchPortNumber) {
+		this.ofSwitchPortNumber = ofSwitchPortNumber;
+	}
+
+	public String getInboundInterfaceCounterOID_UcastPkts() {
+		return inboundInterfaceCounterOID_UcastPkts;
+	}
+
+	public void setInboundInterfaceCounterOID_UcastPkts(
+			String inboundInterfaceCounterOID_UcastPkts) {
+		this.inboundInterfaceCounterOID_UcastPkts = inboundInterfaceCounterOID_UcastPkts;
+	}
+
+	public String getOutboundInterfaceCounterOID_UcastPkts() {
+		return outboundInterfaceCounterOID_UcastPkts;
+	}
+
+	public void setOutboundInterfaceCounterOID_UcastPkts(
+			String outboundInterfaceCounterOID_UcastPkts) {
+		this.outboundInterfaceCounterOID_UcastPkts = outboundInterfaceCounterOID_UcastPkts;
+	}
+
+	public String getInboundInterfaceCounterOID_MulticastPkts() {
+		return inboundInterfaceCounterOID_MulticastPkts;
+	}
+
+	public void setInboundInterfaceCounterOID_MulticastPkts(
+			String inboundInterfaceCounterOID_MulticastPkts) {
+		this.inboundInterfaceCounterOID_MulticastPkts = inboundInterfaceCounterOID_MulticastPkts;
+	}
+
+	public String getOutboundInterfaceCounterOID_MulticastPkts() {
+		return outboundInterfaceCounterOID_MulticastPkts;
+	}
+
+	public void setOutboundInterfaceCounterOID_MulticastPkts(
+			String outboundInterfaceCounterOID_MulticastPkts) {
+		this.outboundInterfaceCounterOID_MulticastPkts = outboundInterfaceCounterOID_MulticastPkts;
+	}
+
+	public String getInboundInterfaceCounterOID_BroadcastPkts() {
+		return inboundInterfaceCounterOID_BroadcastPkts;
+	}
+
+	public void setInboundInterfaceCounterOID_BroadcastPkts(
+			String inboundInterfaceCounterOID_BroadcastPkts) {
+		this.inboundInterfaceCounterOID_BroadcastPkts = inboundInterfaceCounterOID_BroadcastPkts;
+	}
+
+	public String getOutboundInterfaceCounterOID_BroadcastPkts() {
+		return outboundInterfaceCounterOID_BroadcastPkts;
+	}
+
+	public void setOutboundInterfaceCounterOID_BroadcastPkts(
+			String outboundInterfaceCounterOID_BroadcastPkts) {
+		this.outboundInterfaceCounterOID_BroadcastPkts = outboundInterfaceCounterOID_BroadcastPkts;
+	}
+
 	@Override
 	public String toString() {
 		return "Tunnel [tunnelID=" + tunnelID 
-				+ ", sourceEndAddress=" + sourceEndAddress
-				+ ", destinationEndAddress=" + destinationEndAddress
 				+ ", physicalLocalInterfaceName=" + physicalLocalInterfaceName
 				+ ", inboundInterfaceCounterOID=" + inboundInterfaceCounterOID
 				+ ", outboundInterfaceCounterOID="
-				+ outboundInterfaceCounterOID + "]";
+				+ outboundInterfaceCounterOID + ", ofSwitchPortNumber="
+				+ ofSwitchPortNumber + "]";
 	}
 	
 }

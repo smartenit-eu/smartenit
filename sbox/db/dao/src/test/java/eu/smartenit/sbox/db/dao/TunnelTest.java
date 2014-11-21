@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.smartenit.sbox.db.dto.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,19 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.smartenit.sbox.db.dao.LinkDAO;
 import eu.smartenit.sbox.db.dao.util.Tables;
-import eu.smartenit.sbox.db.dto.AS;
-import eu.smartenit.sbox.db.dto.CloudDC;
-import eu.smartenit.sbox.db.dto.CostFunction;
-import eu.smartenit.sbox.db.dto.DC2DCCommunication;
-import eu.smartenit.sbox.db.dto.DC2DCCommunicationID;
-import eu.smartenit.sbox.db.dto.Direction;
-import eu.smartenit.sbox.db.dto.Link;
-import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
-import eu.smartenit.sbox.db.dto.SBox;
-import eu.smartenit.sbox.db.dto.Segment;
-import eu.smartenit.sbox.db.dto.SimpleLinkID;
-import eu.smartenit.sbox.db.dto.SimpleTunnelID;
-import eu.smartenit.sbox.db.dto.Tunnel;
 
 public class TunnelTest {
 
@@ -132,31 +120,42 @@ public class TunnelTest {
 		ldao.insert(l);
 
 		Tunnel t = new Tunnel();
-		t.setTunnelID(new SimpleTunnelID("tunnel1", 1));
-		t.setSourceEndAddress(new NetworkAddressIPv4("10.0.1.0", 24));
-		t.setDestinationEndAddress(new NetworkAddressIPv4("20.0.2.0", 24));
+        EndAddressPairTunnelID tunnelID = new EndAddressPairTunnelID();
+        tunnelID.setTunnelName("tunnel1");
+        tunnelID.setLocalTunnelEndAddress(new NetworkAddressIPv4("10.0.1.0", 24));
+        tunnelID.setRemoteTunnelEndAddress(new NetworkAddressIPv4("20.0.2.0", 24));
+		t.setTunnelID(tunnelID);
 		t.setPhysicalLocalInterfaceName("p");
 		t.setInboundInterfaceCounterOID("1.2.3.4.4.5.6");
 		t.setOutboundInterfaceCounterOID("1.3.6.7");
+        t.setOfSwitchPortNumber(5678);
 		t.setLink(l);
 		
 		tdao.insert(t);
 		list = tdao.findAll();
 		assertEquals(list.size(), 1);
 		
-		t = tdao.findById(new SimpleTunnelID("tunnel1", 1));
+		t = tdao.findById(tunnelID);
 		assertNotNull(t);
-		assertEquals(t.getDestinationEndAddress().getPrefix(), "20.0.2.0");
+        assertEquals(t.getTunnelID().getLocalTunnelEndAddress().getPrefix(), "10.0.1.0");
+        assertEquals(t.getTunnelID().getRemoteTunnelEndAddress().getPrefix(), "20.0.2.0");
+        assertEquals(t.getOfSwitchPortNumber(), 5678);
+        assertEquals(t.getPhysicalLocalInterfaceName(), "p");
 		assertEquals(((SimpleLinkID)t.getLink().getLinkID()).getLocalIspName(), "ote");
 		
 		t.setPhysicalLocalInterfaceName("physical-interface");
-		t.setSourceEndAddress(new NetworkAddressIPv4("30.0.3.0", 8));
+		t.setOutboundInterfaceCounterOID("1.2.3.4.5.6.7");
+        t.setOfSwitchPortNumber(56789);
 		
 		tdao.update(t);
-		t = tdao.findById(new SimpleTunnelID("tunnel1", 1));
+		t = tdao.findById(tunnelID);
 		assertNotNull(t);
-		assertEquals(t.getSourceEndAddress().getPrefix(), "30.0.3.0");
-		assertEquals(t.getPhysicalLocalInterfaceName(), "physical-interface");
+        assertEquals(t.getTunnelID().getLocalTunnelEndAddress().getPrefix(), "10.0.1.0");
+        assertEquals(t.getTunnelID().getRemoteTunnelEndAddress().getPrefix(), "20.0.2.0");
+        assertEquals(t.getOfSwitchPortNumber(), 56789);
+        assertEquals(t.getPhysicalLocalInterfaceName(), "physical-interface");
+        assertEquals(t.getOutboundInterfaceCounterOID(), "1.2.3.4.5.6.7");
+        assertEquals(((SimpleLinkID)t.getLink().getLinkID()).getLocalIspName(), "ote");
 		
 		List<DC2DCCommunication> dcList = ddao.findAll();
 		assertEquals(dcList.size(), 0);
@@ -203,7 +202,7 @@ public class TunnelTest {
 		dcList = ddao.findAll();
 		assertEquals(dcList.size(), 1);
 		
-		tdao.updateByDC2DCCommunicationID((SimpleTunnelID) t.getTunnelID(), id);
+		tdao.updateByDC2DCCommunicationID(t.getTunnelID(), id);
 		
 		list = tdao.findAllByDC2DCCommunicationID(id);
 		assertEquals(list.size(), 1);
@@ -213,11 +212,13 @@ public class TunnelTest {
 		tdao.deleteByDC2DCCommunicationID(id);
 		list = tdao.findAll();
 		assertEquals(list.size(), 0);
-		
-		t = new Tunnel();
-		t.setTunnelID(new SimpleTunnelID("tunnel1", 1));
-		t.setSourceEndAddress(new NetworkAddressIPv4("10.0.1.0", 24));
-		t.setDestinationEndAddress(new NetworkAddressIPv4("20.0.2.0", 24));
+
+        t = new Tunnel();
+        tunnelID = new EndAddressPairTunnelID();
+        tunnelID.setTunnelName("tunnel2");
+        tunnelID.setLocalTunnelEndAddress(new NetworkAddressIPv4("10.0.1.0", 24));
+        tunnelID.setRemoteTunnelEndAddress(new NetworkAddressIPv4("20.0.2.0", 24));
+        t.setTunnelID(tunnelID);
 		t.setPhysicalLocalInterfaceName("p");
 		t.setInboundInterfaceCounterOID("1.2.3.4.4.5.6");
 		t.setOutboundInterfaceCounterOID("1.3.6.7");
@@ -225,7 +226,7 @@ public class TunnelTest {
 		
 		tdao.insert(t);
 		
-		tdao.deleteById(new SimpleTunnelID("tunnel1", 1));
+		tdao.deleteById(tunnelID);
 		list = tdao.findAll();
 		assertEquals(list.size(), 0);
 	}

@@ -22,10 +22,10 @@ import java.util.List;
  * The XVector class.
  *
  * @author George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
-public final class XVector extends Vector implements Serializable {
+public final class XVector extends LocalVector implements Serializable {
 
 	/**
 	 * 
@@ -45,9 +45,11 @@ public final class XVector extends Vector implements Serializable {
 	 * @param vectorValues
 	 * @param sourceAsNumber
 	 */
-	public XVector(List<VectorValue> vectorValues, int sourceAsNumber) {
+	public XVector(List<LocalVectorValue> vectorValues, int sourceAsNumber) {
 		super(vectorValues, sourceAsNumber);
 	}
+
+	
 
 
 }

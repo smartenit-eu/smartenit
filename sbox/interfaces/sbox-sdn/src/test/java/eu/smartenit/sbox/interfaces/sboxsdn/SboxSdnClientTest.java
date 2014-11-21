@@ -17,6 +17,8 @@ package eu.smartenit.sbox.interfaces.sboxsdn;
 
 import static org.junit.Assert.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+
+import eu.smartenit.sbox.db.dto.*;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.util.CharsetUtil;
 
@@ -32,21 +34,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 
-import eu.smartenit.sbox.db.dto.AS;
-import eu.smartenit.sbox.db.dto.CVector;
-import eu.smartenit.sbox.db.dto.CloudDC;
-import eu.smartenit.sbox.db.dto.ConfigData;
-import eu.smartenit.sbox.db.dto.DARouter;
-import eu.smartenit.sbox.db.dto.DC2DCCommunication;
-import eu.smartenit.sbox.db.dto.DC2DCCommunicationID;
-import eu.smartenit.sbox.db.dto.Direction;
-import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
-import eu.smartenit.sbox.db.dto.RVector;
-import eu.smartenit.sbox.db.dto.SBox;
-import eu.smartenit.sbox.db.dto.SDNController;
-import eu.smartenit.sbox.db.dto.SimpleLinkID;
-import eu.smartenit.sbox.db.dto.ThetaCoefficient;
-import eu.smartenit.sbox.db.dto.VectorValue;
 import eu.smartenit.sdn.interfaces.sboxsdn.RCVectors;
 import eu.smartenit.sdn.interfaces.sboxsdn.Serialization;
 import eu.smartenit.sdn.interfaces.sboxsdn.URLs;
@@ -92,8 +79,8 @@ public class SboxSdnClientTest {
 		CVector cVector = new CVector();
 		cVector.setSourceAsNumber(1);
 		List<VectorValue> vectorValues = new ArrayList<VectorValue>();
-		vectorValues.add(new VectorValue(1000000, new SimpleLinkID("link1", "etc")));
-		vectorValues.add(new VectorValue(2000000, new SimpleLinkID("link2", "etc")));
+		vectorValues.add(new VectorValue(1000000, new NetworkAddressIPv4("1.1.1.1", 32)));
+		vectorValues.add(new VectorValue(2000000, new NetworkAddressIPv4("2.2.2.2", 32)));
 		cVector.setVectorValues(vectorValues);
 		
 		RCVectors rcVectors = new RCVectors(null, cVector);
@@ -132,14 +119,14 @@ public class SboxSdnClientTest {
 		CVector cVector = new CVector();
 		cVector.setSourceAsNumber(1);
 		List<VectorValue> vectorValues = new ArrayList<VectorValue>();
-		vectorValues.add(new VectorValue(1000000, new SimpleLinkID("link1", "etc")));
-		vectorValues.add(new VectorValue(2000000, new SimpleLinkID("link2", "etc")));
+        vectorValues.add(new VectorValue(1000000, new NetworkAddressIPv4("1.1.1.1", 32)));
+        vectorValues.add(new VectorValue(2000000, new NetworkAddressIPv4("2.2.2.2", 32)));
 		cVector.setVectorValues(vectorValues);
 		
 		RVector rVector = new RVector();
 		vectorValues = new ArrayList<VectorValue>();
-		vectorValues.add(new VectorValue(2, new SimpleLinkID("link3", "etc")));
-		vectorValues.add(new VectorValue(3, new SimpleLinkID("link4", "etc")));
+        vectorValues.add(new VectorValue(100000000, new NetworkAddressIPv4("1.1.1.1", 32)));
+        vectorValues.add(new VectorValue(200000000, new NetworkAddressIPv4("2.2.2.2", 32)));
 		rVector.setVectorValues(vectorValues);
 		rVector.setSourceAsNumber(3);
 		List<ThetaCoefficient> thetas = new ArrayList<ThetaCoefficient>();
@@ -182,20 +169,19 @@ public class SboxSdnClientTest {
 			throws JsonProcessingException, URISyntaxException {
 		
 		ConfigData configData = new ConfigData();
-		List<DC2DCCommunication> inCommunicationList = new ArrayList<DC2DCCommunication>();
-		DC2DCCommunication dc = new DC2DCCommunication();
-		dc.setId(new DC2DCCommunicationID(552542, "+", 2, "fb", 4, "drop"));
-		dc.setLocalCloud(new CloudDC("fb", 
-				new AS(2, true, null, null, new SBox(new NetworkAddressIPv4("2.2.2.2", 0)), null), 
-				new DARouter(new NetworkAddressIPv4("2.2.2.4", 0), "snmp3"),
-				null, null));
-		dc.setRemoteCloud(new CloudDC("drop", 
-				new AS(4, true, null, null, new SBox(new NetworkAddressIPv4("4.4.4.4", 0)), null), 
-				null, null, null));
-		dc.setTrafficDirection(Direction.incomingTraffic);
-		inCommunicationList.add(dc);
-		configData.setInCommunicationList(inCommunicationList);
-		configData.setOutCommunicationList(null);
+        List<ConfigDataEntry> configDataEntries = new ArrayList<ConfigDataEntry>();
+        ConfigDataEntry configDataEntry = new ConfigDataEntry();
+        configDataEntry.setDaRouterOfDPID("00.xx.xx.xx.xx");
+        configDataEntry.setRemoteDcPrefix(new NetworkAddressIPv4("1.1.1.0", 8));
+        List<TunnelInfo> tunnelInfos = new ArrayList<TunnelInfo>();
+        TunnelInfo t = new TunnelInfo();
+        t.setTunnelID(new EndAddressPairTunnelID("tunnel1", new NetworkAddressIPv4("1.1.1.1", 32),
+                new NetworkAddressIPv4("2.2.2.2", 32)));
+        t.setDaRouterOfPortNumber(4455);
+        tunnelInfos.add(t);
+        configDataEntry.setTunnels(tunnelInfos);
+        configDataEntries.add(configDataEntry);
+        configData.setEntries(configDataEntries);
 		
 		SboxSdnClient ss = new SboxSdnClient();
 		SDNController sdn = new SDNController();
@@ -231,8 +217,8 @@ public class SboxSdnClientTest {
 		CVector cVector = new CVector();
 		cVector.setSourceAsNumber(1);
 		List<VectorValue> vectorValues = new ArrayList<VectorValue>();
-		vectorValues.add(new VectorValue(1000000, new SimpleLinkID("link1", "etc")));
-		vectorValues.add(new VectorValue(2000000, new SimpleLinkID("link2", "etc")));
+        vectorValues.add(new VectorValue(1000000, new NetworkAddressIPv4("1.1.1.1", 32)));
+        vectorValues.add(new VectorValue(2000000, new NetworkAddressIPv4("2.2.2.2", 32)));
 		cVector.setVectorValues(vectorValues);
 		
 		SboxSdnClient ss = new SboxSdnClient();
@@ -263,14 +249,14 @@ public class SboxSdnClientTest {
 		CVector cVector = new CVector();
 		cVector.setSourceAsNumber(1);
 		List<VectorValue> vectorValues = new ArrayList<VectorValue>();
-		vectorValues.add(new VectorValue(1000000, new SimpleLinkID("link1", "etc")));
-		vectorValues.add(new VectorValue(2000000, new SimpleLinkID("link2", "etc")));
+        vectorValues.add(new VectorValue(1000000, new NetworkAddressIPv4("1.1.1.1", 32)));
+        vectorValues.add(new VectorValue(2000000, new NetworkAddressIPv4("2.2.2.2", 32)));
 		cVector.setVectorValues(vectorValues);
 		
 		RVector rVector = new RVector();
 		vectorValues = new ArrayList<VectorValue>();
-		vectorValues.add(new VectorValue(2, new SimpleLinkID("link3", "etc")));
-		vectorValues.add(new VectorValue(3, new SimpleLinkID("link4", "etc")));
+        vectorValues.add(new VectorValue(100000000, new NetworkAddressIPv4("1.1.1.1", 32)));
+        vectorValues.add(new VectorValue(200000000, new NetworkAddressIPv4("2.2.2.2", 32)));
 		rVector.setVectorValues(vectorValues);
 		rVector.setSourceAsNumber(3);
 		List<ThetaCoefficient> thetas = new ArrayList<ThetaCoefficient>();
@@ -303,22 +289,21 @@ public class SboxSdnClientTest {
 	 */
 	@Test
 	public void testConfigure() throws JsonProcessingException {
-		ConfigData configData = new ConfigData();
-		List<DC2DCCommunication> inCommunicationList = new ArrayList<DC2DCCommunication>();
-		DC2DCCommunication dc = new DC2DCCommunication();
-		dc.setId(new DC2DCCommunicationID(552542, "+", 2, "fb", 4, "drop"));
-		dc.setLocalCloud(new CloudDC("fb", 
-				new AS(2, true, null, null, new SBox(new NetworkAddressIPv4("2.2.2.2", 0)), null), 
-				new DARouter(new NetworkAddressIPv4("2.2.2.4", 0), "snmp3"),
-				null, null));
-		dc.setRemoteCloud(new CloudDC("drop", 
-				new AS(4, true, null, null, new SBox(new NetworkAddressIPv4("4.4.4.4", 0)), null), 
-				null, null, null));
-		dc.setTrafficDirection(Direction.incomingTraffic);
-		inCommunicationList.add(dc);
-		configData.setInCommunicationList(inCommunicationList);
-		configData.setOutCommunicationList(null);
-		
+        ConfigData configData = new ConfigData();
+        List<ConfigDataEntry> configDataEntries = new ArrayList<ConfigDataEntry>();
+        ConfigDataEntry configDataEntry = new ConfigDataEntry();
+        configDataEntry.setDaRouterOfDPID("00.xx.xx.xx.xx");
+        configDataEntry.setRemoteDcPrefix(new NetworkAddressIPv4("1.1.1.0", 8));
+        List<TunnelInfo> tunnelInfos = new ArrayList<TunnelInfo>();
+        TunnelInfo t = new TunnelInfo();
+        t.setTunnelID(new EndAddressPairTunnelID("tunnel1", new NetworkAddressIPv4("1.1.1.1", 32),
+                new NetworkAddressIPv4("2.2.2.2", 32)));
+        t.setDaRouterOfPortNumber(4455);
+        tunnelInfos.add(t);
+        configDataEntry.setTunnels(tunnelInfos);
+        configDataEntries.add(configDataEntry);
+        configData.setEntries(configDataEntries);
+
 		SboxSdnClient ss = new SboxSdnClient();
 		SDNController sdn = new SDNController();
 		sdn.setRestHost(new NetworkAddressIPv4("localhost", 0));

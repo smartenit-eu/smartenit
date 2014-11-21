@@ -18,20 +18,15 @@ package eu.smartenit.sbox.db.dao.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import eu.smartenit.sbox.db.dto.*;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
-
-import eu.smartenit.sbox.db.dto.Link;
-import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
-import eu.smartenit.sbox.db.dto.SimpleLinkID;
-import eu.smartenit.sbox.db.dto.SimpleTunnelID;
-import eu.smartenit.sbox.db.dto.Tunnel;
 
 /**
  * The TunnelMapper class.
  * 
  * @authors George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public class TunnelMapper implements ResultSetMapper<Tunnel> {
@@ -51,18 +46,18 @@ public class TunnelMapper implements ResultSetMapper<Tunnel> {
 	public Tunnel map(int index, ResultSet r, StatementContext ctx)
 			throws SQLException {
 		Tunnel t = new Tunnel();
-		t.setTunnelID(new SimpleTunnelID(r.getString("TUNNELNAME"), r
-				.getInt("TUNNELNUMBER")));
+        EndAddressPairTunnelID tunnelID = new EndAddressPairTunnelID();
+        tunnelID.setTunnelName(r.getString("TUNNELNAME"));
+        tunnelID.setLocalTunnelEndAddress(new NetworkAddressIPv4(r.getString("LOCALTUNNELENDADDRESS"), 32));
+        tunnelID.setRemoteTunnelEndAddress(new NetworkAddressIPv4(r.getString("REMOTETUNNELENDADDRESS"), 32));
+		t.setTunnelID(tunnelID);
 		t.setPhysicalLocalInterfaceName(r
 				.getString("PHYSICALLOCALINTERFACENAME"));
-		t.setSourceEndAddress(new NetworkAddressIPv4(r
-				.getString("SOURCEPREFIX"), 0));
-		t.setDestinationEndAddress(new NetworkAddressIPv4(r
-				.getString("DESTINATIONPREFIX"), 0));
 		t.setInboundInterfaceCounterOID(r
 				.getString("INBOUNDINTERFACECOUNTEROID"));
 		t.setOutboundInterfaceCounterOID(r
 				.getString("OUTBOUNDINTERFACECOUNTEROID"));
+        t.setOfSwitchPortNumber(r.getInt("OFSWITCHPORTNUMBER"));
 		Link l = new Link();
 		l.setLinkID(new SimpleLinkID(r.getString("LOCALLINKID"), r
 				.getString("LOCALISPNAME")));

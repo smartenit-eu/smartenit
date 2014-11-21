@@ -45,9 +45,13 @@ import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.CostFunctionDAO;
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
+import eu.smartenit.sbox.db.dao.LinkDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.CVector;
 import eu.smartenit.sbox.db.dto.ConfigData;
+import eu.smartenit.sbox.db.dto.Link;
+import eu.smartenit.sbox.db.dto.LocalRVector;
+import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.RVector;
 import eu.smartenit.sbox.db.dto.SDNController;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
@@ -56,7 +60,7 @@ import eu.smartenit.sbox.interfaces.intersbox.server.InterSBoxServer;
 import eu.smartenit.sbox.interfaces.sboxsdn.SboxSdnClient;
 import eu.smartenit.sbox.ntm.NetworkTrafficManager;
 import eu.smartenit.sbox.ntm.NetworkTrafficManagerDTMMode;
-import eu.smartenit.sbox.ntm.dtm.SDNClientFactory;
+import eu.smartenit.sbox.ntm.dtm.sender.SDNClientFactory;
 import eu.smartenit.sbox.qoa.DTMQosAnalyzer;
 import eu.smartenit.sbox.qoa.SNMPWrapper;
 import eu.smartenit.sbox.qoa.SNMPWrapperFactory;
@@ -106,8 +110,7 @@ public class QoSAnalyzerToNetworkTrafficSenderWithValuesTest {
 	 * known values.
 	 * 
 	 */
-	@Ignore
-	@Test
+	@Test @Ignore
 	public void shouldTestCompleteWorkflowWithGivenValues() throws Exception {
 		
 		logger.info("--Testing full chain starting from QOS Analyzer on the traffic receiver side " +
@@ -118,6 +121,7 @@ public class QoSAnalyzerToNetworkTrafficSenderWithValuesTest {
 		NetworkTrafficManager remoteNTM = new NetworkTrafficManager();
 		remoteNTM.initialize(NetworkTrafficManagerDTMMode.TRAFFIC_SENDER);
 		
+		SBoxProperties.INTER_SBOX_PORT++;
 		new InterSBoxServer(SBoxProperties.INTER_SBOX_PORT, remoteNTM);
 		Thread.sleep(2000);
 		
@@ -152,74 +156,83 @@ public class QoSAnalyzerToNetworkTrafficSenderWithValuesTest {
 	}
 
 	private void verifyAllCVectorUpdates(ArgumentCaptor<CVector> cVectorArgument1) {
-		SimpleLinkID link1ID = new SimpleLinkID("111", "isp1");
-		SimpleLinkID link2ID = new SimpleLinkID("121", "isp1");
-		assertEquals(141, cVectorArgument1.getAllValues().get(0).getVectorValueForLink(link1ID));
-		assertEquals(-141, cVectorArgument1.getAllValues().get(0).getVectorValueForLink(link2ID));
-		assertEquals(495, cVectorArgument1.getAllValues().get(1).getVectorValueForLink(link1ID));
-		assertEquals(-495, cVectorArgument1.getAllValues().get(1).getVectorValueForLink(link2ID));
-		assertEquals(41, cVectorArgument1.getAllValues().get(2).getVectorValueForLink(link1ID));
-		assertEquals(-41, cVectorArgument1.getAllValues().get(2).getVectorValueForLink(link2ID));
-		assertEquals(43, cVectorArgument1.getAllValues().get(3).getVectorValueForLink(link1ID));
-		assertEquals(-43, cVectorArgument1.getAllValues().get(3).getVectorValueForLink(link2ID));
-		assertEquals(420, cVectorArgument1.getAllValues().get(4).getVectorValueForLink(link1ID));
-		assertEquals(-420, cVectorArgument1.getAllValues().get(4).getVectorValueForLink(link2ID));
-		assertEquals(388, cVectorArgument1.getAllValues().get(5).getVectorValueForLink(link1ID));
-		assertEquals(-388, cVectorArgument1.getAllValues().get(5).getVectorValueForLink(link2ID));
-		assertEquals(-475, cVectorArgument1.getAllValues().get(6).getVectorValueForLink(link1ID));
-		assertEquals(475, cVectorArgument1.getAllValues().get(6).getVectorValueForLink(link2ID));
-		assertEquals(-1280, cVectorArgument1.getAllValues().get(7).getVectorValueForLink(link1ID));
-		assertEquals(1280, cVectorArgument1.getAllValues().get(7).getVectorValueForLink(link2ID));
-		assertEquals(-1458, cVectorArgument1.getAllValues().get(8).getVectorValueForLink(link1ID));
-		assertEquals(1458, cVectorArgument1.getAllValues().get(8).getVectorValueForLink(link2ID));
-		assertEquals(-517, cVectorArgument1.getAllValues().get(9).getVectorValueForLink(link1ID));
-		assertEquals(517, cVectorArgument1.getAllValues().get(9).getVectorValueForLink(link2ID));
-		assertEquals(452, cVectorArgument1.getAllValues().get(10).getVectorValueForLink(link1ID));
-		assertEquals(-452, cVectorArgument1.getAllValues().get(10).getVectorValueForLink(link2ID));
-		assertEquals(-572, cVectorArgument1.getAllValues().get(11).getVectorValueForLink(link1ID));
-		assertEquals(572, cVectorArgument1.getAllValues().get(11).getVectorValueForLink(link2ID));
+		NetworkAddressIPv4 tunnelEndPrefix1 = new NetworkAddressIPv4("10.1.1.0", 24);
+		NetworkAddressIPv4 tunnelEndPrefix2 = new NetworkAddressIPv4("10.1.2.0", 24);
+
+		assertEquals(141, cVectorArgument1.getAllValues().get(0).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(-141, cVectorArgument1.getAllValues().get(0).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(495, cVectorArgument1.getAllValues().get(1).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(-495, cVectorArgument1.getAllValues().get(1).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(41, cVectorArgument1.getAllValues().get(2).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(-41, cVectorArgument1.getAllValues().get(2).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(43, cVectorArgument1.getAllValues().get(3).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(-43, cVectorArgument1.getAllValues().get(3).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(420, cVectorArgument1.getAllValues().get(4).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(-420, cVectorArgument1.getAllValues().get(4).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(388, cVectorArgument1.getAllValues().get(5).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(-388, cVectorArgument1.getAllValues().get(5).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(-475, cVectorArgument1.getAllValues().get(6).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(475, cVectorArgument1.getAllValues().get(6).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(-1280, cVectorArgument1.getAllValues().get(7).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(1280, cVectorArgument1.getAllValues().get(7).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(-1458, cVectorArgument1.getAllValues().get(8).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(1458, cVectorArgument1.getAllValues().get(8).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(-517, cVectorArgument1.getAllValues().get(9).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(517, cVectorArgument1.getAllValues().get(9).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(452, cVectorArgument1.getAllValues().get(10).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(-452, cVectorArgument1.getAllValues().get(10).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(-572, cVectorArgument1.getAllValues().get(11).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(572, cVectorArgument1.getAllValues().get(11).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
 	}
 	
 	private void verifyAllCRVectorUpdates(ArgumentCaptor<CVector> cVectorArgument2, ArgumentCaptor<RVector> rVectorArgument) {
-		SimpleLinkID link1ID = new SimpleLinkID("111", "isp1");
-		SimpleLinkID link2ID = new SimpleLinkID("121", "isp1");
-		assertEquals(0, cVectorArgument2.getAllValues().get(0).getVectorValueForLink(link1ID));
-		assertEquals(0, cVectorArgument2.getAllValues().get(0).getVectorValueForLink(link2ID));
-		assertEquals(15300, rVectorArgument.getAllValues().get(0).getVectorValueForLink(link1ID));
-		assertEquals(20800, rVectorArgument.getAllValues().get(0).getVectorValueForLink(link2ID));
-		assertEquals(0, cVectorArgument2.getAllValues().get(1).getVectorValueForLink(link1ID));
-		assertEquals(0, cVectorArgument2.getAllValues().get(1).getVectorValueForLink(link2ID));
-		assertEquals(14900, rVectorArgument.getAllValues().get(1).getVectorValueForLink(link1ID));
-		assertEquals(20700, rVectorArgument.getAllValues().get(1).getVectorValueForLink(link2ID));
-		assertEquals(0, cVectorArgument2.getAllValues().get(2).getVectorValueForLink(link1ID));
-		assertEquals(0, cVectorArgument2.getAllValues().get(2).getVectorValueForLink(link2ID));
-		assertEquals(19900, rVectorArgument.getAllValues().get(2).getVectorValueForLink(link1ID));
-		assertEquals(20100, rVectorArgument.getAllValues().get(2).getVectorValueForLink(link2ID));
-		assertEquals(0, cVectorArgument2.getAllValues().get(3).getVectorValueForLink(link1ID));
-		assertEquals(0, cVectorArgument2.getAllValues().get(3).getVectorValueForLink(link2ID));
-		assertEquals(17200, rVectorArgument.getAllValues().get(3).getVectorValueForLink(link1ID));
-		assertEquals(11800, rVectorArgument.getAllValues().get(3).getVectorValueForLink(link2ID));
+		NetworkAddressIPv4 tunnelEndPrefix1 = new NetworkAddressIPv4("10.1.1.0", 24);
+		NetworkAddressIPv4 tunnelEndPrefix2 = new NetworkAddressIPv4("10.1.2.0", 24);
+		
+		assertEquals(0, cVectorArgument2.getAllValues().get(0).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(0, cVectorArgument2.getAllValues().get(0).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(15300, rVectorArgument.getAllValues().get(0).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(20800, rVectorArgument.getAllValues().get(0).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(0, cVectorArgument2.getAllValues().get(1).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(0, cVectorArgument2.getAllValues().get(1).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(14900, rVectorArgument.getAllValues().get(1).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(20700, rVectorArgument.getAllValues().get(1).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(0, cVectorArgument2.getAllValues().get(2).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(0, cVectorArgument2.getAllValues().get(2).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(19900, rVectorArgument.getAllValues().get(2).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(20100, rVectorArgument.getAllValues().get(2).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(0, cVectorArgument2.getAllValues().get(3).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(0, cVectorArgument2.getAllValues().get(3).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
+		assertEquals(17200, rVectorArgument.getAllValues().get(3).getVectorValueForTunnelEndPrefix(tunnelEndPrefix1));
+		assertEquals(11800, rVectorArgument.getAllValues().get(3).getVectorValueForTunnelEndPrefix(tunnelEndPrefix2));
 	}
 	
 	private void prepareMockForDAOAtNTM(boolean receiver) {
 		ASDAO ntmMockedASDAO = mock(ASDAO.class);
-		when(ntmMockedASDAO.findAllAsesCloudsBgRoutersLinks()).thenReturn(DBStructuresBuilderForMockedDAO.receiverSystems);
+		when(ntmMockedASDAO.findAllAsesCloudsBgRoutersLinks()).thenReturn(DBStructuresBuilderForMockedDAO.receiverSystems1);
 		DC2DCCommunicationDAO ntmMockedComDAO = mock(DC2DCCommunicationDAO.class);
 		if (receiver)
-			when(ntmMockedComDAO.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilderForMockedDAO.receiverCommunications);
+			when(ntmMockedComDAO.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilderForMockedDAO.receiverCommunications1);
 		else
-			when(ntmMockedComDAO.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilderForMockedDAO.senderCommunications);
+			when(ntmMockedComDAO.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilderForMockedDAO.senderCommunications1DC);
 		eu.smartenit.sbox.ntm.dtm.DAOFactory.setASDAOInstance(ntmMockedASDAO);
 		eu.smartenit.sbox.ntm.dtm.DAOFactory.setDC2DCCommunicationDAO(ntmMockedComDAO);
+		
+		LinkDAO ntmMockedLinkDAO = mock(LinkDAO.class);
+    	when(ntmMockedLinkDAO.findById(new SimpleLinkID("111", "isp1"))).thenReturn(
+    			new Link(new SimpleLinkID("111", "isp1"), null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("10.1.1.0", 24)));
+    	when(ntmMockedLinkDAO.findById(new SimpleLinkID("121", "isp1"))).thenReturn(
+    			new Link(new SimpleLinkID("121", "isp1"), null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("10.1.2.0", 24)));
+		eu.smartenit.sbox.ntm.dtm.DAOFactory.setLinkDAO(ntmMockedLinkDAO);
 	}
 	
 	private void prepareMockForDAOAtQOA() {
 		ASDAO qoaMockedASDAO = mock(ASDAO.class);
-		when(qoaMockedASDAO.findAllAsesCloudsBgRoutersLinks()).thenReturn(DBStructuresBuilderForMockedDAO.receiverSystems);		
+		when(qoaMockedASDAO.findAllAsesCloudsBgRoutersLinks()).thenReturn(DBStructuresBuilderForMockedDAO.receiverSystems1);		
 		DC2DCCommunicationDAO qoaMockedComDAO = mock(DC2DCCommunicationDAO.class);
-		when(qoaMockedComDAO.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilderForMockedDAO.receiverCommunications);
+		when(qoaMockedComDAO.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilderForMockedDAO.receiverCommunications1);
 		TimeScheduleParametersDAO qoaMockedTimeDAO = mock(TimeScheduleParametersDAO.class);
-		when(qoaMockedTimeDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.receiverTsp);
+		when(qoaMockedTimeDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.generateReceiverTsp());
 		eu.smartenit.sbox.qoa.DAOFactory.setASDAOInstance(qoaMockedASDAO);
 		eu.smartenit.sbox.qoa.DAOFactory.setDC2DCCommunicationDAO(qoaMockedComDAO);
 		eu.smartenit.sbox.qoa.DAOFactory.setTimeScheduleParametersDAO(qoaMockedTimeDAO);
@@ -232,7 +245,7 @@ public class QoSAnalyzerToNetworkTrafficSenderWithValuesTest {
 		when(ecaMockedCostDAO.findByLinkId(Mockito.argThat(new IsLinkIdStringEqual("121"))))
 			.thenReturn(DBStructuresBuilderForMockedDAO.receiverCostFunction2);
 		TimeScheduleParametersDAO ecaMockedTimeDAO = mock(TimeScheduleParametersDAO.class);
-		when(ecaMockedTimeDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.receiverTsp);
+		when(ecaMockedTimeDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.generateReceiverTsp());
 		eu.smartenit.sbox.eca.DAOFactory.setCostFunctionDAOInstance(ecaMockedCostDAO);
 		eu.smartenit.sbox.eca.DAOFactory.setTimeScheduleParametersDAO(ecaMockedTimeDAO);
 	}
@@ -279,8 +292,8 @@ public class QoSAnalyzerToNetworkTrafficSenderWithValuesTest {
 		SNMPWrapperFactory.setSNMPWrapperInstance(snmpWrapper);
 	}
 
-	private RVector prepareRVectorWithInitialValues() {
-		RVector rVector = new RVector();
+	private LocalRVector prepareRVectorWithInitialValues() {
+		LocalRVector rVector = new LocalRVector();
     	rVector.setSourceAsNumber(10);
     	rVector.addVectorValueForLink(new SimpleLinkID("111", "isp1"), 15000L);
     	rVector.addVectorValueForLink(new SimpleLinkID("121", "isp1"), 21000L);

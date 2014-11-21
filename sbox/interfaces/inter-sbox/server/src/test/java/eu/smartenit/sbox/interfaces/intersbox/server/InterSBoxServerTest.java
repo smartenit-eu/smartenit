@@ -15,24 +15,22 @@
  */
 package eu.smartenit.sbox.interfaces.intersbox.server;
 
-import eu.smartenit.sbox.db.dto.CVector;
-import eu.smartenit.sbox.db.dto.RVector; 
-import eu.smartenit.sbox.interfaces.intersbox.client.InterSBoxClient;
-import eu.smartenit.sbox.interfaces.intersbox.client.InterSBoxObject;
-import eu.smartenit.sbox.ntm.dtm.DTMRemoteVectorsReceiver;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import org.mockito.ArgumentCaptor;
-
-import org.slf4j.Logger;                                                                                                                       
-import org.slf4j.LoggerFactory;    
 
 import org.junit.Test;
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
+import org.mockito.ArgumentCaptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.smartenit.sbox.db.dto.CVector;
+import eu.smartenit.sbox.db.dto.RVector;
+import eu.smartenit.sbox.interfaces.intersbox.client.InterSBoxClient;
+import eu.smartenit.sbox.interfaces.intersbox.client.InterSBoxObject;
+import eu.smartenit.sbox.ntm.dtm.sender.DTMRemoteVectorsReceiver;
 
 public class InterSBoxServerTest 
 {

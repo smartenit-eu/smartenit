@@ -39,42 +39,33 @@
 				<div class="navbar-collapse collapse">
 					<h:form>
 						<ul class="nav navbar-nav navbar-right">
-							<li><h:commandLink value="Home"
-									action="#{dashboardBean.gotoIndexPage}" /></li>
-							<li><h:commandLink value="ISP"
-									action="#{dashboardBean.gotoIspPage}" /></li>
-							<li class="active dropdown"><a href="#"
-								class="dropdown-toggle" data-toggle="dropdown">Network <b
-									class="caret"></b></a>
+							<li><a href="index.xhtml">Home</a></li>
+							<li><a href="isp.xhtml">ISP</a></li>
+							<li class="dropdown active"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown">Network <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><h:commandLink value="Routers"
-											action="#{dashboardBean.gotoRoutersPage}" /></li>
-									<li><h:commandLink value="SDN Controllers"
-											action="#{dashboardBean.gotoSDNControllersPage}" /></li>
-									<li><h:commandLink value="Links"
-											action="#{dashboardBean.gotoLinksPage}" /></li>
-									<li><h:commandLink value="Tunnels"
-											action="#{dashboardBean.gotoTunnelsPage}" /></li>
+									<li><a href="routers.xhtml">Routers</a></li>
+									<li><a href="sdncontrollers.xhtml">SDN Controllers</a></li>
+									<li><a href="links.xhtml">Links</a></li>
+									<li><a href="tunnels.xhtml">Tunnels</a></li>
 								</ul></li>
 							<li class="dropdown"><a href="#" class="dropdown-toggle"
 								data-toggle="dropdown">Datacenters <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><h:commandLink value="Local Clouds"
-											action="#{dashboardBean.gotoLocalCloudsPage}" /></li>
-									<li><h:commandLink value="Remote Clouds"
-											action="#{dashboardBean.gotoRemoteCloudsPage}" /></li>
-									<li><h:commandLink value="Inter-Datacenter"
-											action="#{dashboardBean.gotoInterDatacenterPage}" /></li>
+									<li><a href="localclouds.xhtml">Local Clouds</a></li>
+									<li><a href="remoteclouds.xhtml">Remote Clouds</a></li>
+									<li><a href="interdatacenter.xhtml">Inter-Datacenter</a></li>
 								</ul></li>
 							<li class="dropdown"><a href="#" class="dropdown-toggle"
 								data-toggle="dropdown">SBox <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><h:commandLink value="Settings"
-											action="#{dashboardBean.gotoSettingsPage}" /></li>
+									<li><a href="settings.xhtml">Settings</a></li>
 									<li><a href="#">Reports</a></li>
 									<li><a href="#">Analytics</a></li>
-									<li class="divider"></li>
 									<li><a href="#">Demo</a></li>
+									<li class="divider"></li>
+									<li><h:commandLink value="Logout"
+											action="#{dashboardBean.logout}" /></li>
 								</ul></li>
 						</ul>
 					</h:form>
@@ -92,46 +83,37 @@
 						Name</label>
 					<div class="col-xs-6">
 						<h:inputText type="text" class="form-control" id="tunnelName"
-							placeholder="Tunnel Name"
-							value="#{dashboardBean.tunnel.tunnelID.tunnelName}" 
-							rendered="#{dashboardBean.editable}"/>
+							value="#{tunnelsBean.tunnel.tunnelID.tunnelName}" 
+							rendered="#{tunnelsBean.editable}"/>
 						<h:outputText type="text" class="form-control" 
-							value="#{dashboardBean.tunnel.tunnelID.tunnelName}" 
-							rendered="#{not dashboardBean.editable}"/>
+							value="#{tunnelsBean.tunnel.tunnelID.tunnelName}" 
+							rendered="#{not tunnelsBean.editable}"/>
 					</div>
 				</div>
 
 				<div class="form-group">
-					<label for="tunnelNumber" class="col-xs-4 control-label">Tunnel
-						Number</label>
+					<label for="tunnelLocalEndAddress" class="col-xs-4 control-label">Local 
+						End Address</label>
 					<div class="col-xs-6">
-						<h:inputText type="text" class="form-control" id="tunnelNumber"
-							placeholder="Tunnel Number"
-							value="#{dashboardBean.tunnel.tunnelID.tunnelNumber}" 
-							rendered="#{dashboardBean.editable}"/>
+						<h:inputText type="text" class="form-control" id="tunnelLocalEndAddress"
+							value="#{tunnelsBean.tunnel.tunnelID.localTunnelEndAddress.prefix}" 
+							rendered="#{tunnelsBean.editable}"/>
 						<h:outputText type="text" class="form-control" 
-							value="#{dashboardBean.tunnel.tunnelID.tunnelNumber}" 
-							rendered="#{not dashboardBean.editable}"/>
+							value="#{tunnelsBean.tunnel.tunnelID.localTunnelEndAddress.prefix}" 
+							rendered="#{not tunnelsBean.editable}"/>
 					</div>
 				</div>
-
+				
 				<div class="form-group">
-					<label for="sourceEndAddress" class="col-xs-4 control-label">Source
-						Address</label>
+					<label for="tunnelRemoteEndAddress" class="col-xs-4 control-label">Remote 
+						End Address</label>
 					<div class="col-xs-6">
-						<h:inputText type="text" class="form-control"
-							id="sourceEndAddress" placeholder="Source Address"
-							value="#{dashboardBean.tunnel.sourceEndAddress.prefix}" />
-					</div>
-				</div>
-
-				<div class="form-group">
-					<label for="destinationEndAddress" class="col-xs-4 control-label">Destination
-						Address</label>
-					<div class="col-xs-6">
-						<h:inputText type="text" class="form-control"
-							id="destinationEndAddress" placeholder="Destination Address"
-							value="#{dashboardBean.tunnel.destinationEndAddress.prefix}" />
+						<h:inputText type="text" class="form-control" id="tunnelRemoteEndAddress"
+							value="#{tunnelsBean.tunnel.tunnelID.remoteTunnelEndAddress.prefix}" 
+							rendered="#{tunnelsBean.editable}"/>
+						<h:outputText type="text" class="form-control" 
+							value="#{tunnelsBean.tunnel.tunnelID.remoteTunnelEndAddress.prefix}" 
+							rendered="#{not tunnelsBean.editable}"/>
 					</div>
 				</div>
 
@@ -142,17 +124,26 @@
 					<div class="col-xs-6">
 						<h:inputText type="text" class="form-control"
 							id="physicalLocalInterfaceName"
-							placeholder="Physical Interface Name"
-							value="#{dashboardBean.tunnel.physicalLocalInterfaceName}" />
+							value="#{tunnelsBean.tunnel.physicalLocalInterfaceName}" />
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="ofSwitchPortNumber"
+						class="col-xs-4 control-label">OF Switch Port</label>
+					<div class="col-xs-4">
+						<h:inputText type="text" class="form-control"
+							id="ofSwitchPortNumber"
+							value="#{tunnelsBean.tunnel.ofSwitchPortNumber}" />
 					</div>
 				</div>
 
 				<div class="form-group">
 					<label for="bgRouters" class="col-xs-4 control-label">Link</label>
 					<div class="col-xs-6">
-						<h:selectOneMenu value="#{dashboardBean.selectedLink}" id="links"
+						<h:selectOneMenu value="#{tunnelsBean.selectedLink}" id="links"
 							class="form-control">
-							<f:selectItems value="#{dashboardBean.linksArray}" var="l"
+							<f:selectItems value="#{tunnelsBean.linksArray}" var="l"
 								itemLabel="#{l.linkID.localLinkID},#{l.linkID.localIspName}"
 								itemValue="#{l.linkID.localLinkID},#{l.linkID.localIspName}" />
 						</h:selectOneMenu>
@@ -162,7 +153,7 @@
 				<div class="form-group">
 					<div class="btn-group col-xs-6 col-xs-offset-4">
 						<h:commandButton type="submit" class="btn btn-primary"
-							action="#{dashboardBean.updateTunnel}" value="Submit" />
+							action="#{tunnelsBean.updateTunnel}" value="Submit" />
 						<h:commandButton type="reset" class="btn btn-default"
 							value="Cancel" />
 					</div>
@@ -171,23 +162,23 @@
 			
 			<h:form>
 				<div class="table-responsive">
-					<h:dataTable value="#{dashboardBean.tunnelsList}" var="t"
+					<h:dataTable value="#{tunnelsBean.tunnelsList}" var="t"
 						class="table table-striped">
 						<h:column>
 							<f:facet name="header">Tunnel Name</f:facet>
 								#{t.tunnelID.tunnelName}
 							</h:column>
 						<h:column>
-							<f:facet name="header">Tunnel Number</f:facet>
-								#{t.tunnelID.tunnelNumber}
+							<f:facet name="header">Local Address</f:facet>
+								#{t.tunnelID.localTunnelEndAddress.prefix}
 							</h:column>
 						<h:column>
-							<f:facet name="header">Source Address</f:facet>
-								#{t.sourceEndAddress.prefix}
+							<f:facet name="header">Remote Address</f:facet>
+								#{t.tunnelID.remoteTunnelEndAddress.prefix}
 							</h:column>
 						<h:column>
-							<f:facet name="header">Destination Address</f:facet>
-								#{t.destinationEndAddress.prefix}
+							<f:facet name="header">OF Switch Port</f:facet>
+								#{t.ofSwitchPortNumber}
 							</h:column>
 						<h:column>
 							<f:facet name="header">Link ID</f:facet>
@@ -197,10 +188,10 @@
 							<f:facet name="header">Actions</f:facet>
 							<div class="btn-group">
 								<h:commandLink type="button" class="btn btn-warning btn-sm"
-									action="#{dashboardBean.editTunnel(t)}">
+									action="#{tunnelsBean.editTunnel(t)}">
 									<span class="glyphicon glyphicon-pencil"/></h:commandLink>
 								<h:commandLink type="button" class="btn btn-danger btn-sm"
-									action="#{dashboardBean.deleteTunnel(t)}">
+									action="#{tunnelsBean.deleteTunnel(t)}">
 									<span class="glyphicon glyphicon-remove"/></h:commandLink>
 							</div>
 						</h:column>
@@ -242,23 +233,23 @@
 													validating : 'glyphicon glyphicon-refresh'
 												},
 												fields : {
-													'tunnels:destinationEndAddress' : {
+													'tunnels:tunnelLocalEndAddress' : {
 														validators : {
 															ip : {
-																message : 'The Destination address is not an IPv4 address.'
+																message : 'The Local end address is not an IPv4 address.'
 															},
 															notEmpty : {
-																message : 'The Destination address must not be empty.'
+																message : 'The Local end address must not be empty.'
 															}
 														}
 													},
-													'tunnels:sourceEndAddress' : {
+													'tunnels:tunnelRemoteEndAddress' : {
 														validators : {
 															ip : {
-																message : 'The Source address is not an IPv4 address.'
+																message : 'The Remote end address is not an IPv4 address.'
 															},
 															notEmpty : {
-																message : 'The Source address must not be empty.'
+																message : 'The Remote end address must not be empty.'
 															}
 														}
 													},
@@ -269,10 +260,10 @@
 															}
 														}
 													},
-													'tunnels:tunnelNumber' : {
+													'tunnels:ofSwitchPortNumber' : {
 														validators : {
 															integer: {
-										                        message: 'The Tunnel number must be an integer.'
+										                        message: 'The OF Switch port must be an integer.'
 										                    }
 														}
 													},
@@ -280,20 +271,6 @@
 														validators : {
 															notEmpty : {
 																message : 'The Physical local interface name must not be empty.'
-															}
-														}
-													},
-													'tunnels:inboundInterfaceCounterOID' : {
-														validators : {
-															notEmpty : {
-																message : 'The Outbound interface counter OID must not be empty.'
-															}
-														}
-													},
-													'tunnels:outboundInterfaceCounterOID' : {
-														validators : {
-															notEmpty : {
-																message : 'The Inbound interface counter OID must not be empty.'
 															}
 														}
 													},

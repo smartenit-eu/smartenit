@@ -30,9 +30,7 @@ where <machine-ip-address> is the SBox's ip address (or localhost). Signin with 
 
 Note #1: Steps 1-2 are only required once and during the first installation of the SmartenIT software. 
 
-Note #2: In case you have already installed the previous release of the SmartenIT software (currently v1.0), then to adjust the existing smartenit.db file, extract the modify.sql in the same directory as the smartenit.db and execute: sqlite3 smartenit.db < upgrade.sql. 
-
-Note #3: If you want to change the modify the logging level, edit the logback.xml, change the line <logger name="eu.smartenit.sbox" level="X">, with X the required logging level, e.g. DEBUG, ALL, etc. and rerun the SBox main application: java -Dlogback.configurationFile=./logback.xml -jar sbox.jar
+Note #2: If you want to change the modify the logging level, edit the logback.xml, change the line <logger name="eu.smartenit.sbox" level="X">, with X the required logging level, e.g. DEBUG, ALL, etc. and rerun the SBox main application: java -Dlogback.configurationFile=./logback.xml -jar sbox.jar
 
 
 SDN Controller Instructions

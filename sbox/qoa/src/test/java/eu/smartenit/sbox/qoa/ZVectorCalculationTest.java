@@ -24,10 +24,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import eu.smartenit.sbox.db.dto.DC2DCCommunicationID;
+import eu.smartenit.sbox.db.dto.EndAddressPairTunnelID;
 import eu.smartenit.sbox.db.dto.LinkID;
+import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
-import eu.smartenit.sbox.db.dto.SimpleTunnelID;
-import eu.smartenit.sbox.db.dto.TunnelID;
 import eu.smartenit.sbox.db.dto.ZVector;
 
 /**
@@ -35,7 +35,7 @@ import eu.smartenit.sbox.db.dto.ZVector;
  * {@link MonitoringDataProcessor}.
  * 
  * @author Lukasz Lopatowski
- * @version 1.0
+ * @version 1.2
  * 
  */
 public class ZVectorCalculationTest {
@@ -44,7 +44,7 @@ public class ZVectorCalculationTest {
 	private CounterValues values, values2, values3;
 
 	private LinkID link111ID, link112ID, link121ID, link122ID, link211ID;
-	private TunnelID tunnel1111ID, tunnel1121ID, tunnel1211ID, tunnel1212ID, tunnel1221ID, tunnel1222ID, tunnel1223ID, tunnel2111ID;
+	private EndAddressPairTunnelID tunnel1111ID, tunnel1121ID, tunnel1211ID, tunnel1212ID, tunnel1221ID, tunnel1222ID, tunnel1223ID, tunnel2111ID;
 	private DC2DCCommunicationID com1ID, com2ID, com3ID;
 	
 	@Before
@@ -58,14 +58,14 @@ public class ZVectorCalculationTest {
 		link122ID = new SimpleLinkID("122", "isp1");
 		link211ID = new SimpleLinkID("211", "isp1");
 		
-		tunnel1111ID = new SimpleTunnelID("tunnel1111", 1111);
-		tunnel1121ID = new SimpleTunnelID("tunnel1121", 1121);
-		tunnel1211ID = new SimpleTunnelID("tunnel1211", 1211);
-		tunnel1212ID = new SimpleTunnelID("tunnel1212", 1212);
-		tunnel1221ID = new SimpleTunnelID("tunnel1221", 1221);
-		tunnel1222ID = new SimpleTunnelID("tunnel1222", 1222);
-		tunnel1223ID = new SimpleTunnelID("tunnel1223", 1223);
-		tunnel2111ID = new SimpleTunnelID("tunnel2111", 2111);
+		tunnel1111ID = new EndAddressPairTunnelID("tunnel1111", new NetworkAddressIPv4("10.1.1.1", 32), new NetworkAddressIPv4("10.1.1.2", 32));
+		tunnel1121ID = new EndAddressPairTunnelID("tunnel1121", new NetworkAddressIPv4("10.1.2.1", 32),	new NetworkAddressIPv4("10.1.2.2", 32));
+		tunnel1211ID = new EndAddressPairTunnelID("tunnel1211", new NetworkAddressIPv4("10.2.1.1", 32), new NetworkAddressIPv4("10.2.1.2", 32));
+		tunnel1212ID = new EndAddressPairTunnelID("tunnel1212", new NetworkAddressIPv4("10.2.1.2", 32),	new NetworkAddressIPv4("10.2.1.3", 32));
+		tunnel1221ID = new EndAddressPairTunnelID("tunnel1221", new NetworkAddressIPv4("10.2.2.1", 32),	new NetworkAddressIPv4("10.2.2.2", 32));
+		tunnel1222ID = new EndAddressPairTunnelID("tunnel1222",	new NetworkAddressIPv4("10.2.2.2", 32),	new NetworkAddressIPv4("10.2.2.3", 32));
+		tunnel1223ID = new EndAddressPairTunnelID("tunnel1223", new NetworkAddressIPv4("10.2.2.4", 32),	new NetworkAddressIPv4("10.2.2.5", 32));
+		tunnel2111ID = new EndAddressPairTunnelID("tunnel2111", new NetworkAddressIPv4("10.1.1.4", 32),	new NetworkAddressIPv4("10.1.1.5", 32));
 		
 		values = new CounterValues();
 		values.storeCounterValue(tunnel1111ID, 120);

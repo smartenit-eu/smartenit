@@ -18,8 +18,8 @@ package eu.smartenit.sbox.ntm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.smartenit.sbox.ntm.dtm.DTMRemoteVectorsReceiver;
-import eu.smartenit.sbox.ntm.dtm.DTMTrafficManager;
+import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
+import eu.smartenit.sbox.ntm.dtm.sender.DTMRemoteVectorsReceiver;
 
 /**
  * Main class of the Network Traffic Manager component. Represents an entry

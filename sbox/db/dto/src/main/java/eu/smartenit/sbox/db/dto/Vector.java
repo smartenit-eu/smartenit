@@ -23,7 +23,7 @@ import java.util.List;
  * The Vector class.
  *
  * @author George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public class Vector implements Serializable {
@@ -75,16 +75,16 @@ public class Vector implements Serializable {
 	}
 
 	/**
-	 * It returns the vector value for a linkId.
+	 * It returns the vector value for a tunnelEndPrefix.
 	 * 
-	 * @param linkId The link ID
-	 * @return The vector value. O if the linkId does not exist.
+	 * @param tunnelEndPrefix The tunnel End Prefix
+	 * @return The vector value. O if the tunnelEndPrefix does not exist.
 	 *
 	 */
-	public long getVectorValueForLink(LinkID linkId) {
+	public long getVectorValueForTunnelEndPrefix(NetworkAddressIPv4 tunnelEndPrefix) {
 		if (vectorValues != null) {
 			for (VectorValue v : vectorValues) {
-				if (v.getLinkID().equals(linkId)) {
+				if (tunnelEndPrefix.equals(v.getTunnelEndPrefix())) {
 					return v.getValue();
 				}
 			}
@@ -93,18 +93,19 @@ public class Vector implements Serializable {
 	}
 	
 	/**
-	 * It adds the vector value with linkId and value to the 
+	 * It adds the vector value with tunnelEndPrefix and value to the 
 	 * list.
 	 * 
-	 * @param linkId The link ID
+	 * @param tunnelEndPrefix The tunnel End Prefix
 	 * @param value The value
 	 *
 	 */
-	public void addVectorValueForLink(LinkID linkId, long value) {
+	public void addVectorValueForTunnelEndPrefix(NetworkAddressIPv4 tunnelEndPrefix, 
+			long value) {
 		if (vectorValues == null) {
 			vectorValues = new ArrayList<VectorValue>();
 		}
-		vectorValues.add(new VectorValue(value, linkId));
+		vectorValues.add(new VectorValue(value, tunnelEndPrefix));
 	}
 
 	@Override

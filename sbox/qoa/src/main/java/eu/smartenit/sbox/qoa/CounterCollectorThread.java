@@ -33,11 +33,11 @@ import eu.smartenit.sbox.db.dto.Tunnel;
  * 
  */
 public class CounterCollectorThread implements Callable<CounterValues> {
-	private List<Link> links;
-	private BGRouter bgRouter;
-	private List<Tunnel> tunnels;
-	private DARouter daRouter;
-	private SNMPWrapper snmpWrapper;
+	protected List<Link> links;
+	protected BGRouter bgRouter;
+	protected List<Tunnel> tunnels;
+	protected DARouter daRouter;
+	protected SNMPWrapper snmpWrapper;
 	
 	public CounterCollectorThread() {
 		this.snmpWrapper = SNMPWrapperFactory.getInstance();
@@ -135,7 +135,7 @@ public class CounterCollectorThread implements Callable<CounterValues> {
 		}
 	}
 
-	private long getInboundLinkCounterValueFromBGRouter(Link link) throws Exception {
+	protected long getInboundLinkCounterValueFromBGRouter(Link link) throws Exception {
 		long value = -1;
 		value = parseCounterValue(
 				snmpWrapper.snmpGet(snmpWrapper.prepareOID(link.getInboundInterfaceCounterOID()), 
@@ -143,7 +143,7 @@ public class CounterCollectorThread implements Callable<CounterValues> {
 		return value;
 	}
 	
-	private long getInboundTunnelCounterValueFromDARouter(Tunnel tunnel) {
+	protected long getInboundTunnelCounterValueFromDARouter(Tunnel tunnel) {
 		long value = -1;
 		value = parseCounterValue(
 				snmpWrapper.snmpGet(snmpWrapper.prepareOID(tunnel.getInboundInterfaceCounterOID()), 

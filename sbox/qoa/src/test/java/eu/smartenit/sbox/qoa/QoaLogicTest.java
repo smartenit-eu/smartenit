@@ -51,7 +51,7 @@ import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.eca.EconomicAnalyzer;
-import eu.smartenit.sbox.ntm.dtm.DTMTrafficManager;
+import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
 public class QoaLogicTest {
 	private DTMQosAnalyzer dtmQosAnalyzer;
@@ -61,6 +61,8 @@ public class QoaLogicTest {
 	
 	@Before
 	public void init() {
+		SBoxProperties.LOG_TRAFFIC_DETAILS = false;
+
 		this.trafficManager = mock(DTMTrafficManager.class);
 		this.economicAnalyzer = mock(EconomicAnalyzer.class);
 		this.snmpWrapper = mock(SNMPWrapper.class);

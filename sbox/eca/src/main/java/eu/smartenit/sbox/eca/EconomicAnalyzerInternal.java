@@ -15,10 +15,10 @@
  */
 package eu.smartenit.sbox.eca;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.commons.math3.optimization.GoalType;
@@ -34,19 +34,20 @@ import org.slf4j.LoggerFactory;
 import eu.smartenit.sbox.db.dao.CostFunctionDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.CostFunction;
-import eu.smartenit.sbox.db.dto.RVector;
+import eu.smartenit.sbox.db.dto.LocalRVector;
+import eu.smartenit.sbox.db.dto.LocalVectorValue;
 import eu.smartenit.sbox.db.dto.Segment;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
-import eu.smartenit.sbox.db.dto.VectorValue;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
-import eu.smartenit.sbox.ntm.dtm.DTMTrafficManager;
+import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
 /**
  * Class that holds the economic analyzer algorithm
  * 
  * @author D. D&ouml;nni, K. Bhargav, T. Bocek
+ * @version 1.2
  *
  */
 public class EconomicAnalyzerInternal {
@@ -236,7 +237,6 @@ public class EconomicAnalyzerInternal {
 		tol2 = tsp.getTol2();
 	}
 
-
 	/**
 	 * Retrieves the cost functions from the database
 	 * 
@@ -255,8 +255,6 @@ public class EconomicAnalyzerInternal {
 		return costFunctions;
 	}
 
-
-
 	/**
 	 * Maps the lower border of the segment to corresponding cost function segment
 	 */
@@ -268,8 +266,6 @@ public class EconomicAnalyzerInternal {
 		}
 		logger.info("Cost function map 1 initialized to " + costFunctionMap1);		
 	}
-
-	
 	
 	/**
 	 * Maps the lower border of the segment to corresponding cost function segment
@@ -282,8 +278,6 @@ public class EconomicAnalyzerInternal {
 		}
 		logger.info("Cost function map 2 initialized to " + costFunctionMap2);		
 	}
-	
-
 	
 	/**
 	 * Maps the alpha1 onto D1j intervals (lower left border to obtain the interval)
@@ -309,8 +303,6 @@ public class EconomicAnalyzerInternal {
 		logger.info("Map D1 initialized: " + D1Map);		
 	}
 	
-	
-	
 	/**
 	 * Maps the alpha2 onto D2j intervals (lower left border to obtain the interval)
 	 */
@@ -334,8 +326,6 @@ public class EconomicAnalyzerInternal {
 		}
 		logger.info("Map D2 initialized: " + D2Map);	
 	}
-
-	
 	
 	/**
 	 * Creates the D intervals for each of the alphas.
@@ -350,8 +340,6 @@ public class EconomicAnalyzerInternal {
 			logger.info("D" + (i + 1) + " initialized to " + D.get(i));
 		}		
 	}
-
-	
 	
 	/**
 	 * Creates the alphas from the cost function segments
@@ -373,8 +361,6 @@ public class EconomicAnalyzerInternal {
 			logger.info("Alpha" + (i + 1) + " initialized to " + alpha.get(i));
 		}	
 	}
-
-	
 	
 	/**
 	 * Updates the X_V and Z_V vectors
@@ -390,7 +376,7 @@ public class EconomicAnalyzerInternal {
 		//Number of samples per accounting period
 		long n = accountingPeriod / reportingPeriod;
 		if (ti == n) {			
-			RVector rVector = calculateReferenceVector(X_in.getSourceAsNumber());
+			LocalRVector rVector = calculateReferenceVector(X_in.getSourceAsNumber());
 			if(dtmTrafficManager != null) {
 				dtmTrafficManager.updateRVector(rVector);
 			}
@@ -399,8 +385,6 @@ public class EconomicAnalyzerInternal {
 			ti = 0;
 		}
 	}
-
-	
 	
 	/**
 	 * Accumulates the total traffic volumes
@@ -414,17 +398,14 @@ public class EconomicAnalyzerInternal {
 		X_V[x1] = X_V[x1] + X_in.getVectorValueForLink(link1);
 		X_V[x2] = X_V[x2] + X_in.getVectorValueForLink(link2);
 		
-
-		
+		// TODO Only one Z vector from the list is taken in consideration.
+		//		This might have to be improved in future releases.
 		Z_V[x1] = Z_V[x1] + Z_in_list.get(0).getVectorValueForLink(link1);
 		Z_V[x2] = Z_V[x2] + Z_in_list.get(0).getVectorValueForLink(link2);
-		
 		
 		logger.info("Volume X_V: [" + X_V[x1] + " / " + X_V[x2] + "]");
 		logger.info("Volume Z_V: [" + Z_V[x1] + " / " + Z_V[x2]  + "]");
 	}
-
-	
 	
 	/**
 	 * Resets the volume of the link and tunnel to zero (after the accounting
@@ -438,8 +419,6 @@ public class EconomicAnalyzerInternal {
 		Z_V[x1] = 0;
 		Z_V[x2] = 0;
 	}
-
-	
 	
 	/**
 	 * Calculates the reference vector.
@@ -448,7 +427,7 @@ public class EconomicAnalyzerInternal {
 	 * 
 	 * @return Returns an RVector containing the reference vector values.
 	 */
-	public RVector calculateReferenceVector(int sourceAsNumber) {
+	public LocalRVector calculateReferenceVector(int sourceAsNumber) {
 		logger.info("Calculating S: ");
 		long S = Z_V[x1] + Z_V[x2];
 		logger.info("S: " + S);
@@ -468,8 +447,6 @@ public class EconomicAnalyzerInternal {
 		
 		return calculateReferenceVector(S1, S2, areaList, sourceAsNumber);		
 	}	
-	
-	
 		
 	/**
 	 * Creates a list of candidate areas that may contain the optimal reference vector using the specified algorithm.
@@ -523,7 +500,6 @@ public class EconomicAnalyzerInternal {
 			}
 		}
 		logger.info("Set E: " + E);
-
 		
 		//Deals with the special case where both E1 and E2 contain only null values (i.e. there is no intersection with any alpha)
 		if(nullCounter1 == E.get(x1).size() && nullCounter2 == E.get(x2).size()) {
@@ -542,7 +518,6 @@ public class EconomicAnalyzerInternal {
 			}
 			areaList.add(new Area(dx1, dx2));
 		} 
-
 		
 		//The case where either E1 or E2 contains an alpha value (i.e. there are intersections with at least one of the alphas)
 		else {
@@ -590,8 +565,6 @@ public class EconomicAnalyzerInternal {
 		return areaList;
 	}
 	
-	
-	
 	/**
 	 * Creates a list of areas containing ALL areas (no optimization)
 	 * 
@@ -608,8 +581,6 @@ public class EconomicAnalyzerInternal {
 		return A;
 	}
 	
-	
-	
 	/**
 	 * Calculates the reference vector using simplex method
 	 * 
@@ -619,7 +590,7 @@ public class EconomicAnalyzerInternal {
 	 * @param sourceAsNumber The number of the source AS
 	 * @return Returns an RVector containing the reference vector values.
 	 */
-	private RVector calculateReferenceVector(double[] S1, double[] S2, List<Area> aList, int sourceAsNumber) {
+	private LocalRVector calculateReferenceVector(double[] S1, double[] S2, List<Area> aList, int sourceAsNumber) {
 		List<PointValuePair> solutionList = new ArrayList<PointValuePair>();
 		for(Area a : aList) {			
 			
@@ -678,7 +649,7 @@ public class EconomicAnalyzerInternal {
 		}
 		
 		PointValuePair minimalSolution = getMinimalSolution(solutionList);
-		RVector referenceVector = createReferenceVector(minimalSolution, sourceAsNumber);
+		LocalRVector referenceVector = createReferenceVector(minimalSolution, sourceAsNumber);
 		
 		logger.info("\n");
 		logger.info("Chosen reference vector: " 
@@ -689,8 +660,6 @@ public class EconomicAnalyzerInternal {
 		
 		return referenceVector;
 	}
-
-	
 	
 	/**
 	 * Creates the RVector object from the optimal solution.
@@ -699,17 +668,15 @@ public class EconomicAnalyzerInternal {
 	 * @param sourceAsNumber The number of the source AS
 	 * @return The RVector object of the optimal solution.
 	 */
-	private RVector createReferenceVector(PointValuePair minimalSolution, int sourceAsNumber) {
-		VectorValue vvx1 = new VectorValue(Math.round(minimalSolution.getPoint()[0]), link1);
-		VectorValue vvx2 = new VectorValue(Math.round(minimalSolution.getPoint()[1]), link2);
-		List<VectorValue> referenceVectorList = new ArrayList<VectorValue>();
+	private LocalRVector createReferenceVector(PointValuePair minimalSolution, int sourceAsNumber) {
+		LocalVectorValue vvx1 = new LocalVectorValue(Math.round(minimalSolution.getPoint()[0]), link1);
+		LocalVectorValue vvx2 = new LocalVectorValue(Math.round(minimalSolution.getPoint()[1]), link2);
+		List<LocalVectorValue> referenceVectorList = new ArrayList<LocalVectorValue>();
 		referenceVectorList.add(vvx1);
 		referenceVectorList.add(vvx2);
-		RVector referenceVector = new RVector(referenceVectorList, sourceAsNumber, null);
+		LocalRVector referenceVector = new LocalRVector(referenceVectorList, sourceAsNumber);
 		return referenceVector;
 	}
-
-	
 	
 	/**
 	 * Selects the point value pair having the minimum target function value among all the candidate solutions.
@@ -728,8 +695,6 @@ public class EconomicAnalyzerInternal {
 		}
 		return minimalSolution;
 	}
-
-	
 
 	/**
 	 * Calculates the D1k corresponding to each of the alpha2s in E2
@@ -761,8 +726,6 @@ public class EconomicAnalyzerInternal {
 		logger.info("D1k: " + D1k);
 		return D1k;
 	}
-
-	
 	
 	/**
 	 * Calculates the D2k corresponding to each of the alpha1s in E1
@@ -793,6 +756,5 @@ public class EconomicAnalyzerInternal {
 		logger.info("D2k: " + D2k);
 		return D2k;		
 	}
-
 
 }

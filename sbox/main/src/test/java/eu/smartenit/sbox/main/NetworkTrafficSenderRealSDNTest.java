@@ -15,7 +15,7 @@
  */
 package eu.smartenit.sbox.main;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.Executors;
 
@@ -31,8 +31,8 @@ import eu.smartenit.sbox.commons.SBoxThreadHandler;
 import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.DbConstants;
 import eu.smartenit.sbox.db.dto.CVector;
+import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.RVector;
-import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.interfaces.intersbox.client.InterSBoxClient;
 import eu.smartenit.sbox.interfaces.intersbox.server.InterSBoxServer;
 import eu.smartenit.sbox.ntm.NetworkTrafficManager;
@@ -88,19 +88,20 @@ public class NetworkTrafficSenderRealSDNTest {
 		assertTrue(true);
 		
 		logger.info("Initializing inter-sbox-server with ntm.");
+		SBoxProperties.INTER_SBOX_PORT++;
 		new InterSBoxServer(SBoxProperties.INTER_SBOX_PORT, ntm);
 				
 		Thread.sleep(2000);
 		
 		CVector cVector = new CVector();
-		cVector.setSourceAsNumber(1);
-		cVector.addVectorValueForLink(
-				new SimpleLinkID("link1", "isp"), 500L);
+		cVector.setSourceAsNumber(100);
+		cVector.addVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("172.16.16.0", 30), 500L);
+		cVector.addVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("172.16.16.4", 30), -500L);
 		RVector rVector = new RVector();
-		rVector.setSourceAsNumber(1);
-    	rVector.addVectorValueForLink(
-    			new SimpleLinkID("link1", "isp"), 1000L);
-		
+		rVector.setSourceAsNumber(100);
+    	rVector.addVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("172.16.16.0", 30), 1000L);
+    	rVector.addVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("172.16.16.4", 30), 2000L);
+    	
 		logger.info("Sending r and c vectors through inter-sbox client.");		
 		InterSBoxClient client = new InterSBoxClient();
 		client.send("127.0.0.1", SBoxProperties.INTER_SBOX_PORT, cVector, rVector);
@@ -113,17 +114,11 @@ public class NetworkTrafficSenderRealSDNTest {
 		logger.info("--------------------------");
 	}
 	
-	
-		
-	
 	@AfterClass
 	public static void cleanTests() {
 		DbConstants.DBI_URL = "jdbc:sqlite:smartenit.db";
         
 		SBoxThreadHandler.shutdownNowThreads();
 	}
-	
-	
-	
 
 }

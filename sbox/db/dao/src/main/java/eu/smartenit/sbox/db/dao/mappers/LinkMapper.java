@@ -30,7 +30,7 @@ import eu.smartenit.sbox.db.dto.SimpleLinkID;
  * The LinkMapper class.
  * 
  * @authors George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public class LinkMapper implements ResultSetMapper<Link> {
@@ -53,7 +53,7 @@ public class LinkMapper implements ResultSetMapper<Link> {
 		l.setLinkID(new SimpleLinkID(r.getString("LOCALLINKID"), r
 				.getString("LOCALISPNAME")));
 		l.setPhysicalInterfaceName(r.getString("PHYSICALINTERFACENAME"));
-		l.setAddress(new NetworkAddressIPv4(r.getString("ADDRESSPREFIX"), 0));
+		l.setAddress(new NetworkAddressIPv4(r.getString("ADDRESSPREFIX"), 32));
 		l.setInboundInterfaceCounterOID(r
 				.getString("INBOUNDINTERFACECOUNTEROID"));
 		l.setOutboundInterfaceCounterOID(r
@@ -61,8 +61,10 @@ public class LinkMapper implements ResultSetMapper<Link> {
 		l.setVlan(r.getInt("VLAN"));
 		BGRouter bgRouter = new BGRouter();
 		bgRouter.setManagementAddress(new NetworkAddressIPv4(r
-				.getString("BGROUTERADDRESS"), 0));
+				.getString("BGROUTERADDRESS"), 32));
 		l.setBgRouter(bgRouter);
+		l.setTunnelEndPrefix(new NetworkAddressIPv4(r.getString("TUNNELENDPREFIX"), 
+				r.getInt("TUNNELENDPREFIXLENGTH")));
 		return l;
 
 	}

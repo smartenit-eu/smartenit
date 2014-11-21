@@ -31,7 +31,6 @@ import java.util.concurrent.Executors;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.snmp4j.Target;
 import org.snmp4j.smi.OID;
@@ -48,7 +47,7 @@ import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.eca.EconomicAnalyzer;
-import eu.smartenit.sbox.ntm.dtm.DTMTrafficManager;
+import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
 /**
  * Test class for {@link DTMQosAnalyzer} class. Tests whole DTMQosAnylazer
@@ -95,7 +94,6 @@ public class DTMQosAnalyzerTest {
 		this.dtmQosAnalyzer = new DTMQosAnalyzer(trafficManager, economicAnalyzer);
 	}
 	
-//	@Ignore
 	@Test
 	public void shouldUpdateXAndZVectors() throws Exception {
 		this.dtmQosAnalyzer.initialize();
@@ -104,7 +102,6 @@ public class DTMQosAnalyzerTest {
 		verify(economicAnalyzer, times(4)).updateXZVectors(any(XVector.class), anyListOf(ZVector.class));
 	}
 	
-//	@Ignore
 	@Test
 	public void shouldReturnFalseForInitialization() {
 		SNMPWrapperFactory.setSNMPWrapperInstance(null);

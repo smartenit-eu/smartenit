@@ -18,11 +18,11 @@ package eu.smartenit.sbox.db.dao;
 import java.util.List;
 import java.util.Properties;
 
-import eu.smartenit.sbox.db.dao.gen.*;
+import eu.smartenit.sbox.db.dao.gen.AbstractTunnelDAO;
+import eu.smartenit.sbox.db.dto.Tunnel;
+import eu.smartenit.sbox.db.dto.EndAddressPairTunnelID;
 import eu.smartenit.sbox.db.dto.DC2DCCommunicationID;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
-import eu.smartenit.sbox.db.dto.SimpleTunnelID;
-import eu.smartenit.sbox.db.dto.Tunnel;
 
 import org.skife.jdbi.v2.DBI;
 import org.sqlite.SQLiteConfig;
@@ -31,7 +31,7 @@ import org.sqlite.SQLiteConfig;
  * The TunnelDAO class.
  * 
  * @authors Antonis Makris, George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public class TunnelDAO {
@@ -100,7 +100,7 @@ public class TunnelDAO {
 	 * 
 	 * @param id The SimpleTunnelID.
 	 */
-	public Tunnel findById(SimpleTunnelID id) {
+	public Tunnel findById(EndAddressPairTunnelID id) {
 		return dao.findById(id);
 	}
 	
@@ -126,7 +126,7 @@ public class TunnelDAO {
 	 * 
 	 * @param id The SimpleTunnelID.
 	 */
-	public void deleteById(SimpleTunnelID id) {
+	public void deleteById(EndAddressPairTunnelID id) {
 		dao.deleteById(id);
 	}
 	
@@ -159,7 +159,7 @@ public class TunnelDAO {
 	 * @param tunnelID The SimpleTunnelID.
 	 * @param dcID The DC2DCCommunicationID.
 	 */
-	public void updateByDC2DCCommunicationID(SimpleTunnelID tunnelID, DC2DCCommunicationID dcID) {
+	public void updateByDC2DCCommunicationID(EndAddressPairTunnelID tunnelID, DC2DCCommunicationID dcID) {
 		dao.updateByDC2DCCommunicationID(tunnelID, dcID);
 	}
 

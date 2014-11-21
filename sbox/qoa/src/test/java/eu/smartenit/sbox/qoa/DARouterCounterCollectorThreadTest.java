@@ -31,8 +31,8 @@ import org.snmp4j.Target;
 import org.snmp4j.smi.OID;
 
 import eu.smartenit.sbox.db.dto.DARouter;
+import eu.smartenit.sbox.db.dto.EndAddressPairTunnelID;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
-import eu.smartenit.sbox.db.dto.SimpleTunnelID;
 import eu.smartenit.sbox.db.dto.Tunnel;
 
 /**
@@ -47,10 +47,11 @@ public class DARouterCounterCollectorThreadTest {
 	private static final String IF_HC_IN_OCTETS_OID_RES = "[1.3.6.1.2.1.31.1.1.1.6.2 = 6139713430]";
 	private static final String ROUTER_ADDRESS = "192.168.101.1/161";
 	private static final String COMMUNITY = "smit";
+	private static final String OF_SWITCH_DPID = "dpid";
 	private CounterCollectorThread counterCollectorThread;
 	private DARouter daRouter;
 	private SNMPWrapper snmpWrapper = mock(SNMPWrapper.class);
-	private SimpleTunnelID tunnelID;
+	private EndAddressPairTunnelID tunnelID;
 	private Tunnel tunnel;
 	
 	@Before
@@ -58,7 +59,7 @@ public class DARouterCounterCollectorThreadTest {
 		SNMPWrapperFactory.disableUniqueSnmpWrappperCreationMode();
 		SNMPWrapperFactory.setSNMPWrapperInstance(snmpWrapper);
 		
-		this.tunnelID = new SimpleTunnelID();
+		this.tunnelID = new EndAddressPairTunnelID();
 		this.daRouter = prepareDARouter();
 		this.tunnel = prepareTunnel();
 		when(snmpWrapper.snmpGet(any(OID.class), any(Target.class))).thenReturn(IF_HC_IN_OCTETS_OID_RES);
@@ -100,7 +101,7 @@ public class DARouterCounterCollectorThreadTest {
 	}
 	
 	private DARouter prepareDARouter() {
-		return new DARouter(new NetworkAddressIPv4(ROUTER_ADDRESS, 32), COMMUNITY);
+		return new DARouter(new NetworkAddressIPv4(ROUTER_ADDRESS, 32), COMMUNITY, OF_SWITCH_DPID);
 	}
 	
 	private Tunnel prepareTunnel() {

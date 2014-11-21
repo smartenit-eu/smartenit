@@ -30,7 +30,7 @@ import eu.smartenit.sbox.db.dto.DARouter;
  * The abstract DARouterDAO class, including all SQL queries.
  *
  * @authors Antonis Makris, George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public abstract class AbstractDARouterDAO {
@@ -39,6 +39,7 @@ public abstract class AbstractDARouterDAO {
 			+ "(ADDRESS STRING PRIMARY KEY, " 
 			+ "SDNCONTROLLERADDRESS STRING, "
 			+ "SNMPCOMMUNITY STRING, "
+            + "OFSWITCHDPID STRING, "
 			+ "FOREIGN KEY (SDNCONTROLLERADDRESS) "
 			+ "REFERENCES SDNCONTROLLER(ADDRESS) ON DELETE CASCADE)")
 	public abstract void createTable();
@@ -50,21 +51,21 @@ public abstract class AbstractDARouterDAO {
 	
 	@SqlUpdate("INSERT INTO DAROUTER  "
 			+ "(ADDRESS, " 
-			+ "SNMPCOMMUNITY) "
-			+ "VALUES (:d.address, :d.snmpCommunity)")
+			+ "SNMPCOMMUNITY, OFSWITCHDPID) "
+			+ "VALUES (:d.address, :d.snmpCommunity, :d.ofSwitchDPID)")
 	public abstract void insert(@BindDARouter("d") DARouter d);
 	
 	@SqlUpdate("INSERT INTO DAROUTER  "
 			+ "(ADDRESS, " 
 			+ "SNMPCOMMUNITY, "
-			+ "SDNCONTROLLERADDRESS) "
-			+ "VALUES (:d.address, :d.snmpCommunity, :sdnAddress)")
+			+ "SDNCONTROLLERADDRESS, OFSWITCHDPID) "
+			+ "VALUES (:d.address, :d.snmpCommunity, :sdnAddress, :d.ofSwitchDPID)")
 	public abstract void insertBySDNControllerAddress(@BindDARouter("d") DARouter d, 
 			@Bind("sdnAddress") String sdnAddress);
 	
 	
 	@SqlUpdate("UPDATE DAROUTER  "
-			+ "SET SNMPCOMMUNITY=:d.snmpCommunity "
+			+ "SET SNMPCOMMUNITY=:d.snmpCommunity, OFSWITCHDPID = :d.ofSwitchDPID "
 			+ "WHERE ADDRESS = :d.address")
 	public abstract void update(@BindDARouter("d") DARouter d);
 	
@@ -76,23 +77,16 @@ public abstract class AbstractDARouterDAO {
 			@Bind("sdnAddress") String sdnAddress);
 	
 	
-	@SqlQuery("SELECT "
-			+ "ADDRESS, " 
-			+ "SNMPCOMMUNITY " 
-			+ "FROM DAROUTER")
+	@SqlQuery("SELECT ADDRESS, SNMPCOMMUNITY, OFSWITCHDPID FROM DAROUTER")
 	@Mapper(DARouterMapper.class)
 	public abstract List<DARouter> findAll();
 	
-	@SqlQuery("SELECT "
-			+ "ADDRESS, " 
-			+ "SNMPCOMMUNITY " 
+	@SqlQuery("SELECT ADDRESS, SNMPCOMMUNITY, OFSWITCHDPID "
 			+ "FROM DAROUTER WHERE ADDRESS = :address")
 	@Mapper(DARouterMapper.class)
 	public abstract DARouter findById(@Bind("address") String address);
 	
-	@SqlQuery("SELECT "
-			+ "ADDRESS, " 
-			+ "SNMPCOMMUNITY " 
+	@SqlQuery("SELECT ADDRESS, SNMPCOMMUNITY, OFSWITCHDPID "
 			+ "FROM DAROUTER WHERE SDNCONTROLLERADDRESS = :sdnAddress")
 	@Mapper(DARouterMapper.class)
 	public abstract List<DARouter> findBySDNControllerAddress(@Bind("sdnAddress") String sdnAddress);

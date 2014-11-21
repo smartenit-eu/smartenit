@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.smartenit.sbox.db.dto.CVector;
-import eu.smartenit.sbox.db.dto.SimpleLinkID;
+import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.Vector;
 
 /**
@@ -31,7 +31,7 @@ import eu.smartenit.sbox.db.dto.Vector;
  * It includes methods that test certain support Vector functions.
  *
  * @author George Petropoulos
- * @version 1.0
+ * @version 2.0
  * 
  */
 public class VectorTest {
@@ -39,69 +39,75 @@ public class VectorTest {
 	private static final Logger logger = LoggerFactory.getLogger(VectorTest.class);
 	
 	/**
-	 * It tests the getVectorValueForLink(LinkID linkId) and 
-	 * addVectorValueForLink(LinkID linkId, long value) methods.
+	 * It tests the getVectorValueForTunnelEndPrefix(NetworkAddressIPv4 tunnelEndPrefix) and 
+	 * addVectorValueForTunnelEndPrefix(NetworkAddressIPv4 tunnelEndPrefix, long value) methods.
 	 * 
 	 */
-	@Test
+	@Test 
 	public void testVectorSupportFunctions () {
 		logger.info("Testing vector support functions.");
 		Vector vector = new Vector();
 		
 		assertNull(vector.getVectorValues());
 		
-		SimpleLinkID link1 = new SimpleLinkID("1", "ote");
-		vector.addVectorValueForLink(link1, 10000);
+		NetworkAddressIPv4 tunnelEndPrefix = new NetworkAddressIPv4("1.1.1.1", 32);
+		vector.addVectorValueForTunnelEndPrefix(tunnelEndPrefix, 10000);
 		assertNotNull(vector.getVectorValues());
 		assertEquals(vector.getVectorValues().size(), 1);
 		
-		long value = vector.getVectorValueForLink(link1);
+		NetworkAddressIPv4 testEndPrefix = new NetworkAddressIPv4("1.1.1.1", 32);
+		long value = vector.getVectorValueForTunnelEndPrefix(testEndPrefix);
 		assertEquals(value, 10000);
 		
-		SimpleLinkID link2 = new SimpleLinkID("2", "ote");
-		vector.addVectorValueForLink(link2, 100000);
+		tunnelEndPrefix = new NetworkAddressIPv4("2.2.2.2", 32);
+		vector.addVectorValueForTunnelEndPrefix(tunnelEndPrefix, 20000);
 		assertNotNull(vector.getVectorValues());
 		assertEquals(vector.getVectorValues().size(), 2);
 		
-		value = vector.getVectorValueForLink(link2);
-		assertEquals(value, 100000);
+		testEndPrefix = new NetworkAddressIPv4("2.2.2.2", 32);
+		value = vector.getVectorValueForTunnelEndPrefix(testEndPrefix);
+		assertEquals(value, 20000);
 		
-		SimpleLinkID link3 = new SimpleLinkID("3", "hol");
-		value = vector.getVectorValueForLink(link3);
+		testEndPrefix = new NetworkAddressIPv4("2.2.2.2", 12);
+		value = vector.getVectorValueForTunnelEndPrefix(testEndPrefix);
 		assertEquals(value, 0);
 	}
 	
 	/**
-	 * It tests the getVectorValueForLink(LinkID linkId) and 
-	 * addVectorValueForLink(LinkID linkId, long value) methods
+	 * It tests the getVectorValueForTunnelEndPrefix(NetworkAddressIPv4 tunnelEndPrefix) and 
+	 * addVectorValueForTunnelEndPrefix(NetworkAddressIPv4 tunnelEndPrefix, long value) methods
 	 * for a sample sub-vector, CVector.
 	 * 
 	 */
-	@Test
+	@Test 
 	public void testCVectorSupportFunctions () {
 		logger.info("Testing c vector support functions.");
 		CVector cVector = new CVector();
 		
 		assertNull(cVector.getVectorValues());
 		
-		SimpleLinkID link1 = new SimpleLinkID("1", "ote");
-		cVector.addVectorValueForLink(link1, 10000);
+		assertNull(cVector.getVectorValues());
+		
+		NetworkAddressIPv4 tunnelEndPrefix = new NetworkAddressIPv4("1.1.1.1", 32);
+		cVector.addVectorValueForTunnelEndPrefix(tunnelEndPrefix, 10000);
 		assertNotNull(cVector.getVectorValues());
 		assertEquals(cVector.getVectorValues().size(), 1);
 		
-		long value = cVector.getVectorValueForLink(link1);
+		NetworkAddressIPv4 testEndPrefix = new NetworkAddressIPv4("1.1.1.1", 32);
+		long value = cVector.getVectorValueForTunnelEndPrefix(testEndPrefix);
 		assertEquals(value, 10000);
 		
-		SimpleLinkID link2 = new SimpleLinkID("2", "ote");
-		cVector.addVectorValueForLink(link2, 100000);
+		tunnelEndPrefix = new NetworkAddressIPv4("2.2.2.2", 32);
+		cVector.addVectorValueForTunnelEndPrefix(tunnelEndPrefix, 20000);
 		assertNotNull(cVector.getVectorValues());
 		assertEquals(cVector.getVectorValues().size(), 2);
 		
-		value = cVector.getVectorValueForLink(link2);
-		assertEquals(value, 100000);
+		testEndPrefix = new NetworkAddressIPv4("2.2.2.2", 32);
+		value = cVector.getVectorValueForTunnelEndPrefix(testEndPrefix);
+		assertEquals(value, 20000);
 		
-		SimpleLinkID link3 = new SimpleLinkID("3", "hol");
-		value = cVector.getVectorValueForLink(link3);
+		testEndPrefix = new NetworkAddressIPv4("2.2.2.2", 12);
+		value = cVector.getVectorValueForTunnelEndPrefix(testEndPrefix);
 		assertEquals(value, 0);
 	}
 }

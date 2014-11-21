@@ -28,7 +28,7 @@ import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
  * The DARouterMapper class.
  * 
  * @authors George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public class DARouterMapper implements ResultSetMapper<DARouter> {
@@ -50,6 +50,7 @@ public class DARouterMapper implements ResultSetMapper<DARouter> {
 		DARouter d = new DARouter();
 		d.setManagementAddress(new NetworkAddressIPv4(r.getString("ADDRESS"), 0));
 		d.setSnmpCommunity(r.getString("SNMPCOMMUNITY"));
+        d.setOfSwitchDPID(r.getString("OFSWITCHDPID"));
 		return d;
 
 	}

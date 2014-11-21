@@ -22,7 +22,7 @@ import java.util.List;
  * The ConfigData class.
  *
  * @author George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public final class ConfigData implements Serializable {
@@ -42,43 +42,29 @@ public final class ConfigData implements Serializable {
 	/**
 	 * The constructor with arguments.
 	 * 
-	 * @param inCommunicationList
-	 * @param outCommunicationList
+	 * @param entries
 	 */
-	public ConfigData(List<DC2DCCommunication> inCommunicationList,
-			List<DC2DCCommunication> outCommunicationList) {
-		
-		this.inCommunicationList = inCommunicationList;
-		this.outCommunicationList = outCommunicationList;
-	}
-	
-	List<DC2DCCommunication> inCommunicationList;
-	
-	List<DC2DCCommunication> outCommunicationList;
-
-	public List<DC2DCCommunication> getInCommunicationList() {
-		return inCommunicationList;
+	public ConfigData(List<ConfigDataEntry> entries) {
+		super();
+		this.entries = entries;
 	}
 
-	public void setInCommunicationList(List<DC2DCCommunication> inCommunicationList) {
-		this.inCommunicationList = inCommunicationList;
+
+
+	private List<ConfigDataEntry> entries;
+
+	public List<ConfigDataEntry> getEntries() {
+		return entries;
 	}
 
-	public List<DC2DCCommunication> getOutCommunicationList() {
-		return outCommunicationList;
-	}
-
-	public void setOutCommunicationList(
-			List<DC2DCCommunication> outCommunicationList) {
-		this.outCommunicationList = outCommunicationList;
+	public void setEntries(List<ConfigDataEntry> entries) {
+		this.entries = entries;
 	}
 
 	@Override
 	public String toString() {
-		return "ConfigData [inCommunicationList=" + inCommunicationList
-				+ ", outCommunicationList=" + outCommunicationList + "]";
+		return "ConfigData [entries=" + entries + "]";
 	}
-	
 	
 	
 

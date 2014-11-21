@@ -23,11 +23,11 @@ import org.slf4j.LoggerFactory;
 
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
 import eu.smartenit.sbox.db.dto.DC2DCCommunicationID;
+import eu.smartenit.sbox.db.dto.EndAddressPairTunnelID;
 import eu.smartenit.sbox.db.dto.LinkID;
-import eu.smartenit.sbox.db.dto.SimpleTunnelID;
+import eu.smartenit.sbox.db.dto.LocalVectorValue;
 import eu.smartenit.sbox.db.dto.Tunnel;
 import eu.smartenit.sbox.db.dto.TunnelID;
-import eu.smartenit.sbox.db.dto.VectorValue;
 import eu.smartenit.sbox.db.dto.ZVector;
 
 /**
@@ -77,9 +77,12 @@ public class ZVectorCalculator extends VectorCalculator {
 		
 		logger.debug("Calculating Z vectors for AS {} ...", asNumber);
 		List<ZVector> newZVectors = new ArrayList<ZVector>();
+		ZVector zVector;
 		for (DC2DCCommunicationID id : monitoredTunnels.getAllDC2DCCommunicationIDs(asNumber)) {
-			List<VectorValue> vectorValues = calculateVectorValues(filterCounterValues(values, id), latestCounterValues, asNumber);
-			newZVectors.add(new ZVector(vectorValues, asNumber, id));
+			List<LocalVectorValue> localVectorValues = calculateLocalVectorValues(filterCounterValues(values, id), latestCounterValues, asNumber);
+			zVector = new ZVector(localVectorValues, asNumber);
+			zVector.setCommunicationID(id);
+			newZVectors.add(zVector);
 		}
 		logger.debug("... done.");
 		return newZVectors;
@@ -93,8 +96,8 @@ public class ZVectorCalculator extends VectorCalculator {
 		return filteredValues;
 	}
 
-	private List<VectorValue> calculateVectorValues(CounterValues values, CounterValues latestCounterValues, int asNumber) {
-		List<VectorValue> vectorValues = new ArrayList<VectorValue>();
+	private List<LocalVectorValue> calculateLocalVectorValues(CounterValues values, CounterValues latestCounterValues, int asNumber) {
+		List<LocalVectorValue> localVectorValues = new ArrayList<LocalVectorValue>();
 		for (TunnelID tunnelID : values.getAllTunnelsIds()) {
 			long currentCounterValue = values.getCounterValue(tunnelID);
 			long periodCounterValue = currentCounterValue;
@@ -104,29 +107,29 @@ public class ZVectorCalculator extends VectorCalculator {
 		
 			if (periodCounterValue < 0) {
 				logger.warn("Calculated period counter value for tunnel is less than zero. " +
-						"This is incorrect. Will set it to zero. Affected tunnel: {}", ((SimpleTunnelID)tunnelID).toString());
+						"This is incorrect. Will set it to zero. Affected tunnel: {}", ((EndAddressPairTunnelID)tunnelID).toString());
 				periodCounterValue = 0;
 			}
 			latestCounterValues.storeCounterValue(tunnelID, currentCounterValue);
-			updateVectorValues(vectorValues, monitoredTunnels.getTunnel(tunnelID, asNumber), periodCounterValue);
+			updateVectorValues(localVectorValues, monitoredTunnels.getTunnel(tunnelID, asNumber), periodCounterValue);
 		}
-		return vectorValues;
+		return localVectorValues;
 	}
 
-	private void updateVectorValues(List<VectorValue> vectorValues, Tunnel tunnel, long periodCounterValue) {
+	private void updateVectorValues(List<LocalVectorValue> localVectorValues, Tunnel tunnel, long periodCounterValue) {
 		if (tunnel == null) {
 			logger.warn("Tunnel is null.");
 			return;
 		}
 		
 		LinkID linkID = tunnel.getLink().getLinkID();
-		for (VectorValue vectorValue : vectorValues) {
-			if (vectorValue.getLinkID().equals(linkID)) {
-				vectorValue.setValue(vectorValue.getValue() + periodCounterValue);
+		for (LocalVectorValue localVectorValue : localVectorValues) {
+			if (localVectorValue.getLinkID().equals(linkID)) {
+				localVectorValue.setValue(localVectorValue.getValue() + periodCounterValue);
 				return;
 			}
 		}
-		vectorValues.add(new VectorValue(periodCounterValue, linkID));		
+		localVectorValues.add(new LocalVectorValue(periodCounterValue, linkID));		
 	}
 
 }

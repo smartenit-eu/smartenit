@@ -57,6 +57,7 @@ public class TrafficCollectorTaskFailureScenarioTest {
 	private static final String BG_ROUTER_PREFIX = "192.168.100.1";
 	private static final String DA_ROUTER_PREFIX = "192.168.100.2";
 	private static final String COMMUNITY = "smit";
+	private static final String OF_SWITCH_DPID = "dpid";
 	private static final int AS_NUMBER = 1;
 	
 	private TrafficCollectorTask trafficCollectorTask;
@@ -114,7 +115,7 @@ public class TrafficCollectorTaskFailureScenarioTest {
 	}
 	
 	private DARouter prepareDARouter() {
-		return new DARouter(new NetworkAddressIPv4(DA_ROUTER_PREFIX, 32), COMMUNITY);
+		return new DARouter(new NetworkAddressIPv4(DA_ROUTER_PREFIX, 32), COMMUNITY, OF_SWITCH_DPID);
 	}
 	
 	private Link preapreLink() {

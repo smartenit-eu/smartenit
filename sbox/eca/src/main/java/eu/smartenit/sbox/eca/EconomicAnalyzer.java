@@ -22,7 +22,7 @@ import java.util.Map;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
-import eu.smartenit.sbox.ntm.dtm.DTMTrafficManager;
+import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
 /**
  * EconomicAnalyzer. Used to invoke the economic analyzer algorithm.

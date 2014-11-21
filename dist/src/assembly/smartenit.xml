@@ -33,7 +33,6 @@
       <includes>
         <include>INSTALL.txt</include>
         <include>CHANGELOG.txt</include>
-	<include>LICENSE.txt</include>
       </includes>
     </fileSet>
 
@@ -63,7 +62,7 @@
       <outputDirectory>/sbox</outputDirectory>
       <includes>
         <include>smartenit.db</include>
-        <include>upgrade.sql</include>
+		<!-- <include>upgrade.sql</include> -->
       </includes>
     </fileSet>
 

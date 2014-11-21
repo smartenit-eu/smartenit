@@ -19,7 +19,7 @@ package eu.smartenit.sbox.commons;
  * The global SBox properties. 
  *
  * @author George Petropoulos
- * @version 1.0
+ * @version 1.2
  * 
  */
 public class SBoxProperties {
@@ -37,4 +37,12 @@ public class SBoxProperties {
 	public static long MAX_FETCHING_TIME = 2000;
 	
 	public static int INTER_SBOX_PORT = 9999;
+	
+	// Configuration of QoS Analyzer feature of periodical logging of incoming
+	// traffic details (no. of bytes and packets) to file.
+	public static boolean LOG_TRAFFIC_DETAILS = false;
+	
+	public static String TRAFFIC_DETAILS_FILE_PATH = "./";
+	
+	public static String TRAFFIC_DETAILS_FILE_NAME = "traffic.log";
 }

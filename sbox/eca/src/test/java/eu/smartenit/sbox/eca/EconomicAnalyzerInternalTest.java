@@ -29,14 +29,15 @@ import org.junit.Test;
 import eu.smartenit.sbox.db.dao.CostFunctionDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.CostFunction;
+import eu.smartenit.sbox.db.dto.LocalVector;
+import eu.smartenit.sbox.db.dto.LocalVectorValue;
 import eu.smartenit.sbox.db.dto.Segment;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
-import eu.smartenit.sbox.db.dto.Vector;
 import eu.smartenit.sbox.db.dto.VectorValue;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
-import eu.smartenit.sbox.ntm.dtm.DTMTrafficManager;
+import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
 /**
  * Test class for the {@link EconomicAnalyzerInternal} class.
@@ -297,8 +298,8 @@ public class EconomicAnalyzerInternalTest {
 	 * @return The {@link XVector} object.
 	 */
 	private static XVector createXVector(long x1, long x2, SimpleLinkID link1, SimpleLinkID link2, int sourceAsNumber) {
-		List<VectorValue> vectorValues = createVectorValues(x1, x2, link1, link2);
-		return new XVector(vectorValues , sourceAsNumber);
+		List<LocalVectorValue> vectorValues = createVectorValues(x1, x2, link1, link2);
+		return new XVector(vectorValues, sourceAsNumber);
 	}
 	
 	/**
@@ -313,8 +314,8 @@ public class EconomicAnalyzerInternalTest {
 	 */
 	private static List<ZVector> createZVectorList(long z1, long z2, SimpleLinkID link1, SimpleLinkID link2, int sourceAsNumber) {
 		List<ZVector> zVectorList = new ArrayList<ZVector>();
-		List<VectorValue> vectorValues = createVectorValues(z1, z2, link1, link2);
-		zVectorList.add(new ZVector(vectorValues, sourceAsNumber, null));
+		List<LocalVectorValue> vectorValues = createVectorValues(z1, z2, link1, link2);
+		zVectorList.add(new ZVector(vectorValues, sourceAsNumber));
 		return zVectorList;
 	}
 	
@@ -327,10 +328,10 @@ public class EconomicAnalyzerInternalTest {
 	 * @param link2 {@link SimpleLinkID} of link 1.
 	 * @return A {@link List} of {@link VectorValue}s
 	 */
-	private static List<VectorValue> createVectorValues(long p, long q, SimpleLinkID link1, SimpleLinkID link2) {
-		List<VectorValue> values = new ArrayList<VectorValue>();
-		values.add(new VectorValue(p, link1));
-		values.add(new VectorValue(q, link2));
+	private static List<LocalVectorValue> createVectorValues(long p, long q, SimpleLinkID link1, SimpleLinkID link2) {
+		List<LocalVectorValue> values = new ArrayList<LocalVectorValue>();
+		values.add(new LocalVectorValue(p, link1));
+		values.add(new LocalVectorValue(q, link2));
 		return values;
 	}
 
@@ -362,8 +363,8 @@ public class EconomicAnalyzerInternalTest {
 		
 		ea.updateXZVectors(createXVector(14, 22, id1, id2, 2), createZVectorList(2, 1, id1, id2, 2));
 		
-		Vector referenceVector = ea.calculateReferenceVector(2);
-		List<VectorValue> vectorValueList = referenceVector.getVectorValues();
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
 		assertEquals(15, vectorValueList.get(0).getValue());
 		assertEquals(21, vectorValueList.get(1).getValue());
 
@@ -396,8 +397,8 @@ public class EconomicAnalyzerInternalTest {
 		
 		ea.updateXZVectors(createXVector(14, 22, id1, id2, 2), createZVectorList(3,4, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
-		List<VectorValue> vectorValueList = referenceVector.getVectorValues();
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
 		assertEquals(18, vectorValueList.get(0).getValue());
 		assertEquals(18, vectorValueList.get(1).getValue());		
 	}
@@ -431,8 +432,8 @@ public class EconomicAnalyzerInternalTest {
 		
 		ea.updateXZVectors(createXVector(14, 22, id1, id2, 2), createZVectorList(2,3, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
-		List<VectorValue> vectorValueList = referenceVector.getVectorValues();
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
 		assertEquals(17, vectorValueList.get(0).getValue());
 		assertEquals(19, vectorValueList.get(1).getValue());		
 		
@@ -466,8 +467,8 @@ public class EconomicAnalyzerInternalTest {
 		
 		ea.updateXZVectors(createXVector(14, 22, id1, id2, 2), createZVectorList(4, 4, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
-		List<VectorValue> vectorValueList = referenceVector.getVectorValues();
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
 		assertEquals(18, vectorValueList.get(0).getValue());
 		assertEquals(18, vectorValueList.get(1).getValue());		
 		
@@ -501,8 +502,8 @@ public class EconomicAnalyzerInternalTest {
 		
 		ea.updateXZVectors(createXVector(14, 22, id1, id2, 2), createZVectorList(3,7, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
-		List<VectorValue> vectorValueList = referenceVector.getVectorValues();
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
 		
 		// All values on the line x1 + x2 = 36 between points (4,32) and (6,30) are fine
 		assertEquals(20, vectorValueList.get(0).getValue());
@@ -538,8 +539,8 @@ public class EconomicAnalyzerInternalTest {
 		
 		ea.updateXZVectors(createXVector(14, 22, id1, id2, 2), createZVectorList(2, 1, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
-		List<VectorValue> vectorValueList = referenceVector.getVectorValues();
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
 		
 		assertEquals(15, vectorValueList.get(0).getValue());
 		assertEquals(21, vectorValueList.get(1).getValue());		
@@ -574,8 +575,8 @@ public class EconomicAnalyzerInternalTest {
 		
 		ea.updateXZVectors(createXVector(14, 22, id1, id2, 2), createZVectorList(10, 7, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
-		List<VectorValue> vectorValueList = referenceVector.getVectorValues();
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
 		
 		// The values 6, 30 would also be ok (i.e. all values on the line 4/32 - 6/30)
 		assertEquals(4, vectorValueList.get(0).getValue());
@@ -611,8 +612,8 @@ public class EconomicAnalyzerInternalTest {
 		
 		ea.updateXZVectors(createXVector(8, 28, id1, id2, 2), createZVectorList(3, 7, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
-		List<VectorValue> vectorValueList = referenceVector.getVectorValues();
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
 		
 		// The values 6, 30 would also be ok (i.e. all values on the line 5/31 - 6/30)
 		assertEquals(5, vectorValueList.get(0).getValue());
@@ -648,8 +649,8 @@ public class EconomicAnalyzerInternalTest {
 		
 		ea.updateXZVectors(createXVector(14, 22, id1, id2, 2), createZVectorList(3, 4, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
-		List<VectorValue> vectorValueList = referenceVector.getVectorValues();
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
 		
 		assertEquals(18, vectorValueList.get(0).getValue());
 		assertEquals(18, vectorValueList.get(1).getValue());		
@@ -684,8 +685,8 @@ public class EconomicAnalyzerInternalTest {
 		
 		ea.updateXZVectors(createXVector(14, 22, id1, id2, 2), createZVectorList(3, 7, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
-		List<VectorValue> vectorValueList = referenceVector.getVectorValues();
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
 		
 		assertEquals(20, vectorValueList.get(0).getValue());
 		assertEquals(16, vectorValueList.get(1).getValue());		
@@ -720,8 +721,8 @@ public class EconomicAnalyzerInternalTest {
 		
 		ea.updateXZVectors(createXVector(14, 22, id1, id2, 2), createZVectorList(5, 7, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
-		List<VectorValue> vectorValueList = referenceVector.getVectorValues();
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
 		
 		assertEquals(20, vectorValueList.get(0).getValue());
 		assertEquals(16, vectorValueList.get(1).getValue());		
@@ -756,7 +757,7 @@ public class EconomicAnalyzerInternalTest {
 		XVector xvector = createXVector(14, 22, id1, id2, 2);
 		ea.updateXZVectors(xvector, createZVectorList(3,7, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
 		assertEquals(xvector.getSourceAsNumber(), referenceVector.getSourceAsNumber());
 		
 	}
@@ -790,7 +791,7 @@ public class EconomicAnalyzerInternalTest {
 		XVector xvector = createXVector(14, 22, id1, id2, 2);
 		ea.updateXZVectors(xvector, createZVectorList(3,7, id1, id2, 2));
 
-		Vector referenceVector = ea.calculateReferenceVector(2);
+		LocalVector referenceVector = ea.calculateReferenceVector(2);
 		assertEquals(id1, referenceVector.getVectorValues().get(0).getLinkID());
 		assertEquals(id2, referenceVector.getVectorValues().get(1).getLinkID());
 		

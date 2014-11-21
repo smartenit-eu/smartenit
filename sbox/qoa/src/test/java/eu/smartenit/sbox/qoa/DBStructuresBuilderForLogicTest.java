@@ -21,7 +21,6 @@ import java.util.List;
 
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
-import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.AS;
 import eu.smartenit.sbox.db.dto.BGRouter;
 import eu.smartenit.sbox.db.dto.CloudDC;
@@ -29,19 +28,19 @@ import eu.smartenit.sbox.db.dto.DARouter;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
 import eu.smartenit.sbox.db.dto.DC2DCCommunicationID;
 import eu.smartenit.sbox.db.dto.Direction;
+import eu.smartenit.sbox.db.dto.EndAddressPairTunnelID;
 import eu.smartenit.sbox.db.dto.Link;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
-import eu.smartenit.sbox.db.dto.SimpleTunnelID;
 import eu.smartenit.sbox.db.dto.Tunnel;
 
 /**
  * Helper class for creation of structures that can be returned by mocked DAOs:
- * {@link DC2DCCommunicationDAO}, {@link ASDAO} or
- * {@link TimeScheduleParametersDAO}.
+ * {@link DC2DCCommunicationDAO} and {@link ASDAO}.
  * 
- * @author Lukasz Lopatowski, Jakub Gutkowski
- * @version 1.0
+ * @author Lukasz Lopatowski
+ * @author Jakub Gutkowski
+ * @version 1.2
  * 
  */
 public class DBStructuresBuilderForLogicTest {
@@ -64,11 +63,15 @@ public class DBStructuresBuilderForLogicTest {
 		link121.setBgRouter(bgRouter12);
 		link121.setPhysicalInterfaceName("eth1");
 
-		Tunnel tunnel1111 = new Tunnel(new SimpleTunnelID("tunnel1111", 1111),
-				link111, null, null, null, null, null);
+		Tunnel tunnel1111 =	new Tunnel(new EndAddressPairTunnelID("tunnel1111", 
+				new NetworkAddressIPv4("10.1.1.1", 32), 
+				new NetworkAddressIPv4("10.1.1.2", 32)),
+				link111, null, null, null, 0);
 		tunnel1111.setPhysicalLocalInterfaceName("eth0");
-		Tunnel tunnel1211 = new Tunnel(new SimpleTunnelID("tunnel1211", 1211),
-				link121, null, null, null, null, null);
+		Tunnel tunnel1211 = new Tunnel(new EndAddressPairTunnelID("tunnel1211", 
+				new NetworkAddressIPv4("10.2.1.1", 32), 
+				new NetworkAddressIPv4("10.2.1.2", 32)),
+				link121, null, null, null, 0);
 		tunnel1211.setPhysicalLocalInterfaceName("eth1");
 
 		link111.setTraversingTunnels(Arrays.asList(tunnel1111));
@@ -83,10 +86,9 @@ public class DBStructuresBuilderForLogicTest {
 		as1.setBgRouters(Arrays.asList(bgRouter11, bgRouter12));
 
 		DARouter daRouter1 = new DARouter(
-				new NetworkAddressIPv4("1.1.1.1", 32), "smit");
+				new NetworkAddressIPv4("1.1.1.1", 32), "smit", "00:00:00:00:00:00:00:01");
 
-		CloudDC cloudLocal11 = new CloudDC("cloudLocal11", as1, daRouter1,
-				null, null);
+		CloudDC cloudLocal11 = new CloudDC("cloudLocal11", as1, daRouter1, null, null);
 		as1.setLocalClouds(Arrays.asList(cloudLocal11));
 
 		DC2DCCommunicationID id1 = new DC2DCCommunicationID(1, "id1",

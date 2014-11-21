@@ -15,11 +15,15 @@
  */
 package eu.smartenit.sbox.qoa;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import eu.smartenit.sbox.db.dto.LinkID;
+import eu.smartenit.sbox.db.dto.LocalVectorValue;
 import eu.smartenit.sbox.db.dto.TunnelID;
 
 /**
@@ -28,13 +32,13 @@ import eu.smartenit.sbox.db.dto.TunnelID;
  * 
  * @author <a href="mailto:jgutkow@man.poznan.pl">Jakub Gutkowski</a> (PSNC)
  * @author <a href="mailto:llopat@man.poznan.pl">Lukasz Lopatowski</a> (PSNC)
- * @version 1.0
+ * @version 1.2
  * 
  */
 public class CounterValues {
 	
-	private Map<LinkID, Long> linkCounterValues = new HashMap<LinkID, Long>();
-	private Map<TunnelID, Long> tunnelCounterValues = new HashMap<TunnelID, Long>();
+	protected Map<LinkID, Long> linkCounterValues = new HashMap<LinkID, Long>();
+	protected Map<TunnelID, Long> tunnelCounterValues = new HashMap<TunnelID, Long>();
 
 	/**
 	 * Stores counter value for given link in the structure.
@@ -46,6 +50,22 @@ public class CounterValues {
 	 */
 	public void storeCounterValue(LinkID linkID, long counterValue) {
 		linkCounterValues.put(linkID, counterValue);
+	}
+
+	/**
+	 * Adds value to existing entry in the structure or creates new a entry.
+	 * 
+	 * @param linkID
+	 *            identifier of the monitored link
+	 * @param counterValue
+	 *            counter value collected from the device
+	 */
+	public void addCounterValue(LinkID linkID, long counterValue) {
+		long currentCounterValue = 0;
+		if (linkCounterValues.containsKey(linkID)) {
+			currentCounterValue = linkCounterValues.get(linkID);
+		}
+		linkCounterValues.put(linkID, currentCounterValue + counterValue);
 	}
 
 	/**
@@ -130,6 +150,20 @@ public class CounterValues {
 		return tunnelCounterValues.get(tunnelID);
 	}
 	
+	/**
+	 * Returns new list of {@link LocalVectorValue} based on stored counter
+	 * values for links.
+	 * 
+	 * @return list of vector values
+	 */
+	public List<LocalVectorValue> toLocalVectorValues() {
+		List<LocalVectorValue> vectorValues = new ArrayList<LocalVectorValue>();
+		for(Entry<LinkID, Long> entry : linkCounterValues.entrySet()) {
+			vectorValues.add(new LocalVectorValue(entry.getValue(), entry.getKey()));
+		}
+		return vectorValues;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -172,4 +206,5 @@ public class CounterValues {
 		return "CounterValues [linkCounterValues=" + linkCounterValues
 				+ ", tunnelCounterValues=" + tunnelCounterValues + "]";
 	}
+
 }

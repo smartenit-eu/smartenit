@@ -98,6 +98,10 @@ public class SBox {
 			SBoxProperties.INTER_SBOX_PORT = config.getInt("inter.sbox.port");
 			SBoxProperties.MAX_FETCHING_TIME = config.getLong("max.fetching.time");
 			
+			SBoxProperties.LOG_TRAFFIC_DETAILS = config.getBoolean("log.traffic.details");
+			SBoxProperties.TRAFFIC_DETAILS_FILE_PATH = config.getString("traffic.details.file.path");
+			SBoxProperties.TRAFFIC_DETAILS_FILE_NAME = config.getString("traffic.details.file.name");
+			
 		} catch (ConfigurationException e) {
 			logger.warn("Exception while loading configuration file " 
 					+ SBoxProperties.PROPERTIES_FILE_NAME + ".");
@@ -105,7 +109,7 @@ public class SBox {
 		}  catch (ConversionException e2) {
 			logger.warn("Invalid format of configuration parameters, using default.");
 			
-		} 
+		}
 		
 		logger.debug("Configuration parameters: \n" 
 				+ "connection.retries: " + SBoxProperties.CONNECTION_RETRIES + "\n"
@@ -113,7 +117,10 @@ public class SBox {
 				+ "core.pool.size: " + SBoxProperties.CORE_POOL_SIZE + "\n"
 				+ "db.file: " + SBoxProperties.DB_FILE + "\n"
 				+ "inter.sbox.port: " + SBoxProperties.INTER_SBOX_PORT + "\n"
-				+ "max.fetching.time: " + SBoxProperties.MAX_FETCHING_TIME);
+				+ "max.fetching.time: " + SBoxProperties.MAX_FETCHING_TIME + "\n"
+				+ "log.traffic.details: " + SBoxProperties.LOG_TRAFFIC_DETAILS + "\n"
+				+ "traffic.details.file.path: " + SBoxProperties.TRAFFIC_DETAILS_FILE_PATH + "\n"
+				+ "traffic.details.file.name: " + SBoxProperties.TRAFFIC_DETAILS_FILE_NAME);
 	}
 	
 }
