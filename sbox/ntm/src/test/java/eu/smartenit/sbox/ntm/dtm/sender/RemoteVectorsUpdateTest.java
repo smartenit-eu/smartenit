@@ -28,12 +28,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
 import eu.smartenit.sbox.db.dto.CVector;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.ConfigData;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
+import eu.smartenit.sbox.db.dto.OperationModeSDN;
 import eu.smartenit.sbox.db.dto.RVector;
 import eu.smartenit.sbox.db.dto.SDNController;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.interfaces.sboxsdn.SboxSdnClient;
 import eu.smartenit.sbox.ntm.dtm.DAOFactory;
 import eu.smartenit.sbox.ntm.dtm.sender.DBStructuresBuilder;
@@ -46,7 +50,7 @@ import eu.smartenit.sbox.ntm.dtm.sender.SDNClientFactory;
  * reference vectors from remote SBoxes.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.0
  * 
  */
 public class RemoteVectorsUpdateTest {
@@ -58,6 +62,7 @@ public class RemoteVectorsUpdateTest {
 	
 	private SboxSdnClient sdnClient = mock(SboxSdnClient.class);
 	private DC2DCCommunicationDAO dao = mock(DC2DCCommunicationDAO.class);
+	private static SystemControlParametersDAO scpDAO = mock(SystemControlParametersDAO.class);
 	
 	@Before
 	public void setup() {
@@ -70,7 +75,11 @@ public class RemoteVectorsUpdateTest {
     	SDNClientFactory.setClientInstance(sdnClient);
     	
     	when(dao.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilder.communicationsOnTrafficSender);
-    	DAOFactory.setDC2DCCommunicationDAO(dao);
+    	DAOFactory.setDC2DCComDAOInstance(dao);
+    	
+    	SystemControlParameters scp = new SystemControlParameters(ChargingRule.volume, OperationModeSDN.reactiveWithReferenceVector, 0.1);
+    	when(scpDAO.findLast()).thenReturn(scp);
+    	DAOFactory.setSCPDAOInstance(scpDAO);
 	}
 	
 	@Test

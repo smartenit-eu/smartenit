@@ -16,42 +16,92 @@
     limitations under the License.
 
 -->
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>eu.smartenit.unada</groupId>
-    <artifactId>unada</artifactId>
-    <version>1.2</version>
-  </parent>
-  
-  <groupId>eu.smartenit.unada.om</groupId>
-  <artifactId>om</artifactId>
-  <packaging>jar</packaging>
-  
-  <name>uNaDa Overlay Manager</name>
-  <url>http://maven.apache.org</url>
-  
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-  
-  <repositories>
-	<repository>
-		<id>tomp2p.net</id>
-		<url>http://tomp2p.net/dev/mvn/</url>
-	</repository>
-  </repositories>
-  
-  <dependencies>
-    <dependency>
-		  <groupId>net.tomp2p</groupId>
-		  <artifactId>TomP2P</artifactId>
-		  <version>4.4</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-  </dependencies>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>eu.smartenit.unada</groupId>
+		<artifactId>unada</artifactId>
+		<version>3.0</version>
+	</parent>
+
+	<groupId>eu.smartenit.unada.om</groupId>
+	<artifactId>om</artifactId>
+	<packaging>jar</packaging>
+
+	<name>uNaDa Overlay Manager</name>
+	<url>http://maven.apache.org</url>
+
+	<repositories>
+		<repository>
+			<id>tomp2p.net</id>
+			<url>http://tomp2p.net/dev/mvn/</url>
+		</repository>
+	</repositories>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<!-- tomp2p dependency -->
+		<dependency>
+			<groupId>net.tomp2p</groupId>
+			<artifactId>tomp2p-all</artifactId>
+			<version>5.0-Alpha24</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<!-- json dependency -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.smartenit.unada.db.dto</groupId>
+			<artifactId>dto</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.smartenit.unada.db.dao</groupId>
+			<artifactId>dao</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.smartenit.unada.tpm</groupId>
+			<artifactId>tpm</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.maxmind.geoip2</groupId>
+			<artifactId>geoip2</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.smartenit.unada.commons</groupId>
+			<artifactId>commons</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+		</dependency>
+
+	</dependencies>
+
 </project>

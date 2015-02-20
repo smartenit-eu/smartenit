@@ -22,7 +22,7 @@
   <parent>
     <groupId>eu.smartenit.enduser</groupId>
     <artifactId>enduser</artifactId>
-    <version>1.2</version>
+    <version>3.0</version>
   </parent>
   
   <groupId>eu.smartenit.enduser.em</groupId>

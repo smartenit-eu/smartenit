@@ -113,6 +113,7 @@ public class DTMFloodlightModule implements IFloodlightModule {
         floodlightProvider.addOFMessageListener(OFType.PACKET_IN, new DTMMessageListener(floodlightProvider));
         floodlightProvider.addOFSwitchListener(new DTMSwitchListener());
         restApi.addRestletRoutable(new DTMRestletRoutable());
+        DTM.getInstance().setFloodlightProvider(floodlightProvider);
         logger.debug("startUp(FloodlightModuleContext) end");
     }
 

@@ -20,8 +20,10 @@ import java.util.List;
 
 import eu.smartenit.sbox.db.dto.ConfigData;
 import eu.smartenit.sbox.db.dto.ConfigDataEntry;
+import eu.smartenit.sbox.db.dto.DARouter;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
 import eu.smartenit.sbox.db.dto.Direction;
+import eu.smartenit.sbox.db.dto.LocalDCOfSwitchPorts;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.SDNController;
 import eu.smartenit.sbox.db.dto.Tunnel;
@@ -33,7 +35,7 @@ import eu.smartenit.sbox.ntm.dtm.DAOFactory;
  * {@link DC2DCCommunication}s stored in the data base.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.0
  */
 public class SDNControllerConfigBuilder {
 	
@@ -52,6 +54,14 @@ public class SDNControllerConfigBuilder {
 		}
 		
 		ConfigData configData = new ConfigData();
+		configData.setOperationModeSDN(DAOFactory.getSCPDAOInstance().findLast().getOperationModeSDN());
+		
+		List<LocalDCOfSwitchPorts> localDCPortsConfig = new ArrayList<>();
+		for (DARouter daRouter : controller.getDaRouters()) { 
+			LocalDCOfSwitchPorts dcPorts = new LocalDCOfSwitchPorts(daRouter.getOfSwitchDPID(), daRouter.getLocalDCOfSwitchPortNumbers());
+			localDCPortsConfig.add(dcPorts);
+		}
+		configData.setLocalDCPortsConfig(localDCPortsConfig);
 		configData.setEntries(entries);
 		return configData;
 	}
@@ -77,7 +87,7 @@ public class SDNControllerConfigBuilder {
 
 	private static List<DC2DCCommunication> communications(SDNController controller) {
 		List<DC2DCCommunication> communications = new ArrayList<DC2DCCommunication>();
-		for(DC2DCCommunication communication : DAOFactory.getDCDC2DCCommunicationDAOInstance().findAllDC2DCCommunicationsCloudsTunnels()) {
+		for(DC2DCCommunication communication : DAOFactory.getDCDC2DCComDAOInstance().findAllDC2DCCommunicationsCloudsTunnels()) {
 			if(communication.getTrafficDirection().equals(Direction.outcomingTraffic) 
 					&& communication.getLocalCloud().getSdnController().getManagementAddress().equals(controller.getManagementAddress()))
 				communications.add(communication);

@@ -16,46 +16,115 @@
     limitations under the License.
 
 -->
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>eu.smartenit.unada</groupId>
-    <artifactId>unada</artifactId>
-    <version>1.2</version>
-  </parent>
-  
-  <groupId>eu.smartenit.unada.web</groupId>
-  <artifactId>web</artifactId>
-  <packaging>war</packaging>
-  
-  <name>uNaDa Web UI</name>
-  <url>http://maven.apache.org</url>
-  
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-  	
-  <dependencies>
-    <dependency>
-      <groupId>org.eclipse.jetty.orbit</groupId>
-      <artifactId>javax.servlet</artifactId>
-    </dependency>
-  </dependencies>
-	
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
-        <version>9.1.1.v20140108</version>
-        <configuration>
-    		<scanIntervalSeconds>10</scanIntervalSeconds>
-    		<webApp>
-      			<contextPath>/unada</contextPath>
-    		</webApp>
-  		</configuration>
-      </plugin>
-    </plugins>
-  </build>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>eu.smartenit.unada</groupId>
+		<artifactId>unada</artifactId>
+		<version>3.0</version>
+	</parent>
+
+	<groupId>eu.smartenit.unada.web</groupId>
+	<artifactId>web</artifactId>
+	<packaging>war</packaging>
+
+	<name>uNaDa Web UI</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.sun.faces</groupId>
+			<artifactId>jsf-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.faces</groupId>
+			<artifactId>jsf-impl</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.smartenit.unada.interfaces.enduser</groupId>
+			<artifactId>unada-enduser</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.restfb</groupId>
+			<artifactId>restfb</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.smartenit.unada.commons</groupId>
+			<artifactId>commons</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.smartenit.unada.db.dao</groupId>
+			<artifactId>dao</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.smartenit.unada.db.dto</groupId>
+			<artifactId>dto</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+    </dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<warName>unada</warName>
+					<packagingExcludes>
+						WEB-INF/lib/dao-*.jar, 
+						WEB-INF/lib/dto-*.jar, 
+						WEB-INF/lib/annotations-*.jar,
+						WEB-INF/lib/sqlite-*.jar,
+						WEB-INF/lib/jdbi-*.jar,
+						WEB-INF/lib/jetty-*.jar,
+						WEB-INF/lib/maven-*.jar,
+						WEB-INF/lib/plexus-*.jar,
+						WEB-INF/lib/surefire-*.jar, 
+						WEB-INF/lib/jsf-*.jar,
+						WEB-INF/lib/jersey-*.jar,
+						WEB-INF/lib/jackson-*.jar,
+						WEB-INF/lib/javax.*.jar,
+						WEB-INF/lib/validation-*.jar,
+						WEB-INF/lib/httpclient-*.jar,
+						WEB-INF/lib/httpcore-*.jar,
+						WEB-INF/lib/hk2-*.jar,
+						WEB-INF/lib/restfb-*.jar,
+                        WEB-INF/lib/commons-codec-*.jar,
+                        WEB-INF/lib/commons-logging-*.jar,
+                        WEB-INF/lib/h2-*.jar
+					</packagingExcludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<configuration>
+					<scanIntervalSeconds>10</scanIntervalSeconds>
+					<webApp>
+						<contextPath>/unada</contextPath>
+					</webApp>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

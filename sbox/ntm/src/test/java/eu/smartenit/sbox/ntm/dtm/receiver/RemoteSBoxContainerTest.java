@@ -33,7 +33,7 @@ import eu.smartenit.sbox.ntm.dtm.receiver.RemoteSBoxContainer;
  * {@link RemoteSBoxContainer} class.
  * 
  * @author Lukasz Lopatowski
- * @version 1.0
+ * @version 3.0
  * 
  */
 public class RemoteSBoxContainerTest {
@@ -43,10 +43,10 @@ public class RemoteSBoxContainerTest {
 	
 	@Before
 	public void setup() {
-		when(asDAO.findAllAsesCloudsBgRoutersLinks()).thenReturn(DBStructuresBuilder.systemsOnTrafficReceiver);
-		when(dc2dcCommunicationDAO.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilder.communicationsOnTrafficReceiver);
+		when(asDAO.findAllAsesCloudsBgRoutersLinks()).thenReturn(DBStructuresBuilder.systems);
+		when(dc2dcCommunicationDAO.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilder.communications);
 		DAOFactory.setASDAOInstance(asDAO);
-		DAOFactory.setDC2DCCommunicationDAO(dc2dcCommunicationDAO);
+		DAOFactory.setDC2DCComDAOInstance(dc2dcCommunicationDAO);
 	}
 	
 	@Test

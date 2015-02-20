@@ -76,7 +76,6 @@ public class VectorsContainer {
 	 *            number of the AS
 	 */
 	public void resetXVectorValues(int asNumber) {
-		logger.debug("Reseting link traffic vector values for AS number {} after accounting period end.", asNumber);
 		if (isAsNumberNotSet(asNumber)) {
 			logger.warn("AS number is not set. Will not reset any xVector values.");
 			return;

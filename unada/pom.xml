@@ -21,7 +21,7 @@
   <parent>
     <groupId>eu.smartenit</groupId>
     <artifactId>smartenit</artifactId>
-    <version>1.2</version>
+    <version>3.0</version>
   </parent>
   
   <groupId>eu.smartenit.unada</groupId>
@@ -36,17 +36,14 @@
   </properties>
   
   <modules>
-    <module>main</module>
     <module>interfaces</module>
     <module>db</module>
     <module>ctm</module>
     <module>tpm</module>
     <module>om</module>
-    <module>qoa</module>
-    <module>ena</module>
-    <module>na</module>
     <module>sa</module>
     <module>web</module>
     <module>sm</module>
+    <module>commons</module>
   </modules>
 </project>

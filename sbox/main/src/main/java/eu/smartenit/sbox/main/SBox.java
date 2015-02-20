@@ -102,6 +102,8 @@ public class SBox {
 			SBoxProperties.TRAFFIC_DETAILS_FILE_PATH = config.getString("traffic.details.file.path");
 			SBoxProperties.TRAFFIC_DETAILS_FILE_NAME = config.getString("traffic.details.file.name");
 			
+			SBoxProperties.DEFAULT_REF_VECTOR_FILE = config.getString("default.ref.vector.file");
+			
 		} catch (ConfigurationException e) {
 			logger.warn("Exception while loading configuration file " 
 					+ SBoxProperties.PROPERTIES_FILE_NAME + ".");
@@ -120,7 +122,8 @@ public class SBox {
 				+ "max.fetching.time: " + SBoxProperties.MAX_FETCHING_TIME + "\n"
 				+ "log.traffic.details: " + SBoxProperties.LOG_TRAFFIC_DETAILS + "\n"
 				+ "traffic.details.file.path: " + SBoxProperties.TRAFFIC_DETAILS_FILE_PATH + "\n"
-				+ "traffic.details.file.name: " + SBoxProperties.TRAFFIC_DETAILS_FILE_NAME);
+				+ "traffic.details.file.name: " + SBoxProperties.TRAFFIC_DETAILS_FILE_NAME + "\n"
+				+ "default.ref.vector.file: " + SBoxProperties.DEFAULT_REF_VECTOR_FILE);
 	}
 	
 }

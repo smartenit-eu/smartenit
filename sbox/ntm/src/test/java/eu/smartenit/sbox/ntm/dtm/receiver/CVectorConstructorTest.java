@@ -38,7 +38,7 @@ import eu.smartenit.sbox.ntm.dtm.receiver.CVectorValuesCalculator;
  * in {@link CVectorValuesCalculator} class.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.0
  * 
  */
 public class CVectorConstructorTest
@@ -69,7 +69,7 @@ public class CVectorConstructorTest
 				new Link(null, null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("1.1.1.1", 24)));
 		when(dao.findById(linkID2)).thenReturn(
 				new Link(null, null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("2.2.2.2", 24)));
-		DAOFactory.setLinkDAO(dao);
+		DAOFactory.setLinkDAOInstance(dao);
 	}
 	
 	@Test

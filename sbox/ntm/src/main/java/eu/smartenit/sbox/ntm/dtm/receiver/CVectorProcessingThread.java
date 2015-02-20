@@ -78,7 +78,12 @@ public class CVectorProcessingThread extends VectorProcessingThread {
 		try { 
 			CVector cVector = new CVectorConstructor().construct(xVector, rVector);
 			CVectorHistory.storeInHistory(cVector);
-
+			
+			if (!CVectorUpdateController.getInstance().updateRequired(cVector)) {
+				logger.info("CVector update not required. Will not send any updates.");
+				return;
+			}
+			
 			if (remoteSboxes == null || remoteSboxes.size() == 0)
 				logger.warn("List of remote SBoxes is null or empty. Will not send any updates.");
 			for (SBox remoteSbox : remoteSboxes) {

@@ -17,6 +17,7 @@ package eu.smartenit.sbox.db.dao;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.AfterClass;
@@ -43,6 +44,7 @@ public class DARouterTest {
 	public static void setupDb() {
 		logger.info("Creating all tables for tests.");
 		Tables tables = new Tables();
+		tables.deleteAll();
 		tables.createAll();
 
 		logger.info("Preparing SDNController and DARouter tables.");
@@ -75,11 +77,23 @@ public class DARouterTest {
 		assertNotNull(d);
 		assertEquals(d.getSnmpCommunity(), "snmp");
         assertEquals(d.getOfSwitchDPID(), "abcdefg");
-		
+        assertEquals(d.getLocalDCOfSwitchPortNumbers().size(), 0);
+        
+        ddao.deleteById("5.5.5.5");
+        dlist = ddao.findAll();
+		assertEquals(dlist.size(), 0);
 	}
 
 	@Test
 	public void testDARouterSDNFunctions() throws Exception {
+		
+		DARouter d = new DARouter();
+		d.setManagementAddress(new NetworkAddressIPv4("5.5.5.5", 0));
+		d.setSnmpCommunity("snmp");
+        d.setOfSwitchDPID("abcdefg");
+        d.setLocalDCOfSwitchPortNumbers(Arrays.asList(32, 4, 22));
+		
+		ddao.insert(d);
 		List<DARouter> dlist = ddao.findAll();
 		assertEquals(dlist.size(), 1);
 		
@@ -100,18 +114,28 @@ public class DARouterTest {
 		assertNotNull(s);
 		assertEquals(s.getOpenflowHost().getPrefix(), "1.2.3.5");
 		
-		DARouter d = ddao.findById("5.5.5.5");
+		d = ddao.findById("5.5.5.5");
 		assertNotNull(d);
 		assertEquals(d.getSnmpCommunity(), "snmp");
         assertEquals(d.getOfSwitchDPID(), "abcdefg");
+        assertEquals(d.getLocalDCOfSwitchPortNumbers().size(), 3);
+        assertEquals(d.getLocalDCOfSwitchPortNumbers().get(0).intValue(), 32);
+        assertEquals(d.getLocalDCOfSwitchPortNumbers().get(1).intValue(), 4);
+        assertEquals(d.getLocalDCOfSwitchPortNumbers().get(2).intValue(), 22);
 		
 		d.setSnmpCommunity("newsnmp");
         d.setOfSwitchDPID("asdfg");
+        d.setLocalDCOfSwitchPortNumbers(Arrays.asList(44, 55, 66, 77));
 		ddao.update(d);
 		
 		d = ddao.findById("5.5.5.5");
 		assertEquals(d.getSnmpCommunity(), "newsnmp");
         assertEquals(d.getOfSwitchDPID(), "asdfg");
+        assertEquals(d.getLocalDCOfSwitchPortNumbers().size(), 4);
+        assertEquals(d.getLocalDCOfSwitchPortNumbers().get(0).intValue(), 44);
+        assertEquals(d.getLocalDCOfSwitchPortNumbers().get(1).intValue(), 55);
+        assertEquals(d.getLocalDCOfSwitchPortNumbers().get(2).intValue(), 66);
+        assertEquals(d.getLocalDCOfSwitchPortNumbers().get(3).intValue(), 77);
 		
 		ddao.updateBySDNControllerAddress(d.getManagementAddress().getPrefix(), 
 				s.getManagementAddress().getPrefix());

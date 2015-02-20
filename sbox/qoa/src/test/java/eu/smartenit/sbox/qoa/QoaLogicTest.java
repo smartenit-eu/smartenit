@@ -43,10 +43,13 @@ import eu.smartenit.sbox.commons.SBoxThreadHandler;
 import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.AS;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
@@ -61,6 +64,7 @@ public class QoaLogicTest {
 	
 	@Before
 	public void init() {
+		prepareSystemControlParameters();
 		SBoxProperties.LOG_TRAFFIC_DETAILS = false;
 
 		this.trafficManager = mock(DTMTrafficManager.class);
@@ -115,13 +119,13 @@ public class QoaLogicTest {
 		Thread.sleep(5500);
 		
 		ArgumentCaptor<XVector> xVector = ArgumentCaptor.forClass(XVector.class);
-		verify(trafficManager, times(3)).updateXVector(xVector.capture());
+		verify(trafficManager, times(2)).updateXVector(xVector.capture());
 		
 		assertEquals(20, xVector.getValue().getVectorValueForLink(new SimpleLinkID("111", "isp1")));
 		assertEquals(20, xVector.getValue().getVectorValueForLink(new SimpleLinkID("121", "isp1")));
 		
 		ArgumentCaptor<List> zVectors = ArgumentCaptor.forClass(List.class);
-		verify(economicAnalyzer, times(3)).updateXZVectors(xVector.capture(), zVectors.capture());
+		verify(economicAnalyzer, times(2)).updateXZVectors(xVector.capture(), zVectors.capture());
 		
 		assertEquals(20, xVector.getValue().getVectorValueForLink(new SimpleLinkID("111", "isp1")));
 		assertEquals(2, ((ZVector)zVectors.getValue().get(0)).getVectorValueForLink(new SimpleLinkID("111", "isp1")));
@@ -195,5 +199,12 @@ public class QoaLogicTest {
 			"1.3.6.1.2.1.31.1.1.1.1.5 = eth5",
 			"1.3.6.1.2.1.31.1.1.1.1.6 = eth6",
 			"1.3.6.1.2.1.31.1.1.1.1.7 = eth7");
+	}
+	
+	private void prepareSystemControlParameters() {
+		SystemControlParametersDAO scpDAO = mock(SystemControlParametersDAO.class);
+		SystemControlParameters scp = new SystemControlParameters(ChargingRule.volume, null, 0.15);
+    	when(scpDAO.findLast()).thenReturn(scp);
+    	DAOFactory.setSCPDAOInstance(scpDAO);
 	}
 }

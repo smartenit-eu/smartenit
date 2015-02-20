@@ -15,6 +15,7 @@
  */
 package eu.smartenit.sdn.floodlight090.dtm;
 
+import eu.smartenit.sbox.db.dto.OperationModeSDN;
 import net.floodlightcontroller.core.FloodlightContext;
 import net.floodlightcontroller.core.IFloodlightProviderService;
 import net.floodlightcontroller.core.IOFMessageListener;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Grzegorz Rzym
  * @author Piotr Wydrych
- * @version 1.2
+ * @version 3.0
  */
 public class DTMMessageListener implements IOFMessageListener {
 
@@ -69,15 +70,32 @@ public class DTMMessageListener implements IOFMessageListener {
     public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
         logger.debug("receive(IOFSwitch,OFMessage,FloodlightContext) begin");
         DTM.getInstance().setOFPacketIn((OFPacketIn) msg);
-        short outPort = DTM.getInstance().getOutOfPortNumber();
-        if (outPort != 0) {
-            Flows.add(sw, floodlightProvider, cntx, DTM.getInstance().getOutOfPortNumber(), (OFPacketIn) msg);
+        
+        if (DTM.getInstance().getConfigData() == null) {
+        	logger.warn("DTM is not yet configured with proper ConfigData. Will not process this message from switch ...");
+        	return Command.STOP;
         }
-        else{
-            logger.debug("receive(IOFSwitch,OFMessage,FloodlightContext) DTM not configured");
+        
+        if (DTM.getInstance().getConfigData().getOperationModeSDN() == OperationModeSDN.reactiveWithReferenceVector) {
+            if (DTM.getInstance().getReactiveWithReferenceOutOfPortNumber() != 0) {
+                Flows.add(sw, floodlightProvider, cntx, DTM.getInstance().getReactiveWithReferenceOutOfPortNumber(), (OFPacketIn) msg);
+            } else {
+                logger.debug("receive(IOFSwitch,OFMessage,FloodlightContext) DTM not configured");
+            }
+        } else if (DTM.getInstance().getConfigData().getOperationModeSDN() == OperationModeSDN.reactiveWithoutReferenceVector) {
+            Flows.add(sw, floodlightProvider, cntx, DTM.getInstance().getReactiveWithoutReferenceOutOfPortNumber(), (OFPacketIn) msg);
+        } else if (DTM.getInstance().getConfigData().getOperationModeSDN() == OperationModeSDN.proactiveWithReferenceVector) {
+            DTM.getInstance().sendStaticFlowRule(DTM.getInstance().getProactiveOutOfPortNumber());
+            logger.debug("ERR - should not be here!");
+        } else if (DTM.getInstance().getConfigData().getOperationModeSDN() == OperationModeSDN.proactiveWithoutReferenceVector) {
+            DTM.getInstance().sendStaticFlowRule(DTM.getInstance().getProactiveOutOfPortNumber());
+            logger.debug("ERR - should not be here");
+        } else if (DTM.getInstance().getConfigData().getOperationModeSDN() == null) {
+            logger.warn("receive(IOFSwitch,OFMessage,FloodlightContext) DTM not configured");
         }
+        
         logger.debug("receive(IOFSwitch,OFMessage,FloodlightContext) end");
-        return Command.STOP; // do not process the packet by next listeners
+        return Command.STOP; // do not process the packet by next listeners        
     }
 
     /**

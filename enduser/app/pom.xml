@@ -1,67 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-    Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-            http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
--->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-    <artifactId>enduser</artifactId>
-    <groupId>eu.smartenit.enduser</groupId>
-    <version>1.2</version>
-  </parent>
-  
+
 	<groupId>eu.smartenit.enduser.app</groupId>
-	<artifactId>app</artifactId>
-	<packaging>apk</packaging>
-	<name>End-user Android Application</name>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<platform.version>4.0.1.2</platform.version>
-		<android.plugin.version>3.8.0</android.plugin.version>
-	</properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>com.google.android</groupId>
-			<artifactId>android</artifactId>
-			<version>${platform.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>eu.smartenit.enduser.mntm</groupId>
-			<artifactId>mntm</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-	</dependencies>
+	<artifactId>sit</artifactId>
+	<version>1.0</version>
+	<packaging>pom</packaging>
+	<name>SmartenIT</name>	  
 	
+	<profiles>
+		<profile>
+			<id>standard</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>facebook</module>
+				<module>SIT</module>
+			</modules>
+		</profile>
+    <profile>
+      <id>dev</id>
+			<modules>
+				<module>facebook</module>
+				<module>SIT</module>
+				<module>SIT-Test</module>
+			</modules>
+    </profile>
+    <profile>
+      <id>emu</id>
+			<modules>
+				<module>facebook</module>
+				<module>SIT</module>
+				<module>SIT-Test</module>
+			</modules>
+    </profile>
+	</profiles>
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.10</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.android</groupId>
+				<artifactId>android</artifactId>
+				<version>4.1.1.4</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.android</groupId>
+				<artifactId>android-test</artifactId>
+				<version>4.1.1.4</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<build>
-		<finalName>smartenit-${project.artifactId}</finalName>
-		<plugins>
-			<plugin>
-				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
-				<artifactId>android-maven-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<sdk>
-						<platform>14</platform>
-					</sdk>
-				</configuration>
-			</plugin>
-		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-jarsigner-plugin</artifactId>
+					<version>1.2</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.5</version>
+					<configuration>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+					<artifactId>android-maven-plugin</artifactId>
+					<version>3.8.2</version>
+					<configuration>
+						<sdk>
+							<platform>19</platform>
+						</sdk>
+						<zipalign>
+							<verbose>true</verbose>
+						</zipalign>
+						<undeployBeforeDeploy>true</undeployBeforeDeploy>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.5</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
+	
 </project>

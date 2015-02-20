@@ -32,8 +32,6 @@ public class LocalRVector extends LocalVector implements Serializable {
 	 */
 	private static final long serialVersionUID = 6945600399384669109L;
 	
-	
-	
 	/**
 	 * The constructor.
 	 */
@@ -63,10 +61,8 @@ public class LocalRVector extends LocalVector implements Serializable {
 
 	@Override
 	public String toString() {
-		return "LocalRVector [thetaCollection=" + thetaCollection + "]";
+		return "LocalRVector [vectorValues=" + getVectorValues() + ", sourceAsNumber="
+		+ getSourceAsNumber() + ", thetaCollection=" + thetaCollection + "]";
 	}
-	
-	
-	
 
 }

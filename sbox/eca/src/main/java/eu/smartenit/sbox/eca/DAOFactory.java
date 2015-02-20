@@ -16,12 +16,14 @@
 package eu.smartenit.sbox.eca;
 
 import eu.smartenit.sbox.db.dao.CostFunctionDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 
 
 /**
  * Static factory class used to obtain an instance of specific DAO class.
- * Following DAO classes are supported: {@link CostFunctionDAO}
+ * Following DAO classes are supported: {@link CostFunctionDAO}, {link
+ * {@link TimeScheduleParametersDAO} and {@link SystemControlParametersDAO}.
  * 
  * @author D. Doenni, K. Bhargav, T. Bocek
  * @version 1.0
@@ -30,7 +32,8 @@ import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 public class DAOFactory {
 
 	private static CostFunctionDAO costFunctionDAO = new CostFunctionDAO();
-	private static TimeScheduleParametersDAO timeScheduleParametersDAO = new TimeScheduleParametersDAO();
+	private static SystemControlParametersDAO scpDAO = new SystemControlParametersDAO();
+	private static TimeScheduleParametersDAO tspDAO = new TimeScheduleParametersDAO();
 	
 	/**
 	 * Returns locally stored instance of {@link CostFunctionDAO}. Specific DAO instance
@@ -40,6 +43,26 @@ public class DAOFactory {
 	 */
 	public static CostFunctionDAO getCostFunctionDAOInstance() {
 		return costFunctionDAO; 
+	}
+	
+	/**
+	 * Returns locally stored instance of {@link SystemControlParametersDAO}.
+	 * Specific DAO instance can be set using appropriate static setter method.
+	 * 
+	 * @return locally stored {@link SystemControlParametersDAO} instance
+	 */
+	public static SystemControlParametersDAO getSCPDAOInstance() {
+		return scpDAO;
+	}
+	
+	/**
+	 * Returns locally stored instance of {@link TimeScheduleParametersDAO}.
+	 * Specific DAO instance can be set using appropriate static setter method.
+	 * 
+	 * @return locally stored {@link TimeScheduleParametersDAO} instance
+	 */
+	public static TimeScheduleParametersDAO getTSPDAOInstance() {
+		return tspDAO;
 	}
 	
 	/**
@@ -54,23 +77,25 @@ public class DAOFactory {
 	}
 	
 	/**
-	 * Returns locally stored instance of {@link TimeScheduleParametersDAO}. Specific DAO instance
-	 * can be set using appropriate static setter method.
+	 * Method used to set a given instance of {@link SystemControlParametersDAO}
+	 * to be returned on each request.
 	 * 
-	 * @return locally stored {@link TimeScheduleParametersDAO} instance
+	 * @param dao
+	 *            specific instance of {@link SystemControlParametersDAO}
 	 */
-	public static TimeScheduleParametersDAO getTimeScheduleParametersDAO() {
-		return timeScheduleParametersDAO;
+	public static void setSCPDAOInstance(SystemControlParametersDAO dao) {
+		scpDAO = dao;
 	}
-	
+
 	/**
-	 * Method used to set a given instance of {@link TimeScheduleParametersDAO} to be returned on
-	 * each request.
+	 * Method used to set a given instance of {@link TimeScheduleParametersDAO}
+	 * to be returned on each request.
 	 * 
-	 * @param dao specific instance of {@link TimeScheduleParametersDAO}
+	 * @param dao
+	 *            specific instance of {@link TimeScheduleParametersDAO}
 	 */
-	public static void setTimeScheduleParametersDAO(TimeScheduleParametersDAO dao) {
-		timeScheduleParametersDAO = dao;
+	public static void setTSPDAOInstance(TimeScheduleParametersDAO dao) {
+		tspDAO = dao;
 	}
 	
 }

@@ -46,6 +46,7 @@ import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.CostFunctionDAO;
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
 import eu.smartenit.sbox.db.dao.LinkDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.CVector;
 import eu.smartenit.sbox.db.dto.ConfigData;
@@ -60,6 +61,7 @@ import eu.smartenit.sbox.interfaces.intersbox.server.InterSBoxServer;
 import eu.smartenit.sbox.interfaces.sboxsdn.SboxSdnClient;
 import eu.smartenit.sbox.ntm.NetworkTrafficManager;
 import eu.smartenit.sbox.ntm.NetworkTrafficManagerDTMMode;
+import eu.smartenit.sbox.ntm.dtm.receiver.CVectorUpdateController;
 import eu.smartenit.sbox.ntm.dtm.sender.SDNClientFactory;
 import eu.smartenit.sbox.qoa.DTMQosAnalyzer;
 import eu.smartenit.sbox.qoa.SNMPWrapper;
@@ -125,7 +127,7 @@ public class TwoReceiverDCsWithValuesTest {
 		
 		SBoxProperties.INTER_SBOX_PORT++;
 		new InterSBoxServer(SBoxProperties.INTER_SBOX_PORT, remoteNTM);
-		Thread.sleep(2000);
+		Thread.sleep(6000);
 		
 		verify(mockedSDNClient, times(1)).configure(any(SDNController.class), any(ConfigData.class));
 		
@@ -133,6 +135,7 @@ public class TwoReceiverDCsWithValuesTest {
 		prepareMockForDAOAtNTM(RECEIVER_AS1_NUMBER);
 		NetworkTrafficManager localNTM = new NetworkTrafficManager();
 		localNTM.initialize(NetworkTrafficManagerDTMMode.TRAFFIC_RECEIVER);
+		CVectorUpdateController.deactivate();
 		localNTM.getDtmTrafficManager().updateRVector(prepareRVectorWithInitialValues(RECEIVER_AS1_NUMBER));
 		
 		logger.info("Initializing Economic Analyzer at RECEIVER domain, #1.");
@@ -149,6 +152,7 @@ public class TwoReceiverDCsWithValuesTest {
 		prepareMockForDAOAtNTM(RECEIVER_AS2_NUMBER);
 		NetworkTrafficManager localNTM2 = new NetworkTrafficManager();
 		localNTM2.initialize(NetworkTrafficManagerDTMMode.TRAFFIC_RECEIVER);
+		CVectorUpdateController.deactivate();
 		localNTM2.getDtmTrafficManager().updateRVector(prepareRVectorWithInitialValues(RECEIVER_AS2_NUMBER));
 		
 		logger.info("Initializing Economic Analyzer at RECEIVER domain, #3.");
@@ -301,7 +305,7 @@ public class TwoReceiverDCsWithValuesTest {
 			when(ntmMockedComDAO.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilderForMockedDAO.senderCommunications2DCs);
 		
 		eu.smartenit.sbox.ntm.dtm.DAOFactory.setASDAOInstance(ntmMockedASDAO);
-		eu.smartenit.sbox.ntm.dtm.DAOFactory.setDC2DCCommunicationDAO(ntmMockedComDAO);
+		eu.smartenit.sbox.ntm.dtm.DAOFactory.setDC2DCComDAOInstance(ntmMockedComDAO);
 		
 		LinkDAO ntmMockedLinkDAO = mock(LinkDAO.class);
     	when(ntmMockedLinkDAO.findById(new SimpleLinkID("111", "isp1"))).thenReturn(
@@ -312,7 +316,15 @@ public class TwoReceiverDCsWithValuesTest {
     			new Link(new SimpleLinkID("311", "isp3"), null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("10.3.1.0", 24)));
     	when(ntmMockedLinkDAO.findById(new SimpleLinkID("321", "isp3"))).thenReturn(
     			new Link(new SimpleLinkID("321", "isp3"), null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("10.3.2.0", 24)));
-		eu.smartenit.sbox.ntm.dtm.DAOFactory.setLinkDAO(ntmMockedLinkDAO);
+		eu.smartenit.sbox.ntm.dtm.DAOFactory.setLinkDAOInstance(ntmMockedLinkDAO);
+		
+		SystemControlParametersDAO ntmMockedSCPDAO = mock(SystemControlParametersDAO.class);
+		when(ntmMockedSCPDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.scpWithVolumeRule);
+		eu.smartenit.sbox.ntm.dtm.DAOFactory.setSCPDAOInstance(ntmMockedSCPDAO);
+
+		TimeScheduleParametersDAO ntmMockedTimeDAO = mock(TimeScheduleParametersDAO.class);
+		when(ntmMockedTimeDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.tspForVolumeRule);
+		eu.smartenit.sbox.ntm.dtm.DAOFactory.setTSPDAOInstance(ntmMockedTimeDAO);
 	}
 	
 	private void prepareMockForDAOAtQOA(short asNumber) {
@@ -327,10 +339,13 @@ public class TwoReceiverDCsWithValuesTest {
 		}
 		
 		TimeScheduleParametersDAO qoaMockedTimeDAO = mock(TimeScheduleParametersDAO.class);
-		when(qoaMockedTimeDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.generateReceiverTsp());
+		when(qoaMockedTimeDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.tspForVolumeRule);
+		SystemControlParametersDAO qoaMockedSCPDAO = mock(SystemControlParametersDAO.class);
+		when(qoaMockedSCPDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.scpWithVolumeRule);
 		eu.smartenit.sbox.qoa.DAOFactory.setASDAOInstance(qoaMockedASDAO);
 		eu.smartenit.sbox.qoa.DAOFactory.setDC2DCCommunicationDAO(qoaMockedComDAO);
 		eu.smartenit.sbox.qoa.DAOFactory.setTimeScheduleParametersDAO(qoaMockedTimeDAO);
+		eu.smartenit.sbox.qoa.DAOFactory.setSCPDAOInstance(qoaMockedSCPDAO);
 	}
 	
 	private void prepareMockForDAOAtECA() {
@@ -344,9 +359,12 @@ public class TwoReceiverDCsWithValuesTest {
 		when(ecaMockedCostDAO.findByLinkId(Mockito.argThat(new IsLinkIdStringEqual("321"))))
 			.thenReturn(DBStructuresBuilderForMockedDAO.receiverCostFunction4);
 		TimeScheduleParametersDAO ecaMockedTimeDAO = mock(TimeScheduleParametersDAO.class);
-		when(ecaMockedTimeDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.generateReceiverTsp());
+		when(ecaMockedTimeDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.tspForVolumeRule);
+		SystemControlParametersDAO ecaMockedSCPDAO = mock(SystemControlParametersDAO.class);
+		when(ecaMockedSCPDAO.findLast()).thenReturn(DBStructuresBuilderForMockedDAO.scpWithVolumeRule);
 		eu.smartenit.sbox.eca.DAOFactory.setCostFunctionDAOInstance(ecaMockedCostDAO);
-		eu.smartenit.sbox.eca.DAOFactory.setTimeScheduleParametersDAO(ecaMockedTimeDAO);
+		eu.smartenit.sbox.eca.DAOFactory.setTSPDAOInstance(ecaMockedTimeDAO);
+		eu.smartenit.sbox.eca.DAOFactory.setSCPDAOInstance(ecaMockedSCPDAO);
 	}
 	
 	private void prepareMockForSDNClient() {
@@ -361,56 +379,64 @@ public class TwoReceiverDCsWithValuesTest {
 		
 		/* localLinkID -> 111 */
 		when(snmpWrapper.snmpGet(Mockito.argThat(new IsOidEqual("1.3.6.1.2.1.31.1.1.1.6.0")), Mockito.argThat(new IsAddressEqual("1.2.1.1"))))
-			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.0 = 4900]", "1.3.6.1.2.1.31.1.1.1.6.0 = 9150]", "1.3.6.1.2.1.31.1.1.1.6.0 = 15000]",
+			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.0 = 0]",
+					"1.3.6.1.2.1.31.1.1.1.6.0 = 4900]", "1.3.6.1.2.1.31.1.1.1.6.0 = 9150]", "1.3.6.1.2.1.31.1.1.1.6.0 = 15000]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 20000]", "1.3.6.1.2.1.31.1.1.1.6.0 = 24200]", "1.3.6.1.2.1.31.1.1.1.6.0 = 29700]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 35700]", "1.3.6.1.2.1.31.1.1.1.6.0 = 42700]", "1.3.6.1.2.1.31.1.1.1.6.0 = 47900]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 51900]", "1.3.6.1.2.1.31.1.1.1.6.0 = 56900]", "1.3.6.1.2.1.31.1.1.1.6.0 = 62900]");
 		
 		/* localLinkID -> 121 */
 		when(snmpWrapper.snmpGet(Mockito.argThat(new IsOidEqual("1.3.6.1.2.1.31.1.1.1.6.1")), Mockito.argThat(new IsAddressEqual("1.2.1.2"))))
-			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.1 = 7200]", "1.3.6.1.2.1.31.1.1.1.6.1 = 14000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 21100]",
+			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.1 = 0]",
+					"1.3.6.1.2.1.31.1.1.1.6.1 = 7200]", "1.3.6.1.2.1.31.1.1.1.6.1 = 14000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 21100]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 28000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 34600]", "1.3.6.1.2.1.31.1.1.1.6.1 = 42000]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 49200]", "1.3.6.1.2.1.31.1.1.1.6.1 = 57000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 63800]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 66800]", "1.3.6.1.2.1.31.1.1.1.6.1 = 73800]", "1.3.6.1.2.1.31.1.1.1.6.1 = 77800]");
 		
 		/* tunnelNumber -> 1111 */
 		when(snmpWrapper.snmpGet(Mockito.argThat(new IsOidEqual("1.3.6.1.2.1.31.1.1.1.6.0")), Mockito.argThat(new IsAddressEqual("1.1.1.1"))))
-			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.0 = 900]", "1.3.6.1.2.1.31.1.1.1.6.0 = 1900]", "1.3.6.1.2.1.31.1.1.1.6.0 = 2900]",
+			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.0 = 0]",
+					"1.3.6.1.2.1.31.1.1.1.6.0 = 900]", "1.3.6.1.2.1.31.1.1.1.6.0 = 1900]", "1.3.6.1.2.1.31.1.1.1.6.0 = 2900]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 3790]", "1.3.6.1.2.1.31.1.1.1.6.0 = 4700]", "1.3.6.1.2.1.31.1.1.1.6.0 = 5600]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 7600]", "1.3.6.1.2.1.31.1.1.1.6.0 = 10800]", "1.3.6.1.2.1.31.1.1.1.6.0 = 11700]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 12550]", "1.3.6.1.2.1.31.1.1.1.6.0 = 13300]", "1.3.6.1.2.1.31.1.1.1.6.0 = 14200]");
 		
 		/* tunnelNumber -> 1211 */
 		when(snmpWrapper.snmpGet(Mockito.argThat(new IsOidEqual("1.3.6.1.2.1.31.1.1.1.6.1")), Mockito.argThat(new IsAddressEqual("1.1.1.1"))))
-			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.1 = 90]", "1.3.6.1.2.1.31.1.1.1.6.1 = 205]", "1.3.6.1.2.1.31.1.1.1.6.1 = 300]",
+			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.1 = 0]",
+					"1.3.6.1.2.1.31.1.1.1.6.1 = 90]", "1.3.6.1.2.1.31.1.1.1.6.1 = 205]", "1.3.6.1.2.1.31.1.1.1.6.1 = 300]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 380]", "1.3.6.1.2.1.31.1.1.1.6.1 = 460]", "1.3.6.1.2.1.31.1.1.1.6.1 = 500]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 1050]", "1.3.6.1.2.1.31.1.1.1.6.1 = 1600]", "1.3.6.1.2.1.31.1.1.1.6.1 = 2200]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 2950]", "1.3.6.1.2.1.31.1.1.1.6.1 = 3600]", "1.3.6.1.2.1.31.1.1.1.6.1 = 4400]");
 		
 		/* localLinkID -> 311 */
 		when(snmpWrapper.snmpGet(Mockito.argThat(new IsOidEqual("1.3.6.1.2.1.31.1.1.1.6.0")), Mockito.argThat(new IsAddressEqual("3.2.1.1"))))
-			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.0 = 8000]", "1.3.6.1.2.1.31.1.1.1.6.0 = 12000]", "1.3.6.1.2.1.31.1.1.1.6.0 = 16500]",
+			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.0 = 0]",
+					"1.3.6.1.2.1.31.1.1.1.6.0 = 8000]", "1.3.6.1.2.1.31.1.1.1.6.0 = 12000]", "1.3.6.1.2.1.31.1.1.1.6.0 = 16500]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 22000]", "1.3.6.1.2.1.31.1.1.1.6.0 = 26300]", "1.3.6.1.2.1.31.1.1.1.6.0 = 29500]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 35500]", "1.3.6.1.2.1.31.1.1.1.6.0 = 42500]", "1.3.6.1.2.1.31.1.1.1.6.0 = 47700]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 51700]", "1.3.6.1.2.1.31.1.1.1.6.0 = 56700]", "1.3.6.1.2.1.31.1.1.1.6.0 = 62700]");
 		
 		/* localLinkID -> 321 */
 		when(snmpWrapper.snmpGet(Mockito.argThat(new IsOidEqual("1.3.6.1.2.1.31.1.1.1.6.1")), Mockito.argThat(new IsAddressEqual("3.2.1.2"))))
-			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.1 = 6000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 9000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 13000]",
+			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.1 = 0]",
+					"1.3.6.1.2.1.31.1.1.1.6.1 = 6000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 9000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 13000]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 19950]", "1.3.6.1.2.1.31.1.1.1.6.1 = 25050]", "1.3.6.1.2.1.31.1.1.1.6.1 = 30550]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 37750]", "1.3.6.1.2.1.31.1.1.1.6.1 = 45500]", "1.3.6.1.2.1.31.1.1.1.6.1 = 52350]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 55350]", "1.3.6.1.2.1.31.1.1.1.6.1 = 62350]", "1.3.6.1.2.1.31.1.1.1.6.1 = 66350]");
 		
 		/* tunnelNumber -> 3111 */
 		when(snmpWrapper.snmpGet(Mockito.argThat(new IsOidEqual("1.3.6.1.2.1.31.1.1.1.6.0")), Mockito.argThat(new IsAddressEqual("3.1.1.1"))))
-			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.0 = 5000]", "1.3.6.1.2.1.31.1.1.1.6.0 = 6000]", "1.3.6.1.2.1.31.1.1.1.6.0 = 7000]",
+			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.0 = 0]",
+					"1.3.6.1.2.1.31.1.1.1.6.0 = 5000]", "1.3.6.1.2.1.31.1.1.1.6.0 = 6000]", "1.3.6.1.2.1.31.1.1.1.6.0 = 7000]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 8850]", "1.3.6.1.2.1.31.1.1.1.6.0 = 10300]", "1.3.6.1.2.1.31.1.1.1.6.0 = 13500]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 15500]", "1.3.6.1.2.1.31.1.1.1.6.0 = 17700]", "1.3.6.1.2.1.31.1.1.1.6.0 = 19600]",
 					"1.3.6.1.2.1.31.1.1.1.6.0 = 20450]", "1.3.6.1.2.1.31.1.1.1.6.0 = 21200]", "1.3.6.1.2.1.31.1.1.1.6.0 = 22100]");
 		
 		/* tunnelNumber -> 3211 */
 		when(snmpWrapper.snmpGet(Mockito.argThat(new IsOidEqual("1.3.6.1.2.1.31.1.1.1.6.1")), Mockito.argThat(new IsAddressEqual("3.1.1.1"))))
-			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.1 = 3000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 5000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 9000]",
+			.thenReturn("1.3.6.1.2.1.31.1.1.1.6.1 = 0]",
+					"1.3.6.1.2.1.31.1.1.1.6.1 = 3000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 5000]", "1.3.6.1.2.1.31.1.1.1.6.1 = 9000]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 12550]", "1.3.6.1.2.1.31.1.1.1.6.1 = 13500]", "1.3.6.1.2.1.31.1.1.1.6.1 = 16500]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 17050]", "1.3.6.1.2.1.31.1.1.1.6.1 = 17600]", "1.3.6.1.2.1.31.1.1.1.6.1 = 18200]",
 					"1.3.6.1.2.1.31.1.1.1.6.1 = 18950]", "1.3.6.1.2.1.31.1.1.1.6.1 = 19600]", "1.3.6.1.2.1.31.1.1.1.6.1 = 20400]");

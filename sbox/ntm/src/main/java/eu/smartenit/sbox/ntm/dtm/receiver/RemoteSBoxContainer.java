@@ -34,7 +34,7 @@ import eu.smartenit.sbox.ntm.dtm.DAOFactory;
  * number basis.
  * 
  * @author Lukasz Lopatowski
- * @version 1.0
+ * @version 3.0
  * 
  */
 public class RemoteSBoxContainer {
@@ -83,7 +83,7 @@ public class RemoteSBoxContainer {
 	}
 	
 	private List<DC2DCCommunication> getAllDC2DCCommunicationsFromDB() {
-		return DAOFactory.getDCDC2DCCommunicationDAOInstance().findAllDC2DCCommunicationsCloudsTunnels();
+		return DAOFactory.getDCDC2DCComDAOInstance().findAllDC2DCCommunicationsCloudsTunnels();
 	}
 
 	private List<SBox> getRemoteSBoxes(AS localAS, List<DC2DCCommunication> communications) {

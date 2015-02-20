@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,12 +36,17 @@ import eu.smartenit.sbox.commons.SBoxProperties;
 import eu.smartenit.sbox.commons.SBoxThreadHandler;
 import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.LinkDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
+import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.CVector;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.Link;
 import eu.smartenit.sbox.db.dto.LocalRVector;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.SBox;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
+import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.interfaces.intersbox.client.InterSBoxClient;
 import eu.smartenit.sbox.ntm.dtm.DAOFactory;
@@ -54,7 +60,7 @@ import eu.smartenit.sbox.ntm.dtm.receiver.RemoteSBoxContainer;
  * after receiving updated link traffic vector from QoS Analyzer component.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.0
  * 
  */
 public class XVectorUpdateTest {
@@ -70,17 +76,19 @@ public class XVectorUpdateTest {
 	private RemoteSBoxContainer container = mock(RemoteSBoxContainer.class);
 	private InterSBoxClient client = mock(InterSBoxClient.class);
 	private LinkDAO dao = mock(LinkDAO.class);
+	private SystemControlParametersDAO scpDAO = mock(SystemControlParametersDAO.class);
+	private TimeScheduleParametersDAO tspDAO = mock(TimeScheduleParametersDAO.class);
 	
 	@Before
 	public void setup() {
 		SimpleLinkID linkID1 = new SimpleLinkID(LINK1_ID, ISP1_ID);
 		SimpleLinkID linkID2 = new SimpleLinkID(LINK2_ID, ISP1_ID);
 		xVector.setSourceAsNumber(asNumber);
-    	xVector.addVectorValueForLink(linkID1, 500L);
-    	xVector.addVectorValueForLink(linkID2, 500L);
+    	xVector.addVectorValueForLink(linkID1, 1000L);
+    	xVector.addVectorValueForLink(linkID2, 1200L);
 		rVector.setSourceAsNumber(asNumber);
-    	rVector.addVectorValueForLink(linkID1, 1000L);
-    	rVector.addVectorValueForLink(linkID2, 1000L);
+    	rVector.addVectorValueForLink(linkID1, 10000L);
+    	rVector.addVectorValueForLink(linkID2, 10000L);
     	
     	InterSBoxClientFactory.disableUniqueClientCreationMode();
     	InterSBoxClientFactory.setClientInstance(client);
@@ -93,7 +101,16 @@ public class XVectorUpdateTest {
     	when(dao.findById(linkID2)).thenReturn(
     			new Link(linkID2, null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("20.20.20.20", 24)));
     	
-    	DAOFactory.setLinkDAO(dao);
+    	SystemControlParameters scp = new SystemControlParameters(ChargingRule.volume, null, 0.1);
+    	when(scpDAO.findLast()).thenReturn(scp);
+    	TimeScheduleParameters tsp = new TimeScheduleParameters();
+    	tsp.setCompensationPeriod(12);
+    	tsp.setReportPeriodDTM(3);
+    	when(tspDAO.findLast()).thenReturn(tsp);
+    	
+    	DAOFactory.setSCPDAOInstance(scpDAO);
+    	DAOFactory.setTSPDAOInstance(tspDAO);
+    	DAOFactory.setLinkDAOInstance(dao);
     	SBoxThreadHandler.threadService = 
     			Executors.newScheduledThreadPool(SBoxProperties.CORE_POOL_SIZE, new ThreadFactory());
 	}
@@ -134,10 +151,11 @@ public class XVectorUpdateTest {
 	}
 	
 	@Test
-	public void shouldCalculateCAndUpdateCVectorAfterXVectorUpdate() throws Exception {
+	public void shouldCalculateCAndUpdateCVectorNoCVectorUpdateController() throws Exception {
 		DTMTrafficManager manager = new DTMTrafficManager();
 		manager.setSBoxContainer(container);
 		manager.initialize();
+		CVectorUpdateController.deactivate();
 		manager.updateRVector(rVector);
 		manager.updateXVector(xVector);
 		manager.updateXVector(xVector);
@@ -151,4 +169,34 @@ public class XVectorUpdateTest {
 		CVectorHistory.clear();
 	}
 	
+	@Test
+	public void shouldCalculateCAndUpdateCVectorWithCVectorUpdateController() throws Exception {
+		DTMTrafficManager manager = new DTMTrafficManager();
+		manager.setSBoxContainer(container);
+		manager.initialize();
+		manager.updateRVector(rVector);
+		Thread.sleep(200);
+		manager.updateXVector(xVector);
+		Thread.sleep(200);
+		manager.updateXVector(xVector);
+		Thread.sleep(200);
+		manager.updateXVector(xVector);
+		Thread.sleep(200);
+		manager.updateXVector(xVector);
+		Thread.sleep(200);
+		manager.updateXVector(xVector);
+		
+		Thread.sleep(1200);
+		verify(client, times(4)).send(any(String.class), anyInt(), any(CVector.class));
+		reset(client);
+		System.out.println(CVectorHistory.toText());
+		assertEquals(5, CVectorHistory.entries().size());
+		CVectorHistory.clear();
+	}
+	
+	@After
+	public void after() {
+		CVectorUpdateController.deactivate();
+		CVectorUpdateController.getInstance().reset();
+	}
 }

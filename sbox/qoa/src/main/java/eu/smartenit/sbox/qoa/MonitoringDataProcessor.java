@@ -56,13 +56,15 @@ public class MonitoringDataProcessor {
 	 * @param asNumber
 	 *            number of the AS for which link traffic vector calculation
 	 *            should be performed
-	 * @param values
+	 * @param lastValues
+	 *            last counter values
+	 * @param newValues
 	 *            counter values collected from inter-domain links of given AS
 	 *            to be used in link traffic vector calculation
 	 * @return calculated {@link XVector}
 	 */
-	public XVector calculateXVector(int asNumber, CounterValues values) {
-		return xVectorCalculator.calculateXVector(asNumber, values);
+	public XVector calculateXVector(int asNumber, CounterValues lastValues, CounterValues newValues) {
+		return xVectorCalculator.calculateXVector(asNumber, lastValues, newValues);
 	}
 
 	/**
@@ -71,13 +73,15 @@ public class MonitoringDataProcessor {
 	 * @param asNumber
 	 *            number of the AS for which tunnel traffic vectors calculation
 	 *            should be performed
-	 * @param values
+	 * @param lastValues
+	 *            last counter values
+	 * @param newValues
 	 *            counter values collected from tunnels in given AS to be used
 	 *            in tunnel traffic vectors calculation
 	 * @return list of calculated {@link ZVector}s
 	 */
-	public List<ZVector> calculateZVectors(int asNumber, CounterValues values) {
-		return zVectorCalculator.calculateZVectors(asNumber, values);
+	public List<ZVector> calculateZVectors(int asNumber, CounterValues lastValues, CounterValues newValues) {
+		return zVectorCalculator.calculateZVectors(asNumber, lastValues, newValues);
 	}
 
 	/**

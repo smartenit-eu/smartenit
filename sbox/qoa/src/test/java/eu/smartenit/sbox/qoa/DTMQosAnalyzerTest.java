@@ -40,9 +40,12 @@ import eu.smartenit.sbox.commons.SBoxThreadHandler;
 import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.AS;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
@@ -66,6 +69,7 @@ public class DTMQosAnalyzerTest {
 	
 	@Before
 	public void init() {
+		prepareSystemControlParameters();
 		this.trafficManager = mock(DTMTrafficManager.class);
 		this.economicAnalyzer = mock(EconomicAnalyzer.class);
 		
@@ -93,11 +97,11 @@ public class DTMQosAnalyzerTest {
 
 		this.dtmQosAnalyzer = new DTMQosAnalyzer(trafficManager, economicAnalyzer);
 	}
-	
+
 	@Test
 	public void shouldUpdateXAndZVectors() throws Exception {
 		this.dtmQosAnalyzer.initialize();
-		Thread.sleep(3500);
+		Thread.sleep(7000);
 		verify(trafficManager, times(4)).updateXVector(any(XVector.class));
 		verify(economicAnalyzer, times(4)).updateXZVectors(any(XVector.class), anyListOf(ZVector.class));
 	}
@@ -115,9 +119,9 @@ public class DTMQosAnalyzerTest {
 
 	private TimeScheduleParameters prepareTimeScheduleParameters() {
 		final TimeScheduleParameters tsp = new TimeScheduleParameters();
-		tsp.setAccountingPeriod(100);
-		tsp.setReportingPeriod(2);
-		tsp.setStartDate(new Date(DateTime.now().plusMillis(1500).getMillis()));
+		tsp.setAccountingPeriod(9);
+		tsp.setReportingPeriod(3);
+		tsp.setStartDate(new Date(DateTime.now().plusMillis(500).getMillis()));
 		return tsp;
 	}
 
@@ -138,5 +142,12 @@ public class DTMQosAnalyzerTest {
 			"1.3.6.1.2.1.31.1.1.1.1.5 = eth5",
 			"1.3.6.1.2.1.31.1.1.1.1.6 = eth6",
 			"1.3.6.1.2.1.31.1.1.1.1.7 = eth7");
+	}
+
+	private void prepareSystemControlParameters() {
+		SystemControlParametersDAO scpDAO = mock(SystemControlParametersDAO.class);
+		SystemControlParameters scp = new SystemControlParameters(ChargingRule.volume, null, 0.15);
+    	when(scpDAO.findLast()).thenReturn(scp);
+    	DAOFactory.setSCPDAOInstance(scpDAO);
 	}
 }

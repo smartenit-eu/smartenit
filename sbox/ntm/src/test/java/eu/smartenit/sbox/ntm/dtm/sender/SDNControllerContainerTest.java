@@ -16,6 +16,7 @@
 package eu.smartenit.sbox.ntm.dtm.sender;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +27,7 @@ import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
 import eu.smartenit.sbox.db.dto.CVector;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.RVector;
+import eu.smartenit.sbox.db.dto.SDNController;
 import eu.smartenit.sbox.interfaces.sboxsdn.SboxSdnClient;
 import eu.smartenit.sbox.ntm.dtm.DAOFactory;
 
@@ -34,7 +36,7 @@ import eu.smartenit.sbox.ntm.dtm.DAOFactory;
  * {@link SDNControllerConfigBuilder} class.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.0
  * 
  */
 public class SDNControllerContainerTest {
@@ -58,7 +60,7 @@ public class SDNControllerContainerTest {
     	SDNClientFactory.setClientInstance(sdnClient);
     	
     	when(dao.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilder.communicationsOnTrafficSender);
-    	DAOFactory.setDC2DCCommunicationDAO(dao);
+    	DAOFactory.setDC2DCComDAOInstance(dao);
 	}
 	
 	@Test
@@ -67,6 +69,7 @@ public class SDNControllerContainerTest {
 		container.populateControllersFromDB();
 		
 		assertEquals(2, container.getAllControllers().size());
+		assertNotNull(((SDNController)container.getAllControllers().toArray()[0]).getDaRouters());
 	}
 	
 }

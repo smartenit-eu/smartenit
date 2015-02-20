@@ -33,9 +33,12 @@ import eu.smartenit.sbox.commons.SBoxThreadHandler;
 import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.DbConstants;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
 import eu.smartenit.sbox.db.dto.AS;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.eca.EconomicAnalyzer;
@@ -49,14 +52,16 @@ public class EconomicAnalyzerNetworkTrafficReceiverTest {
 			.getLogger(EconomicAnalyzerNetworkTrafficReceiverTest.class);
 	
 	private static ASDAO asdao;
-	
 	private static AS remoteAS;
-
+	
+	private static SystemControlParametersDAO scpDAO;
+	private static SystemControlParameters scp;
+	
 	@BeforeClass
-	public static void setupTests() {
+	public static void setupTests() throws Exception {
 		logger.info("Importing existing db schema and values.");
 		DbConstants.DBI_URL = "jdbc:sqlite:src/test/resources/local.db";
-
+				
 		logger.info("Initializing thread service.");
 		ThreadFactory threadFactory = new ThreadFactory();
 		SBoxThreadHandler.threadService = Executors.newScheduledThreadPool(
@@ -67,7 +72,13 @@ public class EconomicAnalyzerNetworkTrafficReceiverTest {
       	remoteAS = asdao.findByAsNumber(200);
       	remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("127.0.0.1", 0));
       	asdao.update(remoteAS);
-
+      	
+      	//modifying charging rule to ChargingRule.volume
+      	scpDAO = new SystemControlParametersDAO();
+      	scp = scpDAO.findLast();
+      	scp.setChargingRule(ChargingRule.volume);
+      	scpDAO.insert(scp);
+      	
 		logger.info("Initializing inter-sbox-server.");
 		SBoxProperties.INTER_SBOX_PORT++;
 		new InterSBoxServer(SBoxProperties.INTER_SBOX_PORT);
@@ -89,7 +100,7 @@ public class EconomicAnalyzerNetworkTrafficReceiverTest {
 
 		EconomicAnalyzer eca = new EconomicAnalyzer(ntm.getDtmTrafficManager());
 
-		for (int i = 0; i < 23; i++) {
+		for (int i = 0; i < 25; i++) {
 			XVector xVector = new XVector();
 			xVector.setSourceAsNumber(100);
 			xVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 500L);
@@ -110,12 +121,16 @@ public class EconomicAnalyzerNetworkTrafficReceiverTest {
 	}
 
 	@AfterClass
-	public static void cleanTests() {
+	public static void cleanTests() throws Exception {
 		DbConstants.DBI_URL = "jdbc:sqlite:smartenit.db";
 		
 		remoteAS = asdao.findByAsNumber(200);
 		remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("150.254.160.143", 0));
 		asdao.update(remoteAS);
+		
+      	scp = scpDAO.findLast();
+      	scp.setChargingRule(ChargingRule.volume);
+      	scpDAO.insert(scp);
 		
 		SBoxThreadHandler.shutdownNowThreads();
 	}

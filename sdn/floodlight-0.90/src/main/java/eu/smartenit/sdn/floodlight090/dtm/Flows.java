@@ -21,6 +21,8 @@ import java.util.List;
 import net.floodlightcontroller.core.FloodlightContext;
 import net.floodlightcontroller.core.IFloodlightProviderService;
 import net.floodlightcontroller.core.IOFSwitch;
+import net.floodlightcontroller.packet.Ethernet;
+import net.floodlightcontroller.packet.IPv4;
 import org.openflow.protocol.OFFlowMod;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFMessage;
@@ -37,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Grzegorz Rzym
  * @author Piotr Wydrych
- * @version 1.0
+ * @version 3.0
  */
 public class Flows {
 
@@ -45,6 +47,42 @@ public class Flows {
 
     private Flows() {
         logger.debug("Flows() begin/end");
+    }
+
+    public static void init(IOFSwitch sw, IFloodlightProviderService floodlightProvider, FloodlightContext cntx, short dcPort, short inetPort) {
+        logger.debug("init(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) begin");
+
+        //floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
+        OFFlowMod flowMod = (OFFlowMod) floodlightProvider.getOFMessageFactory().getMessage(OFType.FLOW_MOD);
+
+        // Create new match
+        OFMatch match = new OFMatch();
+        match.setInputPort(inetPort);
+        match.setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_IN_PORT);
+        flowMod.setMatch(match);
+        
+        flowMod.setCommand(OFFlowMod.OFPFC_ADD);
+        flowMod.setIdleTimeout((short) 0);
+        flowMod.setHardTimeout((short) 0);
+        flowMod.setPriority((short) 10);
+        flowMod.setBufferId(OFPacketOut.BUFFER_ID_NONE);
+        flowMod.setFlags((short) 1);
+
+        List<OFAction> actions = new ArrayList<>();
+        actions.add(new OFActionOutput().setPort(dcPort));
+        flowMod.setActions(actions);
+        flowMod.setLengthU(OFFlowMod.MINIMUM_LENGTH + OFActionOutput.MINIMUM_LENGTH);
+
+        logger.debug("Modyfing to rule {}", flowMod.toString());
+
+        try {
+            sw.write(flowMod, cntx);
+            sw.flush();
+            logger.debug(String.format("Added return rule from port %d to port %d (to switch %s)", inetPort, dcPort, sw.getStringId()));
+        } catch (IOException ex) {
+            logger.error(String.format("Error while adding return flow rule (in port %d, out port %d) to switch %s", inetPort, dcPort, sw.getStringId()), ex);
+        }
+        logger.debug("init(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) end");
     }
 
     /**
@@ -112,4 +150,70 @@ public class Flows {
         logger.debug("add(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) end");
     }
 
+    public static void del(IOFSwitch sw, IFloodlightProviderService floodlightProvider, FloodlightContext cntx, String dcIP, int dcMask) {
+        logger.debug("del(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) end");
+        OFMatch match = new OFMatch();
+
+        match.setDataLayerType(Ethernet.TYPE_IPv4);
+        match.setNetworkDestination(IPv4.toIPv4Address(dcIP));
+        int nw_dst_mask = ((1 << OFMatch.OFPFW_NW_DST_BITS) - 1) << dcMask;
+        match.setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_DL_TYPE & ~nw_dst_mask);
+
+        OFFlowMod flowMod = (OFFlowMod) floodlightProvider.getOFMessageFactory().getMessage(OFType.FLOW_MOD);
+        //OFFlowMod flowMod = new OFFlowMod(); <-without floodlightProvider
+        flowMod.setMatch(match);
+        flowMod.setType(OFType.FLOW_MOD);
+        flowMod.setCommand(OFFlowMod.OFPFC_DELETE);
+
+        try {
+            sw.write(flowMod, null);
+            sw.flush();
+            logger.debug(String.format("Flow rule {} deleted from switch {}", match.toString(), sw.getStringId()));
+        } catch (IOException ex) {
+            logger.error(String.format("Unable to send delete flow message: ", ex.getMessage()));
+        }
+        logger.debug("del(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) end");
+    }
+
+    public static void mod(IOFSwitch sw, IFloodlightProviderService floodlightProvider, FloodlightContext cntx, String dcIP, int dcMask, short outPort) {
+        logger.debug("mod(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) begin");
+
+        //floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
+        OFFlowMod flowMod = (OFFlowMod) floodlightProvider.getOFMessageFactory().getMessage(OFType.FLOW_MOD);
+
+        // Create new match
+        OFMatch match = new OFMatch();
+        //match.setNetworkDestination(IPv4.toIPv4Address(networkDestination));
+        match.setDataLayerType(Ethernet.TYPE_IPv4);
+        match.setNetworkDestination(IPv4.toIPv4Address(dcIP));
+        int nw_dst_mask = ((1 << OFMatch.OFPFW_NW_DST_BITS) - 1) << dcMask;
+        match.setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_DL_TYPE & ~nw_dst_mask);
+        flowMod.setMatch(match);
+        //altenratywnie
+        //OFMatch mTo = new OFMatch();
+        //mTo.fromString("dl_type=0x800,nw_dst=224.128.0.0/9");
+
+        flowMod.setCommand(OFFlowMod.OFPFC_MODIFY_STRICT); //OFPFC_MODIFY
+        flowMod.setIdleTimeout((short) 0);
+        flowMod.setHardTimeout((short) 0);
+        flowMod.setPriority((short) 100);
+        flowMod.setBufferId(OFPacketOut.BUFFER_ID_NONE);
+        flowMod.setFlags((short) 1);
+
+        List<OFAction> actions = new ArrayList<>();
+        actions.add(new OFActionOutput().setPort(outPort));
+        flowMod.setActions(actions);
+        flowMod.setLengthU(OFFlowMod.MINIMUM_LENGTH + OFActionOutput.MINIMUM_LENGTH);
+
+        logger.debug("Modyfing to rule {}", flowMod.toString());
+
+        try {
+            sw.write(flowMod, cntx);
+            sw.flush();
+            logger.debug(String.format("Flow rule (out port %d) added to switch %s", outPort, sw.getStringId()));
+        } catch (IOException ex) {
+            logger.error(String.format("Error while modyfing flow rule (out port %d) to switch %s", outPort, sw.getStringId()), ex);
+        }
+        logger.debug("mod(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) end");
+    }
 }

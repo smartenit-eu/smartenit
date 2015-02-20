@@ -22,6 +22,7 @@ import eu.smartenit.sbox.db.dao.gen.*;
 import eu.smartenit.sbox.db.dto.CloudDC;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
 import eu.smartenit.sbox.db.dto.DC2DCCommunicationID;
+import eu.smartenit.sbox.db.dto.SDNController;
 
 import org.skife.jdbi.v2.DBI;
 import org.sqlite.SQLiteConfig;
@@ -30,7 +31,7 @@ import org.sqlite.SQLiteConfig;
  * The DC2DCCommunicationDAO class.
  * 
  * @authors Antonis Makris, George Petropoulos
- * @version 1.0
+ * @version 3.0
  * 
  */
 public class DC2DCCommunicationDAO {
@@ -129,9 +130,10 @@ public class DC2DCCommunicationDAO {
 			//setting da router
 			localCloud.setDaRouter(
 					dadao.findById(localCloud.getDaRouter().getManagementAddress().getPrefix()));
-			//setting sdn controller
-			localCloud.setSdnController(
-					sdndao.findById(localCloud.getSdnController().getManagementAddress().getPrefix()));
+			//setting sdn controller and its da routers
+			SDNController sdnController = sdndao.findById(localCloud.getSdnController().getManagementAddress().getPrefix());
+			sdnController.setDaRouters(dadao.findBySDNControllerAddress(sdnController.getManagementAddress().getPrefix()));
+			localCloud.setSdnController(sdnController);
 			//setting as with all required information
 			localCloud.setAs(
 					asdao.findASCloudsBgRoutersLinksByASNumber(dc2dc.getId().getLocalAsNumber()));

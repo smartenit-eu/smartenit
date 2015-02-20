@@ -106,7 +106,7 @@ public class NetworkTrafficReceiverTest {
 	 * inter-sbox server multiple times. 
 	 * 
 	 */
-	@Test
+	@Test @Ignore
 	public void shouldInitializeTrafficReceiverAndSendToInterSboxMultipleTimes() throws InterruptedException {
 		logger.info("--Testing traffic receiver initialize. --");
 		NetworkTrafficManager ntm = new NetworkTrafficManager();

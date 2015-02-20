@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
@@ -16,18 +16,17 @@
     limitations under the License.
 
 -->
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>eu.smartenit.unada</groupId>
     <artifactId>unada</artifactId>
-    <version>1.2</version>
+    <version>3.0</version>
   </parent>
   
   <groupId>eu.smartenit.unada.ctm</groupId>
   <artifactId>ctm</artifactId>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
   
   <name>uNaDa Cloud Traffic Manager</name>
   <url>http://maven.apache.org</url>
@@ -42,4 +41,9 @@
       <artifactId>junit</artifactId>
     </dependency>
   </dependencies>
+  <modules>
+    <module>proxy</module>
+    <module>cache</module>
+    <module>main</module>
+  </modules>
 </project>

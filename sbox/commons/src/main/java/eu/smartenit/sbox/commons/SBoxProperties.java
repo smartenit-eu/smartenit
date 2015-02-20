@@ -45,4 +45,9 @@ public class SBoxProperties {
 	public static String TRAFFIC_DETAILS_FILE_PATH = "./";
 	
 	public static String TRAFFIC_DETAILS_FILE_NAME = "traffic.log";
+	
+	// Configuration of Network Traffic Manager
+	
+	// Points to file with default reference vector (serialized to JSON) to be read by NTM during initialization (optional) 
+	public static String DEFAULT_REF_VECTOR_FILE = "./rvector.json";
 }

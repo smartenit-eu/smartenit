@@ -31,7 +31,9 @@ import eu.smartenit.sbox.db.dto.ConfigData;
 import eu.smartenit.sbox.db.dto.ConfigDataEntry;
 import eu.smartenit.sbox.db.dto.EndAddressPairTunnelID;
 import eu.smartenit.sbox.db.dto.Link;
+import eu.smartenit.sbox.db.dto.LocalDCOfSwitchPorts;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
+import eu.smartenit.sbox.db.dto.OperationModeSDN;
 import eu.smartenit.sbox.db.dto.RVector;
 import eu.smartenit.sbox.db.dto.Tunnel;
 import eu.smartenit.sbox.db.dto.TunnelInfo;
@@ -134,8 +136,9 @@ public class SerializationTest {
     				 	"{\"tunnelName\":\"" + TUNNEL_NAME_22 + "\"," + 
     				 	"\"localTunnelEndAddress\":{\"prefix\":\"" + LOCAL_TUNNEL_END_ADDRESS_4 + "\",\"prefixLength\":32}," + 
     				 	"\"remoteTunnelEndAddress\":{\"prefix\":\"" + REMOTE_TUNNEL_END_ADDRESS_4 + "\",\"prefixLength\":32}}," + 
-    				 	"\"daRouterOfPortNumber\":2}]}" +
-    		"]}";
+    				 	"\"daRouterOfPortNumber\":2}]}]," +
+    				 	"\"operationModeSDN\":\"reactiveWithReferenceVector\"," +
+    				 	"\"localDCPortsConfig\":[{\"daRouterOfDPID\":\"00:00:00:00:00:00:00:01\",\"localDCOfSwitchPortNumbers\":[1,2]}]}";
 
     /**
      * Test serialization of {@link RCVectors}.
@@ -171,6 +174,9 @@ public class SerializationTest {
     public void testSerializeConfigData() throws Exception {
         String text;
         ConfigData configData = new ConfigData();
+        
+        configData.setLocalDCPortsConfig(Arrays.asList(new LocalDCOfSwitchPorts(DA_ROUTER_OF_DPID1, Arrays.asList(1,2))));
+        configData.setOperationModeSDN(OperationModeSDN.reactiveWithReferenceVector);
         
         ConfigDataEntry entry1 = new ConfigDataEntry();
         entry1.setRemoteDcPrefix(new NetworkAddressIPv4(REMOTE_DC_PREFIX_1, REMOTE_DC_PREFIX_LENGHT));
@@ -251,36 +257,43 @@ public class SerializationTest {
         Assert.assertEquals(SOURCE_AS_NUMBER, vectors.getCompensationVector().getSourceAsNumber());
     }
 
-        /**
-         * Test deserialization of {@link ConfigData}.
-         *
-         * @throws Exception
-         */
-        @Test
-        public void testDeserializeConfigData() throws Exception {    
-        ConfigData configData = Serialization.deserialize(SERIALIZED_CONFIG_DATA, ConfigData.class);
-		ConfigDataEntry entry = getEntryFromConfigData(
-				new NetworkAddressIPv4(REMOTE_DC_PREFIX_1, REMOTE_DC_PREFIX_LENGHT), DA_ROUTER_OF_DPID1, configData);
-        
-        Assert.assertNotNull(entry);
-        Assert.assertEquals(2, entry.getTunnels().size());
-        Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_11, 1, entry.getTunnels()));
-        Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_12, 2, entry.getTunnels()));
+	/**
+	 * Test deserialization of {@link ConfigData}.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testDeserializeConfigData() throws Exception {
+		ConfigData configData = Serialization.deserialize(
+				SERIALIZED_CONFIG_DATA, ConfigData.class);
 		
-		entry = getEntryFromConfigData(
-				new NetworkAddressIPv4(REMOTE_DC_PREFIX_2, REMOTE_DC_PREFIX_LENGHT), DA_ROUTER_OF_DPID1, configData);
+		Assert.assertEquals(OperationModeSDN.reactiveWithReferenceVector, configData.getOperationModeSDN());
+		Assert.assertEquals(1, configData.getLocalDCPortsConfig().size());
+		Assert.assertEquals(DA_ROUTER_OF_DPID1, configData.getLocalDCPortsConfig().get(0).getDaRouterOfDPID());
+		Assert.assertEquals(1, configData.getLocalDCPortsConfig().get(0).getLocalDCOfSwitchPortNumbers().get(0).intValue());
+		
+		ConfigDataEntry entry = getEntryFromConfigData(new NetworkAddressIPv4(REMOTE_DC_PREFIX_1, REMOTE_DC_PREFIX_LENGHT),
+				DA_ROUTER_OF_DPID1, configData);
+
+		Assert.assertNotNull(entry);
+		Assert.assertEquals(2, entry.getTunnels().size());
+		Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_11, 1, entry.getTunnels()));
+		Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_12, 2, entry.getTunnels()));
+
+		entry = getEntryFromConfigData(new NetworkAddressIPv4(REMOTE_DC_PREFIX_2, REMOTE_DC_PREFIX_LENGHT),
+				DA_ROUTER_OF_DPID1, configData);
 		Assert.assertEquals(2, entry.getTunnels().size());
 		Assert.assertNotNull(entry);
-        Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_11, 3, entry.getTunnels()));
-        Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_12, 4, entry.getTunnels()));
-    
-		entry = getEntryFromConfigData(
-				new NetworkAddressIPv4(REMOTE_DC_PREFIX_3, REMOTE_DC_PREFIX_LENGHT), DA_ROUTER_OF_DPID1, configData);
+		Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_11, 3, entry.getTunnels()));
+		Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_12, 4, entry.getTunnels()));
+
+		entry = getEntryFromConfigData(new NetworkAddressIPv4(REMOTE_DC_PREFIX_3, REMOTE_DC_PREFIX_LENGHT),
+				DA_ROUTER_OF_DPID1, configData);
 		Assert.assertEquals(2, entry.getTunnels().size());
 		Assert.assertNotNull(entry);
-        Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_21, 1, entry.getTunnels()));
-        Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_22, 2, entry.getTunnels()));
-    }
+		Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_21, 1, entry.getTunnels()));
+		Assert.assertNotNull(getTunnelInfoFromList(TUNNEL_NAME_22, 2,entry.getTunnels()));
+	}
     
 	private ConfigDataEntry getEntryFromConfigData(NetworkAddressIPv4 dcNetwork, String dpid, ConfigData data) {
 		for(ConfigDataEntry entry : data.getEntries()) {

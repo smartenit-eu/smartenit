@@ -34,8 +34,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import eu.smartenit.sbox.commons.SBoxThreadHandler;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
+import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.SimpleTunnelID;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
@@ -57,6 +61,8 @@ public class SNMPTrafficCollectorTest {
 	
 	@Before
 	public void init() {
+		prepareTimeScheduleParameters(null);
+		prepareSystemControlParameters(null);
 		this.dtmQosAnalyzer = mock(DTMQosAnalyzer.class);
 		this.monitoringDataProcessor = mock(MonitoringDataProcessor.class);
 		this.threadService = mock(ScheduledExecutorService.class);
@@ -71,23 +77,25 @@ public class SNMPTrafficCollectorTest {
 	@Test
 	public void shouldCalculateXVextor() {
 		snmpTrafficCollector.notifyNewCounterValues(AS_NUMBER, prepareCounterValues());
-		verify(monitoringDataProcessor, times(1)).calculateXVector(AS_NUMBER, prepareCounterValues());
+		verify(monitoringDataProcessor, times(1)).calculateXVector(AS_NUMBER, null, prepareCounterValues());
 	}
 	
 	@Test
 	public void shouldCalculateZVectors() {
 		snmpTrafficCollector.notifyNewCounterValues(AS_NUMBER, prepareCounterValues());
-		verify(monitoringDataProcessor, times(1)).calculateZVectors(AS_NUMBER, prepareCounterValues());
+		verify(monitoringDataProcessor, times(1)).calculateZVectors(AS_NUMBER, null, prepareCounterValues());
 	}
 	
 	@Test
 	public void shouldUpdateXVector() {
 		snmpTrafficCollector.notifyNewCounterValues(AS_NUMBER, prepareCounterValues());
+		snmpTrafficCollector.notifyNewCounterValues(AS_NUMBER, prepareCounterValues());
 		verify(dtmQosAnalyzer, times(1)).updateXVector(any(XVector.class));
 	}
 	
 	@Test
-	public void shouldUpdateZVectors() {
+	public void shouldUpdateXZVectors() {
+		snmpTrafficCollector.notifyNewCounterValues(AS_NUMBER, prepareCounterValues());
 		snmpTrafficCollector.notifyNewCounterValues(AS_NUMBER, prepareCounterValues());
 		verify(dtmQosAnalyzer, times(1)).updateXZVectors(any(XVector.class), anyListOf(ZVector.class));
 	}
@@ -97,7 +105,7 @@ public class SNMPTrafficCollectorTest {
 		final Set<Integer> asList = prepareAsList(5);
 		when(monitoredLinks.getAllAsNumbers()).thenReturn(asList);
 		when(monitoredTunnels.getAllAsNumbers()).thenReturn(asList);
-		snmpTrafficCollector.scheduleMonitoringTasks(prepareTimeScheduleParameters());
+		snmpTrafficCollector.scheduleMonitoringTasks();
 		verify(threadService, times(5)).scheduleAtFixedRate(any(Runnable.class), any(Long.class), any(Long.class), any(TimeUnit.class));
 	}
 
@@ -126,7 +134,7 @@ public class SNMPTrafficCollectorTest {
 	
 	@Test
 	public void shouldCalculateInitialDelay() {
-		assertEquals(11, snmpTrafficCollector.calculateInitialDelay(prepareTimeScheduleParameters()));
+		assertEquals(11, snmpTrafficCollector.calculateInitialDelay(DAOFactory.getTimeScheduleParametersDAOInstance().findLast()));
 	}
 	
 	private CounterValues prepareCounterValues() {
@@ -144,11 +152,23 @@ public class SNMPTrafficCollectorTest {
 		return asList;
 	}
 	
-	private TimeScheduleParameters prepareTimeScheduleParameters() {
-		final TimeScheduleParameters tsp = new TimeScheduleParameters();
-		tsp.setAccountingPeriod(300);
-		tsp.setReportingPeriod(30);
-		tsp.setStartDate(new Date(DateTime.now().plusMillis(11500).getMillis()));
-		return tsp;
+	private void prepareTimeScheduleParameters(TimeScheduleParameters tsp) {
+		if(tsp == null) { 
+			tsp = new TimeScheduleParameters();
+			tsp.setAccountingPeriod(300);
+			tsp.setReportingPeriod(30);
+			tsp.setStartDate(new Date(DateTime.now().plusMillis(11500).getMillis()));
+		}
+		final TimeScheduleParametersDAO tspDAO = mock(TimeScheduleParametersDAO.class);
+		when(tspDAO.findLast()).thenReturn(tsp);
+		DAOFactory.setTimeScheduleParametersDAO(tspDAO);
+	}
+	
+	private void prepareSystemControlParameters(SystemControlParameters scp) {
+		SystemControlParametersDAO scpDAO = mock(SystemControlParametersDAO.class);
+		if (scp == null)
+			scp = new SystemControlParameters(ChargingRule.volume, null, 0.15);
+    	when(scpDAO.findLast()).thenReturn(scp);
+    	DAOFactory.setSCPDAOInstance(scpDAO);
 	}
 }

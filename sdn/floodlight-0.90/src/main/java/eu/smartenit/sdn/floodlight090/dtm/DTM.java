@@ -47,10 +47,13 @@ import org.slf4j.LoggerFactory;
 import eu.smartenit.sbox.db.dto.CVector;
 import eu.smartenit.sbox.db.dto.ConfigData;
 import eu.smartenit.sbox.db.dto.ConfigDataEntry;
+import eu.smartenit.sbox.db.dto.LocalDCOfSwitchPorts;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
+import eu.smartenit.sbox.db.dto.OperationModeSDN;
 import eu.smartenit.sbox.db.dto.RVector;
 import eu.smartenit.sbox.db.dto.TunnelInfo;
 import eu.smartenit.sbox.db.dto.VectorValue;
+import net.floodlightcontroller.core.IFloodlightProviderService;
 
 /**
  * Main DTM class. Includes port statistics poller. Holds information on current
@@ -59,7 +62,7 @@ import eu.smartenit.sbox.db.dto.VectorValue;
  *
  * @author Grzegorz Rzym
  * @author Piotr Wydrych
- * @version 1.2
+ * @version 3.0
  */
 public class DTM {
 
@@ -99,6 +102,11 @@ public class DTM {
                     return;
                 }
 
+                if (configData.getOperationModeSDN() == OperationModeSDN.proactiveWithoutReferenceVector || configData.getOperationModeSDN() == OperationModeSDN.reactiveWithoutReferenceVector) {
+                    logger.debug("run() finished - operation mode without statistcs");
+                    return;
+                }
+
                 try {
                     List<Future<List<OFStatistics>>> futures = new ArrayList<>();
                     for (Short port : daRouterPorts) {
@@ -126,6 +134,7 @@ public class DTM {
                         //logger.debug("TRANSMITTED BYTES " + transmittedBytesMap.get(port) + " ON DA PORT " + port);
                         ++i;
                     }
+                    DTM.this.transmittedBytesMapUpdated();
                 } catch (IOException | InterruptedException | ExecutionException | TimeoutException ex) {
                     logger.error("Error during statistics polling", ex);
                 }
@@ -158,6 +167,8 @@ public class DTM {
 
     private Set<Short> daRouterPorts;
 
+    private IFloodlightProviderService floodlightProvider;
+
     Map<NetworkAddressIPv4, Long> cVectorMap = new HashMap<>();
     Map<Short, Long> daRouterCVectorMap = new HashMap<>();
     Map<NetworkAddressIPv4, Long> rVectorMap = new HashMap<>();
@@ -167,6 +178,12 @@ public class DTM {
     Map<Short, NetworkAddressIPv4> compensatingToTunnelMap = new HashMap<>();
     Map<Short, Boolean> compensatingMap = new HashMap<>();
     Map<Short, Short> daRouterCompenstatingToTunnelMap = new HashMap<>();
+    Map<NetworkAddressIPv4, Short> dcPrefixOutOfPortMap = new HashMap<>();
+    Map<Integer, ArrayList<Short>> dcNumberOfPortsMap = new HashMap<>();
+    Map<Integer, Short> dcNumberCompensatingToTunnelMap = new HashMap<>();
+    Map<Integer, Boolean> dcNumberCompensateMap = new HashMap<>();
+    Map<Integer, ArrayList<Double>> dcNumberInvRMap = new HashMap<>();
+    Map<Integer, NetworkAddressIPv4> dcNumberDCAddress = new HashMap<>();
 
     private DTM() {
         logger.debug("DTM() begin");
@@ -191,6 +208,23 @@ public class DTM {
         return singleton;
     }
 
+	/**
+	 * Sets DTM instance to null. When the instance will be requested next time
+	 * it will be created. This method is mainly meant to be using in tests.
+	 * 
+	 */
+    public static void resetInstance() {
+    	singleton = null;
+    }
+    
+    public IFloodlightProviderService getFloodlightProvider() {
+        return floodlightProvider;
+    }
+
+    public void setFloodlightProvider(IFloodlightProviderService floodlightProvider) {
+        this.floodlightProvider = floodlightProvider;
+    }
+
     /**
      * Updates configuration.
      *
@@ -204,6 +238,30 @@ public class DTM {
         this.configData = configData;
         daRouterPorts = getAllDARouterPorts(configData);
         logger.debug("All DA Router ports: " + daRouterPorts.toString());
+
+        int i = 1;
+        for (ConfigDataEntry configDataEntry : configData.getEntries()) {
+            ArrayList<Short> ports = new ArrayList<Short>();
+            for (TunnelInfo tunnelInfo : configDataEntry.getTunnels()) {
+                ports.add((short) tunnelInfo.getDaRouterOfPortNumber());
+            }
+            dcNumberOfPortsMap.put(i, ports);
+            dcNumberDCAddress.put(i, configDataEntry.getRemoteDcPrefix());
+            i++;
+        }
+
+        //init DA Router
+        for (LocalDCOfSwitchPorts localDCOfSwitchPorts
+                : configData.getLocalDCPortsConfig()) {
+            for (Integer localDCOfSwitchPortNumber : localDCOfSwitchPorts.getLocalDCOfSwitchPortNumbers()) {
+                for (ConfigDataEntry configDataEntry : configData.getEntries()) {
+                    for (TunnelInfo tunnelInfo : configDataEntry.getTunnels()) {
+                        Flows.init(sw, floodlightProvider, null, localDCOfSwitchPortNumber.shortValue(), (short) tunnelInfo.getDaRouterOfPortNumber());
+                    }
+                }
+            }
+
+        }
 
         logger.debug("setConfigData(ConfigData) end");
     }
@@ -270,6 +328,7 @@ public class DTM {
                 }
             }
         }
+        calculateRInvMap(referenceVector);
 
         logger.debug("Reference vector set to " + referenceVector);
         logger.debug("setReferenceVector(RVector) end");
@@ -300,25 +359,30 @@ public class DTM {
         this.compensationVector = compensationVector;
         logger.debug("Compensation vector set to " + compensationVector);
 
+        int i = 1;
         for (VectorValue vectorValue : compensationVector.getVectorValues()) {
             String subnet = vectorValue.getTunnelEndPrefix().getPrefix() + "/" + Integer.toString(vectorValue.getTunnelEndPrefix().getPrefixLength());
             SubnetUtils utils = new SubnetUtils(subnet);
             for (ConfigDataEntry configDataEntry : configData.getEntries()) {
+                dcNumberCompensateMap.put(i, Boolean.TRUE); //TODO
                 for (TunnelInfo tunnelInfo : configDataEntry.getTunnels()) {
                     if (utils.getInfo().isInRange(tunnelInfo.getTunnelID().getRemoteTunnelEndAddress().getPrefix())) {
                         daRouterCVectorMap.put((short) tunnelInfo.getDaRouterOfPortNumber(), vectorValue.getValue());
-                        transmittedBytesStartMap.put((short) tunnelInfo.getDaRouterOfPortNumber(), transmittedBytesMap.get((short) tunnelInfo.getDaRouterOfPortNumber()));
-                        if (vectorValue.getValue() > 0) {
-                            daRouterCompenstatingToTunnelMap.put((short) tunnelInfo.getDaRouterOfPortNumber(), (short) 1);
-                        }
-                        if (vectorValue.getValue() < 0) {
-                            daRouterCompenstatingToTunnelMap.put((short) tunnelInfo.getDaRouterOfPortNumber(), (short) -1);
-                        }
-                        if (vectorValue.getValue() == 0) {
-                            daRouterCompenstatingToTunnelMap.put((short) tunnelInfo.getDaRouterOfPortNumber(), (short) 0);
+                        if (configData.getOperationModeSDN() == OperationModeSDN.proactiveWithReferenceVector || configData.getOperationModeSDN() == OperationModeSDN.reactiveWithReferenceVector) {
+                            transmittedBytesStartMap.put((short) tunnelInfo.getDaRouterOfPortNumber(), transmittedBytesMap.get((short) tunnelInfo.getDaRouterOfPortNumber()));
+                            if (vectorValue.getValue() > 0) {
+                                daRouterCompenstatingToTunnelMap.put((short) tunnelInfo.getDaRouterOfPortNumber(), (short) 1);
+                            }
+                            if (vectorValue.getValue() < 0) {
+                                daRouterCompenstatingToTunnelMap.put((short) tunnelInfo.getDaRouterOfPortNumber(), (short) -1);
+                            }
+                            if (vectorValue.getValue() == 0) {
+                                daRouterCompenstatingToTunnelMap.put((short) tunnelInfo.getDaRouterOfPortNumber(), (short) 0);
+                            }
                         }
                     }
                 }
+                i++;
             }
         }
 
@@ -329,7 +393,10 @@ public class DTM {
                 compensatingToTunnelMap.put((short) compensationVector.getSourceAsNumber(), vectorValue.getTunnelEndPrefix());
             }
         }
-        //logger.debug("Compensating to tunnel " + compensatingToTunnel + (compensatingToTunnel == 0 ? " (not compensating)" : ""));
+
+        if (configData.getOperationModeSDN() == OperationModeSDN.proactiveWithReferenceVector || configData.getOperationModeSDN() == OperationModeSDN.proactiveWithoutReferenceVector) {
+            sendStaticFlowRule(getProactiveOutOfPortNumber());
+        }
         logger.debug("setCompensationVector(CVector) end");
     }
 
@@ -370,15 +437,96 @@ public class DTM {
         return sw;
     }
 
-    /**
-     * Updates traffic counters on switch ports 1..{@link #LINK_COUNT}.
-     *
-     * @param transmittedBytes traffic counters (in bytes)
-     */
-    private synchronized void setTransmittedBytes(long[] transmittedBytes) {
-        logger.debug("setTransmittedBytes(long[]) begin");
-//        this.transmittedBytes = transmittedBytes;
-        logger.debug("setTransmittedBytes(long[]) end");
+    private synchronized void transmittedBytesMapUpdated() {
+        if (configData.getOperationModeSDN() == OperationModeSDN.proactiveWithReferenceVector) {
+            logger.debug("transmittedBytesMapUpdated() begin");
+            if (configData == null) {
+                throw new IllegalArgumentException("DTM has not been configured yet");
+            }
+
+            if (cVectorMap.isEmpty() || rVectorMap.isEmpty()) {
+                throw new IllegalArgumentException("Vectors are empty");
+            }
+
+            for (Map.Entry<Integer, ArrayList<Short>> entrySet : dcNumberOfPortsMap.entrySet()) {
+                Integer dcNumber = entrySet.getKey();
+                short i = 1;
+                for (Short portNumber : entrySet.getValue()) {
+                    if (daRouterCompenstatingToTunnelMap.get(portNumber) == 1) {
+                        dcNumberCompensatingToTunnelMap.put(dcNumber, i);
+                    }
+                    ++i;
+                }
+            }
+
+            for (Map.Entry<Integer, Boolean> compensate : dcNumberCompensateMap.entrySet()) {
+                if (compensate.getValue()) {
+                    if (transmittedBytesMap.get(dcNumberOfPortsMap.get(compensate.getKey()).get(dcNumberCompensatingToTunnelMap.get(compensate.getKey()) - 1))
+                            - transmittedBytesStartMap.get(dcNumberOfPortsMap.get(compensate.getKey()).get(dcNumberCompensatingToTunnelMap.get(compensate.getKey()) - 1))
+                            > daRouterCVectorMap.get(dcNumberOfPortsMap.get(compensate.getKey()).get(dcNumberCompensatingToTunnelMap.get(compensate.getKey()) - 1))
+                            / dcNumberInvRMap.get(compensate.getKey()).get(dcNumberCompensatingToTunnelMap.get(compensate.getKey()) - 1)) {
+
+                        resetTransmittedBytesStart(dcNumberOfPortsMap.get(compensate.getKey()).get(0));
+                        resetTransmittedBytesStart(dcNumberOfPortsMap.get(compensate.getKey()).get(1));
+
+                        dcNumberCompensatingToTunnelMap.remove(compensate.getKey());
+                        int tunnel = dcNumberCompensatingToTunnelMap.get(compensate.getKey()).intValue();
+                        tunnel = (tunnel % 2) + 1;
+                        dcNumberCompensatingToTunnelMap.put(compensate.getKey(), (short) tunnel);
+                        compensate.setValue(Boolean.FALSE);
+                    }
+                } else {
+                    long traffic_1 = 0;
+                    long trafficDA_B = 0;
+                    traffic_1 = transmittedBytesMap.get(dcNumberOfPortsMap.get(compensate.getKey()).get(1))
+                            - transmittedBytesStartMap.get(dcNumberOfPortsMap.get(compensate.getKey()).get(1));
+                    trafficDA_B = traffic_1 + transmittedBytesMap.get(dcNumberOfPortsMap.get(compensate.getKey()).get(2))
+                            - transmittedBytesStartMap.get(dcNumberOfPortsMap.get(compensate.getKey()).get(2));
+                    dcNumberCompensatingToTunnelMap.remove(compensate.getKey());
+                    if (traffic_1 / trafficDA_B <= dcNumberInvRMap.get(compensate.getKey()).get(1)) {
+                        dcNumberCompensatingToTunnelMap.put(compensate.getKey(), (short) 1);
+                    } else {
+                        dcNumberCompensatingToTunnelMap.put(compensate.getKey(), (short) 2);
+                    }
+
+                }
+
+                //send flow rule
+                String dcIP = dcNumberDCAddress.get(compensate.getKey()).getPrefix();
+                int dcMask = dcNumberDCAddress.get(compensate.getKey()).getPrefixLength();
+                short outPort = dcNumberCompensatingToTunnelMap.get(dcNumberOfPortsMap.get(compensate.getKey()).get(dcNumberCompensatingToTunnelMap.get(compensate.getKey()) - 1));
+
+                Flows.mod(sw, floodlightProvider, null, dcIP, dcMask, outPort);
+            }
+
+            logger.debug("transmittedBytesMapUpdated() end");
+        }
+    }
+
+    private synchronized void calculateRInvMap(RVector referenceVector) {
+        long R[] = new long[2];
+        int dcNumber = 0;
+
+        for (Map.Entry<Short, Long> rVectorMap : daRouterRVectorMap.entrySet()) {
+            if (rVectorMap.getValue() == referenceVector.getVectorValues().get(0).getValue()) {
+                R[0] = rVectorMap.getValue();
+            } else if (rVectorMap.getValue() == referenceVector.getVectorValues().get(1).getValue()) {
+                R[1] = rVectorMap.getValue();
+            }
+
+            for (Map.Entry<Integer, ArrayList<Short>> entrySet : dcNumberOfPortsMap.entrySet()) {
+                if (rVectorMap.getKey() == entrySet.getValue().get(0)) {
+                    dcNumber = entrySet.getKey();
+                }
+            }
+        }
+
+        ArrayList<Double> rInv = new ArrayList<>();
+        rInv.add((double) (R[1] / (R[0] + R[1])));
+        rInv.add((double) (R[0] / (R[0] + R[1])));
+
+        dcNumberInvRMap.put(dcNumber, rInv);
+
     }
 
     /**
@@ -394,17 +542,17 @@ public class DTM {
 
     /**
      * Returns statistics of transmitted bytes on all switch ports
-     * 
+     *
      * @return transmitted bytes map
      */
     public Map<Short, Long> getTransmittedBytesOnAllPorts() {
         return transmittedBytesMap;
     }
-    
+
     /**
      * Resets traffic start counter on selected switch's port
-     * 
-     * @param daRouterOfPortNumber 
+     *
+     * @param daRouterOfPortNumber
      */
     private synchronized void resetTransmittedBytesStart(short daRouterOfPortNumber) {
         logger.debug("resetTransmittedBytesStart() begin for OF port: " + daRouterOfPortNumber);
@@ -456,21 +604,53 @@ public class DTM {
                 + (i & 0xFF);
     }
 
+    public void sendStaticFlowRule(Map<NetworkAddressIPv4, Short> dcPrefixOutOfPortMap) {
+        for (NetworkAddressIPv4 netAddr : dcPrefixOutOfPortMap.keySet()) {
+            Flows.mod(sw, floodlightProvider, null, netAddr.getPrefix(), netAddr.getPrefixLength(), dcPrefixOutOfPortMap.get(netAddr));
+        }
+    }
+
+    public synchronized Map<NetworkAddressIPv4, Short> getProactiveOutOfPortNumber() {
+        logger.debug("getOutOfPortNumberProactiveWithoutReference() begin");
+        if (configData == null) {
+            throw new IllegalArgumentException("DTM has not been configured yet");
+        }
+
+        if (cVectorMap.isEmpty()) {
+            throw new IllegalArgumentException("Compensation vector empty");
+        }
+
+        for (VectorValue cVectorValue : compensationVector.getVectorValues()) {
+            if (cVectorValue.getValue() >= 0) {
+                String subnet = cVectorValue.getTunnelEndPrefix().getPrefix() + "/" + Integer.toString(cVectorValue.getTunnelEndPrefix().getPrefixLength());
+                SubnetUtils utils = new SubnetUtils(subnet);
+                for (ConfigDataEntry configDataEntry : configData.getEntries()) {
+                    for (TunnelInfo tunnelInfo : configDataEntry.getTunnels()) {
+                        if (utils.getInfo().isInRange(tunnelInfo.getTunnelID().getRemoteTunnelEndAddress().getPrefix())) {
+                            dcPrefixOutOfPortMap.put(configDataEntry.getRemoteDcPrefix(), (short) tunnelInfo.getDaRouterOfPortNumber());
+                        }
+                    }
+                }
+            }
+        }
+        logger.debug("getOutOfPortNumberProactiveWithoutReference() end");
+
+        return dcPrefixOutOfPortMap;
+    }
+
     /**
      * Returns output port of switch for a new flow.
      *
      * @return output port number
      */
-    public synchronized short getOutOfPortNumber() {
-        logger.debug("getOutOfPortNumber() begin");
+    public synchronized short getReactiveWithReferenceOutOfPortNumber() {
+        logger.debug("getOutOfPortNumberReactiveWithReference() begin");
         if (configData == null) {
             throw new IllegalArgumentException("DTM has not been configured yet");
         }
 
         if (rVectorMap.isEmpty() || cVectorMap.isEmpty()) {
-            logger.debug("Vectors not set");
-            logger.debug("getOutOfPortNumber() end");
-            return 0;
+            throw new IllegalArgumentException("Vectors not set");
         }
 
         OFPacketIn pi = getOFPacketIn();
@@ -493,6 +673,7 @@ public class DTM {
 
         if (selectedDaRouterOfPortNumber == null) {
             logger.debug("Destination host unreachable! Wrong IP address: " + piDestAddr);
+            logger.debug("getOutOfPortNumberReactiveWithReference() end");
             return 0;
         }
 
@@ -570,7 +751,61 @@ public class DTM {
         logger.debug("\t transmittedBytes: " + transmittedBytesMap.toString());
         logger.debug("\t traffic: " + Arrays.toString(traffic) + ", trafficDAB: " + trafficDCDC);
         logger.debug("\t OFPortNumber: " + daRouterOfPortNumber);
-        logger.debug("\t getOutOfPortNumber() end");
+        logger.debug("getOutOfPortNumberReactiveWithReference() end");
+        return (short) daRouterOfPortNumber;
+    }
+
+    public synchronized short getReactiveWithoutReferenceOutOfPortNumber() {
+        logger.debug("getOutOfPortNumberReactiveWithoutReference() begin");
+        if (configData == null) {
+            throw new IllegalArgumentException("DTM has not been configured yet");
+        }
+
+        if (cVectorMap.isEmpty()) {
+            throw new IllegalArgumentException("Compensation vector empty");
+        }
+
+        OFPacketIn pi = getOFPacketIn();
+        String piDestAddr = intToStringIp(new OFMatch().loadFromPacket(pi.getPacketData(), pi.getInPort()).getNetworkDestination());
+
+        logger.debug("Network dest = " + intToStringIp(new OFMatch().loadFromPacket(pi.getPacketData(), pi.getInPort()).getNetworkDestination()));
+
+        short[] selectedDaRouterOfPortNumber = null;
+        for (ConfigDataEntry entry : configData.getEntries()) {
+            String subnet = entry.getRemoteDcPrefix().getPrefix() + "/" + Integer.toString(entry.getRemoteDcPrefix().getPrefixLength());
+            SubnetUtils utils = new SubnetUtils(subnet);
+            if (utils.getInfo().isInRange(piDestAddr)) {
+                selectedDaRouterOfPortNumber = new short[]{
+                    (short) entry.getTunnels().get(0).getDaRouterOfPortNumber(),
+                    (short) entry.getTunnels().get(1).getDaRouterOfPortNumber()
+                };
+                logger.debug("IP " + piDestAddr + " in range " + subnet);
+            }
+        }
+
+        if (selectedDaRouterOfPortNumber == null) {
+            logger.debug("Destination host unreachable! Wrong IP address: " + piDestAddr);
+            logger.debug("getOutOfPortNumberReactiveWithoutReference");
+            return 0;
+        }
+
+        logger.debug("Selected DA router ports: " + Arrays.toString(selectedDaRouterOfPortNumber));
+
+        double[] C = {
+            daRouterCVectorMap.get(selectedDaRouterOfPortNumber[0]),
+            daRouterCVectorMap.get(selectedDaRouterOfPortNumber[1]),};
+
+        if (C[0] >= 0) {
+            daRouterOfPortNumber = selectedDaRouterOfPortNumber[0];
+        } else if (C[1] >= 0) {
+            daRouterOfPortNumber = selectedDaRouterOfPortNumber[1];
+        } else {
+            daRouterOfPortNumber = 0;
+        }
+
+        logger.debug("Summary:");
+        logger.debug("\t OFPortNumber: " + daRouterOfPortNumber);
+        logger.debug("getOutOfPortNumberReactiveWithoutReference() end");
         return (short) daRouterOfPortNumber;
     }
 
@@ -600,6 +835,24 @@ public class DTM {
                 throw new IllegalArgumentException("Number of tunnels below " + LINK_COUNT);
             }
         }
+
+        if (configData.getOperationModeSDN() == null) {
+            throw new IllegalArgumentException("Operation mode cannot be null");
+        }
+
+        if (configData.getLocalDCPortsConfig() == null || configData.getLocalDCPortsConfig().size() == 0) {
+            throw new IllegalArgumentException("List of LocalDCPortsConfig cannot be empty or null");
+        }
+
+        for (LocalDCOfSwitchPorts localDCOfSwitchPorts : configData.getLocalDCPortsConfig()) {
+            if (localDCOfSwitchPorts.getDaRouterOfDPID() == null) {
+                throw new IllegalArgumentException("DA route OF DPID cannot be null");
+            }
+            if (localDCOfSwitchPorts.getLocalDCOfSwitchPortNumbers() == null || localDCOfSwitchPorts.getLocalDCOfSwitchPortNumbers().size() == 0) {
+                throw new IllegalArgumentException("List of Local DC OF Switch Ports cannot be empty or null");
+            }
+
+        }
     }
 
     private void validateReferenceVector(RVector referenceVector) throws IllegalArgumentException {
@@ -609,7 +862,7 @@ public class DTM {
 
         if (referenceVector.getVectorValues().size() != 2) {
             throw new IllegalArgumentException(
-            		"Reference vector must have exactly 2 values since this implementaion supports exactly 2 incoming inter-domain links.");
+                    "Reference vector must have exactly 2 values since this implementaion supports exactly 2 incoming inter-domain links.");
         }
 
         for (VectorValue vectorValue : referenceVector.getVectorValues()) {
@@ -628,7 +881,7 @@ public class DTM {
         }
         if (compensationVector.getVectorValues().size() != 2) {
             throw new IllegalArgumentException(
-            		"Compensation vector must have exactly 2 values since this implementation supports exactly 2 incoming inter-domain links.");
+                    "Compensation vector must have exactly 2 values since this implementation supports exactly 2 incoming inter-domain links.");
         }
 
         long sum = 0;

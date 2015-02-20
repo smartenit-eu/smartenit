@@ -16,27 +16,16 @@
 package eu.smartenit.sbox.eca;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.math3.optimization.GoalType;
-import org.apache.commons.math3.optimization.PointValuePair;
-import org.apache.commons.math3.optimization.linear.LinearConstraint;
-import org.apache.commons.math3.optimization.linear.LinearObjectiveFunction;
-import org.apache.commons.math3.optimization.linear.NoFeasibleSolutionException;
-import org.apache.commons.math3.optimization.linear.Relationship;
-import org.apache.commons.math3.optimization.linear.SimplexSolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.smartenit.sbox.db.dao.CostFunctionDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.CostFunction;
 import eu.smartenit.sbox.db.dto.LocalRVector;
-import eu.smartenit.sbox.db.dto.LocalVectorValue;
-import eu.smartenit.sbox.db.dto.Segment;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
@@ -44,199 +33,129 @@ import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
 /**
- * Class that holds the economic analyzer algorithm
+ * Class that implements Economic Analyzer operations within a single autonomous
+ * system.
  * 
  * @author D. D&ouml;nni, K. Bhargav, T. Bocek
- * @version 1.2
- *
+ * @author Lukasz Lopatowski
+ * @version 3.0
+ * 
  */
 public class EconomicAnalyzerInternal {
 	
-	/**
-	 * Logger for this class
-	 */
 	private static final Logger logger = LoggerFactory.getLogger(EconomicAnalyzerInternal.class);	
 
 	/**
-	 * The accounting period
+	 * Counter variable for the number of traffic updates
 	 */
-	private static final long accountingPeriod;
-
-	/**
-	 * Samples/Reports are taken every x seconds
-	 */
-	private static final long reportingPeriod;
-	
-	/**
-	 * If true, ALL areas will be run against the cost functions without simplification
-	 */
-	private static final boolean SIMPLE_CALCULATION = false;
-
-	/**
-	 * Counter variable for the number of samples
-	 */
-	private int ti = 0;
+	private int updateCounter = 0;
 
 	/**
 	 * Index for axis x1
 	 */	
-	private final static int x1 = 0;
+	final static int x1 = 0;
 	
 	/**
 	 * Index for axis x2
 	 */
-	private final static int x2 = 1;
+	final static int x2 = 1;
 
 	/**
-	 * Total volume traffic vector
+	 * Contains the link IDs for links 1
 	 */
-	private final long[] X_V = new long[2];
-
-	/**
-	 * Total volume traffic vector received from the DC-B collected on DA-A
-	 * router
-	 */
-	private final long[] Z_V = new long[2];
-
-	/**
-	 * Contains the alpha values for x1 and x2
-	 */
-	private final List<List<Long>> alpha = new ArrayList<List<Long>>();
+	final SimpleLinkID link1;
 	
 	/**
-	 * Contains alphas for x1 axis
+	 * Contains the link IDs for links 2
 	 */
-	private final List<Long> alpha1;
-
-	/**
-	 * Contains alphas for x2 axis
-	 */
-	private final List<Long> alpha2;
-	
-	/**
-	 * Contains the Dij intervals
-	 */
-	private final List<List<DInterval>> D = new ArrayList<List<DInterval>>();
-
-	/**
-	 * Splits the Dij intervals into x1
-	 */
-	private final List<DInterval> D1;
-	
-	/**
-	 * Splits the Dij intervals into x2
-	 */
-	private final List<DInterval> D2;
-	
-	/**
-	 * Maps the alpha1 onto D1j intervals (lower left border to obtain the interval)
-	 */
-	private final Map<Long, List<DInterval>> D1Map = new HashMap<Long, List<DInterval>>();
-	
-	/**
-	 * Maps the alpha2 onto D2j intervals (lower left border to obtain the interval)
-	 */
-	private final Map<Long, List<DInterval>> D2Map = new HashMap<Long, List<DInterval>>();
-
-	/**
-	 * Contains the cost functions
-	 */
-	private List<CostFunction> costFunctions;
-	
-	/**
-	 * Maps the alpha1 onto the corresponding cost function segment (lower left border to obtain the cf segments)
-	 */
-	private final Map<Long, Segment> costFunctionMap1 = new HashMap<Long, Segment>();
-	
-	/**
-	 * Maps the alpha2 onto the corresponding cost function segment (lower left border to obtain the cf segments)
-	 */
-	private final Map<Long, Segment> costFunctionMap2 = new HashMap<Long, Segment>();
+	final SimpleLinkID link2;
 	
 	/**
 	 * The {@link DTMTrafficManager} instance.
 	 */
 	private final DTMTrafficManager dtmTrafficManager;
 
-	/**
-	 * Contains the link IDs for links 1
-	 */
-	private final SimpleLinkID link1;
+	final ChargingRule chargingRule;
+	
+	final ReferenceVectorCalculator calculator;
+
+	final TrafficSamplesContainer trafficContainer;
+
+	private int reportsInAccountingPeriod;
 	
 	/**
-	 * Contains the link IDs for links 2
-	 */
-	private final SimpleLinkID link2;
-	
-	/**
-	 * TODO Replace with actual values
+	 * Constructor for EconomicAnalyzerInternal
 	 * 
-	 * Parameter which allows to influence on reference vector prediction by decreasing or increasing values for Z_V[x1]
+	 * @param dtmTrafficManager
+	 * @param link1
+	 *            The {@link SimpleLinkID} of link 1
+	 * @param link2
+	 *            The {@link SimpleLinkID} of link 2
 	 */
-	private final double tol1;
-	
-	/**
-	 * TODO Replace with actual values
-	 * 
-	 * Parameter which allows to influence on reference vector prediction by decreasing or increasing values for Z_V[x2]
-	 */
-	private final double tol2;	
-	
-	/**
-	 * Static initializer for reporting/accounting parameters
-	 */
-	static {
+	EconomicAnalyzerInternal(DTMTrafficManager dtmTrafficManager, SimpleLinkID link1, SimpleLinkID link2) {
+		this.dtmTrafficManager = dtmTrafficManager;
+		this.link1 = link1;
+		this.link2 = link2;
+		chargingRule = DAOFactory.getSCPDAOInstance().findLast().getChargingRule();
 		TimeScheduleParameters tsp = getTimeScheduleParametersFromDB();
-		accountingPeriod = tsp.getAccountingPeriod();
-		reportingPeriod = tsp.getReportingPeriod();
+		
+		if (chargingRule.equals(ChargingRule.volume)) {
+			long xzReportPeriod = (tsp.getReportPeriodEA() == 0) ? tsp.getReportingPeriod() : tsp.getReportPeriodEA();
+			reportsInAccountingPeriod = (int) (tsp.getAccountingPeriod() / xzReportPeriod);
+			trafficContainer = new TotalVolumeSamplesContainer(link1, link2);
+		} else {
+			if (tsp.getSamplingPeriod() != tsp.getReportPeriodEA()) {
+				logger.error("In this release reportingPeriodEA must be equal to samplingPeriod (and should be equal to 300)");
+				throw new IllegalArgumentException(
+						"In this release reportingPeriodEA must be equal to samplingPeriod (and should be equal to 300)");
+			}
+			
+			reportsInAccountingPeriod = (int) (tsp.getAccountingPeriod() / tsp.getSamplingPeriod());
+			trafficContainer = new The95PercentileSamplesContainer(link1, link2);
+		}
+		
+		calculator = new ReferenceVectorCalculator(link1, link2, getCostFunctionsFromDB(), tsp);
 	}
-	
+
+	/**
+	 * Updates link and tunnel traffic data. If accounting period elapsed,
+	 * calculates new reference vector and sends is to configured NTM instance.
+	 * 
+	 * @param xVector
+	 *            The link traffic vector
+	 * @param zVectors
+	 *            The list of tunnel traffic vectors
+	 */
+	void updateXZVectors(XVector xVector, List<ZVector> zVectors) {
+		logger.debug("New update received.");
+		updateCounter++;
+		trafficContainer.storeTrafficValues(xVector, zVectors);
+
+		if (updateCounter == reportsInAccountingPeriod) {
+			logger.debug("Accounting period elapsed. Will calculate new reference vector.");
+			LocalRVector rVector = calculator.calculate(
+					trafficContainer.getTrafficValuesForLinks(), trafficContainer.getTrafficValuesForTunnels(), xVector.getSourceAsNumber());
+			
+			if(dtmTrafficManager != null) {
+				dtmTrafficManager.updateRVector(rVector);
+			}
+			
+			trafficContainer.resetTrafficValues();
+			updateCounter = 0;
+		}
+	}
+
 	/**
 	 * Retrieves the time schedule parameters from the database
 	 * 
 	 * @return Returns a {@link TimeScheduleParameters} object holding the time schedule parameters
 	 */
-	private static TimeScheduleParameters getTimeScheduleParametersFromDB() {
-		TimeScheduleParametersDAO dao = DAOFactory.getTimeScheduleParametersDAO();
+	private TimeScheduleParameters getTimeScheduleParametersFromDB() {
+		TimeScheduleParametersDAO dao = DAOFactory.getTSPDAOInstance();
 		TimeScheduleParameters tsp = dao.findLast();
 		return tsp;
 	}
 	
-	/**
-	 * Constructor for EconomicAnalyzerInternal
-	 *  
-	 * @param dtmTrafficManager
-	 * @param link1 The {@link SimpleLinkID} of link 1
-	 * @param link2 The {@link SimpleLinkID} of link 2
-	 */
-	EconomicAnalyzerInternal(DTMTrafficManager dtmTrafficManager, SimpleLinkID link1, SimpleLinkID link2) {
-		this.dtmTrafficManager = dtmTrafficManager;
-		this.link1 = link1;
-		this.link2 = link2;		
-		
-		this.costFunctions = getCostFunctionsFromDB();
-		
-		//initialize
-		initializeAlpha();
-		alpha1 = alpha.get(x1);
-		alpha2 = alpha.get(x2);
-		
-		initializeD();
-		D1 = D.get(x1);
-		D2 = D.get(x2);
-
-		initializeD1Map();
-		initializeD2Map();
-		
-		assert costFunctions.size() == 2;
-		initializeCostFunctionMap1();
-		initializeCostFunctionMap2();
-		
-		TimeScheduleParameters tsp = getTimeScheduleParametersFromDB();
-		tol1 = tsp.getTol1();
-		tol2 = tsp.getTol2();
-	}
-
 	/**
 	 * Retrieves the cost functions from the database
 	 * 
@@ -254,507 +173,5 @@ public class EconomicAnalyzerInternal {
 		
 		return costFunctions;
 	}
-
-	/**
-	 * Maps the lower border of the segment to corresponding cost function segment
-	 */
-	private void initializeCostFunctionMap1() {
-		// Cost Function 1
-		logger.info("Initializing cost function map 1 ...");
-		for (Segment segment : costFunctions.get(0).getSegments()) {
-			costFunctionMap1.put(segment.getLeftBorder(), segment);
-		}
-		logger.info("Cost function map 1 initialized to " + costFunctionMap1);		
-	}
 	
-	/**
-	 * Maps the lower border of the segment to corresponding cost function segment
-	 */
-	private void initializeCostFunctionMap2() {
-		// Cost Function 2
-		logger.info("Initializing cost function map 2 ...");
-		for (Segment segment : costFunctions.get(1).getSegments()) {
-			costFunctionMap2.put(segment.getLeftBorder(), segment);
-		}
-		logger.info("Cost function map 2 initialized to " + costFunctionMap2);		
-	}
-	
-	/**
-	 * Maps the alpha1 onto D1j intervals (lower left border to obtain the interval)
-	 */
-	private void initializeD1Map() {
-		logger.info("Initializing map D1 ... ");
-		for(int i = 0; i < alpha1.size(); i++) {
-			if(i == 0) {
-				List<DInterval> intervalList = new ArrayList<DInterval>();
-				intervalList.add(D1.get(i));				
-				D1Map.put(alpha1.get(i), intervalList);
-			} else if (i == alpha1.size() - 1) {
-				List<DInterval> intervalList = new ArrayList<DInterval>();
-				intervalList.add(D1.get(i - 1));
-				D1Map.put(alpha1.get(i), intervalList);
-			} else {
-				List<DInterval> intervalList = new ArrayList<DInterval>();
-				intervalList.add(D1.get(i - 1));
-				intervalList.add(D1.get(i));				
-				D1Map.put(alpha1.get(i), intervalList);				
-			}			
-		}
-		logger.info("Map D1 initialized: " + D1Map);		
-	}
-	
-	/**
-	 * Maps the alpha2 onto D2j intervals (lower left border to obtain the interval)
-	 */
-	private void initializeD2Map() {
-		logger.info("Initializing map D2 ... ");
-		for(int i = 0; i < alpha2.size(); i++) {
-			if(i == 0) {
-				List<DInterval> intervalList = new ArrayList<DInterval>();
-				intervalList.add(D2.get(i));				
-				D2Map.put(alpha2.get(i), intervalList);
-			} else if (i == alpha2.size() - 1) {
-				List<DInterval> intervalList = new ArrayList<DInterval>();
-				intervalList.add(D2.get(i - 1));
-				D2Map.put(alpha2.get(i), intervalList);
-			} else {
-				List<DInterval> intervalList = new ArrayList<DInterval>();
-				intervalList.add(D2.get(i - 1));
-				intervalList.add(D2.get(i));				
-				D2Map.put(alpha2.get(i), intervalList);				
-			}			
-		}
-		logger.info("Map D2 initialized: " + D2Map);	
-	}
-	
-	/**
-	 * Creates the D intervals for each of the alphas.
-	 */	
-	private void initializeD() {		
-		for(int i = 0; i < alpha.size(); i++) {
-			D.add(new ArrayList<DInterval>());
-			List<Long> alphai = alpha.get(i);
-			for(int j = 0; j < alphai.size() - 1; j++) {
-				D.get(i).add(new DInterval(alphai.get(j), alphai.get(j + 1)));
-			}
-			logger.info("D" + (i + 1) + " initialized to " + D.get(i));
-		}		
-	}
-	
-	/**
-	 * Creates the alphas from the cost function segments
-	 */
-	private void initializeAlpha() {
-
-		for(int i = 0; i < costFunctions.size(); i++) {
-			alpha.add(new ArrayList<Long>());
-			CostFunction cf = costFunctions.get(i);
-			List<Segment> segmentList = cf.getSegments();
-			for (int j = 0; j < segmentList.size(); j++) {
-				Segment segment = segmentList.get(j);
-				alpha.get(i).add(segment.getLeftBorder());
-				if(j == segmentList.size() - 1) {
-					assert segment.getRightBorder() < 0;
-					alpha.get(i).add(Long.MAX_VALUE);
-				} 
-			}
-			logger.info("Alpha" + (i + 1) + " initialized to " + alpha.get(i));
-		}	
-	}
-	
-	/**
-	 * Updates the X_V and Z_V vectors
-	 * 
-	 * @param X_in : The X_in vector
-	 * @param Z_in_list : The Z_in vector list
-	 */
-	public void updateXZVectors(XVector X_in, List<ZVector> Z_in_list) {
-		
-		ti++;
-		accumulateTotalVolume(X_in, Z_in_list);
-		
-		//Number of samples per accounting period
-		long n = accountingPeriod / reportingPeriod;
-		if (ti == n) {			
-			LocalRVector rVector = calculateReferenceVector(X_in.getSourceAsNumber());
-			if(dtmTrafficManager != null) {
-				dtmTrafficManager.updateRVector(rVector);
-			}
-
-			resetTotalVolume();
-			ti = 0;
-		}
-	}
-	
-	/**
-	 * Accumulates the total traffic volumes
-	 * 
-	 * @param X_in: The X_in vector
-	 * @param Z_in: The Z_in vector
-	 */
-	private void accumulateTotalVolume(XVector X_in, List<ZVector> Z_in_list) {
-		logger.info("Accumulating volume...");
-		
-		X_V[x1] = X_V[x1] + X_in.getVectorValueForLink(link1);
-		X_V[x2] = X_V[x2] + X_in.getVectorValueForLink(link2);
-		
-		// TODO Only one Z vector from the list is taken in consideration.
-		//		This might have to be improved in future releases.
-		Z_V[x1] = Z_V[x1] + Z_in_list.get(0).getVectorValueForLink(link1);
-		Z_V[x2] = Z_V[x2] + Z_in_list.get(0).getVectorValueForLink(link2);
-		
-		logger.info("Volume X_V: [" + X_V[x1] + " / " + X_V[x2] + "]");
-		logger.info("Volume Z_V: [" + Z_V[x1] + " / " + Z_V[x2]  + "]");
-	}
-	
-	/**
-	 * Resets the volume of the link and tunnel to zero (after the accounting
-	 * period has expired)
-	 * 
-	 */
-	private void resetTotalVolume() {
-		X_V[x1] = 0;
-		X_V[x2] = 0;
-
-		Z_V[x1] = 0;
-		Z_V[x2] = 0;
-	}
-	
-	/**
-	 * Calculates the reference vector.
-	 * 
-	 * @param sourceAsNumber The number of the source AS
-	 * 
-	 * @return Returns an RVector containing the reference vector values.
-	 */
-	public LocalRVector calculateReferenceVector(int sourceAsNumber) {
-		logger.info("Calculating S: ");
-		long S = Z_V[x1] + Z_V[x2];
-		logger.info("S: " + S);
-
-		List<Area> areaList;
-		if(SIMPLE_CALCULATION) {
-			areaList = calculateAreaSimple(S);
-			logger.info("areaList: " + areaList);
-		} else {
-			areaList = calculateAreaAdvanced(S);
-			logger.info("areaList: " + areaList);
-		}
-		
-		double[] Z_V_comma = {Z_V[x1] * tol1, Z_V[x2] * tol2};
-		double[] S1 = {-Z_V_comma[x1], Z_V_comma[x1]};
-		double[] S2 = {Z_V_comma[x2], -Z_V_comma[x2]};
-		
-		return calculateReferenceVector(S1, S2, areaList, sourceAsNumber);		
-	}	
-		
-	/**
-	 * Creates a list of candidate areas that may contain the optimal reference vector using the specified algorithm.
-	 * 
-	 * @param S The DC manipulation freedom
-	 * @return A list of candidate areas to be used for optimization.
-	 */
-	private List<Area> calculateAreaAdvanced(long S) {
-		List<Area> areaList = new ArrayList<Area>();
-		//List<List<Long>> E = calculateSetE(S, areaList);
-
-		logger.info("Calculating set E ...");
-		
-		List<List<Long>> E = new ArrayList<List<Long>>();
-		E.add(new ArrayList<Long>());
-		E.add(new ArrayList<Long>());
-
-		//Counts how many null values are in E1 and E2
-		int nullCounter1 = 0;
-		int nullCounter2 = 0;
-
-		//Calculates set E1
-		for (int i = 0; i < alpha1.size(); i++) {
-			
-			logger.info("Checking: " + alpha1.get(i) + ">=" + (X_V[x1] - S) + " && " + alpha1.get(i) +  "<=" + (X_V[x1] + S));
-			
-			if ((alpha1.get(i) >= X_V[x1] - S) && (alpha1.get(i) <= X_V[x1] + S)) {
-				E.get(x1).add(alpha1.get(i));
-				
-				logger.info("Adding " + alpha1.get(i));
-			} else {
-				E.get(x1).add(null);
-				nullCounter1++;
-				logger.info("Adding " + null);
-			}
-		}
-
-		//Calculates set E2
-		for (int i = 0; i < alpha2.size(); i++) {
-			
-			logger.info("Checking: " + alpha2.get(i) + ">=" + (X_V[x2] - S) + " && " + alpha2.get(i) +  "<=" + (X_V[x2] + S));
-			
-			if ((alpha2.get(i) >= X_V[x2] - S) && (alpha2.get(i) <= X_V[x2] + S)) {
-				E.get(x2).add(alpha2.get(i));
-				
-				logger.info("Adding " + alpha2.get(i));
-			} else {
-				E.get(x2).add(null);
-				nullCounter2++;
-				logger.info("Adding " + null);
-			}
-		}
-		logger.info("Set E: " + E);
-		
-		//Deals with the special case where both E1 and E2 contain only null values (i.e. there is no intersection with any alpha)
-		if(nullCounter1 == E.get(x1).size() && nullCounter2 == E.get(x2).size()) {
-			DInterval dx1 = null;
-			DInterval dx2 = null;
-			
-			for (int j = 0; j < D1.size(); j++) {
-				if (D1.get(j).contains(X_V[x1])) {
-					dx1 = D1.get(j);
-				}
-			}
-			for (int j = 0; j < D2.size(); j++) {
-				if (D2.get(j).contains(X_V[x2])) {
-					dx2 = D2.get(j);
-				}
-			}
-			areaList.add(new Area(dx1, dx2));
-		} 
-		
-		//The case where either E1 or E2 contains an alpha value (i.e. there are intersections with at least one of the alphas)
-		else {
-			
-			//Create D1k
-			List<DInterval> D1k = calculateD1k(E, S);
-					
-			//Create D2k
-			List<DInterval> D2k = calculateD2k(E, S);		
-			
-			for(int i = 0; i < E.get(x1).size(); i++) {
-				List<Long> E1 = E.get(x1);
-				if (E1.get(i) != null) {
-					for(int j = 0; j < D2k.size(); j++) {
-						List<DInterval> intervalList = D1Map.get(E1.get(i));
-						for(int k = 0; k < intervalList.size(); k++) {
-							Area area = new Area(intervalList.get(k), D2k.get(j));
-							if(!areaList.contains(area)) {
-								areaList.add(area);
-							}
-						}
-					}
-				}
-			}
-			
-			for(int i = 0; i < E.get(x2).size(); i++) {
-				List<Long> E2 = E.get(x2);
-				if (E2.get(i) != null) {
-					for(int j = 0; j < D1k.size(); j++) {
-						List<DInterval> intervalList = D2Map.get(E2.get(i));
-						for(int k = 0; k < intervalList.size(); k++) {
-							Area area = new Area(D1k.get(j), intervalList.get(k));
-							if(!areaList.contains(area)) {
-								areaList.add(area);
-							}							
-						}
-						
-					}
-				}
-			}			
-			
-		}
-		logger.info("Area list size: " + areaList.size());
-		
-		return areaList;
-	}
-	
-	/**
-	 * Creates a list of areas containing ALL areas (no optimization)
-	 * 
-	 * @param S The DC manipulation freedom
-	 * @return A list containing ALL areas (no optimization)
-	 */
-	private List<Area> calculateAreaSimple(long S) {
-		List<Area> A = new ArrayList<Area>();
-		for(int i = 0; i < D1.size(); i++) {
-			for(int j = 0; j < D2.size(); j++) {
-				A.add(new Area(D1.get(i), D2.get(j)));				
-			}			
-		}
-		return A;
-	}
-	
-	/**
-	 * Calculates the reference vector using simplex method
-	 * 
-	 * @param S1 The DC traffic manipulation freedom 
-	 * @param S2 The DC traffic manipulation freedom 
-	 * @param aList The list of candidate areas
-	 * @param sourceAsNumber The number of the source AS
-	 * @return Returns an RVector containing the reference vector values.
-	 */
-	private LocalRVector calculateReferenceVector(double[] S1, double[] S2, List<Area> aList, int sourceAsNumber) {
-		List<PointValuePair> solutionList = new ArrayList<PointValuePair>();
-		for(Area a : aList) {			
-			
-			Long x1Lower = a.getD1().getLowerBound(); // Corresponds to alpha1i
-			Long x1Upper = a.getD1().getUpperBound(); // Corresponds to alpha1i+1
-			Long x2Lower = a.getD2().getLowerBound(); // Corresponds to alpha2i
-			Long x2Upper = a.getD2().getUpperBound(); // Corresponds to alpha2i+1
-			
-			Segment segment1 = costFunctionMap1.get(x1Lower); // Corresponds to the suitable cf segment for alpha1
-			Segment segment2 = costFunctionMap2.get(x2Lower); // Corresponds to the suitable cf segment for alpha2
-			
-			// Function    f:  f1(x1) + f2(x2) + c //c corresponds to the sum of the constant part of f1 and f2
-			// Constraints c1: x1       >  alpha1i
-			//             c2: x1       <= alpha1i+1 
-			//             c3:      x2  >  alpha2j
-			//             c4:      x2  <= alpha2j+1
-			//             c5: x1 + x2  == X_V[x1] + X_V[x2]
-			//			   c6: x1       >= X_V[x1] + S1[x1]
-			//             c7: x1       <= X_V[x1] + S2[x1]
-			//             c8: x2       >= X_V[x2] + S2[x2]
-			//	           c9: x2       <= X_V[x2] + S1[x2]
-			
-			
-			LinearObjectiveFunction f = new LinearObjectiveFunction(new double[] {segment1.getB(), segment2.getB()}, (segment1.getA() + segment2.getA())); //f1(x1) + f2(x2)
-			Collection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
-			constraints.add(new LinearConstraint(new double[]{1, 0}, Relationship.GEQ, x1Lower.doubleValue()));
-			constraints.add(new LinearConstraint(new double[]{1, 0}, Relationship.LEQ, x1Upper.doubleValue()));
-			constraints.add(new LinearConstraint(new double[]{0, 1}, Relationship.GEQ, x2Lower.doubleValue()));
-			constraints.add(new LinearConstraint(new double[]{0, 1}, Relationship.LEQ, x2Upper.doubleValue()));
-			constraints.add(new LinearConstraint(new double[]{1, 1}, Relationship.EQ, X_V[x1] + X_V[x2]));
-			constraints.add(new LinearConstraint(new double[]{1, 0}, Relationship.GEQ, X_V[x1] + S1[x1]));
-			constraints.add(new LinearConstraint(new double[]{1, 0}, Relationship.LEQ, X_V[x1] + S2[x1]));
-			constraints.add(new LinearConstraint(new double[]{0, 1}, Relationship.GEQ, X_V[x2] + S2[x2]));
-			constraints.add(new LinearConstraint(new double[]{0, 1}, Relationship.LEQ, X_V[x2] + S1[x2]));
-			
-			
-			
-			try {
-				PointValuePair  solution = new SimplexSolver().optimize(f, constraints, GoalType.MINIMIZE, true);
-				solutionList.add(solution);
-				
-				double x = solution.getPoint()[0];
-				double y = solution.getPoint()[1];
-				double value = solution.getValue();
-				logger.info("\n");
-				logger.info("Area [" + x1Lower + ", " + x1Upper + ", " + x2Lower + ", " + x2Upper + "]");
-				logger.info("Cost function: " + segment1.getB() + "x1 " + segment2.getB() + "x2 " + " + " + (segment1.getA() + segment2.getA()));
-				logger.info("Reference vector x1=" + x + " x2=" + y + " f1(x1) + f2(x2)=" + value);
-			} catch (NoFeasibleSolutionException e) {
-				logger.info("\n");
-				logger.info("Area [" + x1Lower + ", " + x1Upper + ", " + x2Lower + ", " + x2Upper + "]");
-				logger.info("Cost function: " + segment1.getB() + "x1 " + segment2.getB() + "x2 " + " + " + (segment1.getA() + segment2.getA()));
-				logger.error("No feasible solution found: for area " + a);
-			}
-
-		}
-		
-		PointValuePair minimalSolution = getMinimalSolution(solutionList);
-		LocalRVector referenceVector = createReferenceVector(minimalSolution, sourceAsNumber);
-		
-		logger.info("\n");
-		logger.info("Chosen reference vector: " 
-				+ referenceVector.getVectorValues().get(0).getValue()
-				+ " "
-				+ referenceVector.getVectorValues().get(1).getValue()
-				);
-		
-		return referenceVector;
-	}
-	
-	/**
-	 * Creates the RVector object from the optimal solution.
-	 * 
-	 * @param minimalSolution The optimal solution.
-	 * @param sourceAsNumber The number of the source AS
-	 * @return The RVector object of the optimal solution.
-	 */
-	private LocalRVector createReferenceVector(PointValuePair minimalSolution, int sourceAsNumber) {
-		LocalVectorValue vvx1 = new LocalVectorValue(Math.round(minimalSolution.getPoint()[0]), link1);
-		LocalVectorValue vvx2 = new LocalVectorValue(Math.round(minimalSolution.getPoint()[1]), link2);
-		List<LocalVectorValue> referenceVectorList = new ArrayList<LocalVectorValue>();
-		referenceVectorList.add(vvx1);
-		referenceVectorList.add(vvx2);
-		LocalRVector referenceVector = new LocalRVector(referenceVectorList, sourceAsNumber);
-		return referenceVector;
-	}
-	
-	/**
-	 * Selects the point value pair having the minimum target function value among all the candidate solutions.
-	 * 
-	 * @param solutionList A list of candidate solutions 
-	 * @return The point value pair having the minimum target function value among all the candidate solutions.
-	 */
-	private PointValuePair getMinimalSolution(List<PointValuePair> solutionList) {
-		assert !solutionList.isEmpty();
-		PointValuePair minimalSolution = solutionList.get(0);
-
-		for(int i = 0; i < solutionList.size(); i++) {
-			if(solutionList.get(i).getValue() < minimalSolution.getValue()) {
-				minimalSolution = solutionList.get(i);
-			}
-		}
-		return minimalSolution;
-	}
-
-	/**
-	 * Calculates the D1k corresponding to each of the alpha2s in E2
-	 * 
-	 * @param E The set E
-	 * @param S The DC traffic manipulation freedom
-	 * @return A list of matching intervals (D1k)
-	 */
-	private List<DInterval> calculateD1k(List<List<Long>> E, long S) {
-		logger.info("Creating D1k ...");
-		List<DInterval> D1k = new ArrayList<DInterval>();
-		for (int i = 0; i < alpha2.size(); i++) {
-			if (E.get(x2).get(i) != null) {
-
-				// S = X_V[x1] + X_V[x2]
-				logger.info("alpha2: " + alpha2.get(i));
-				long result = X_V[x1] + X_V[x2] - alpha2.get(i);
-				logger.info("x1 = " + result);
-				
-				for (int j = 0; j < D1.size(); j++) {
-					if (D1.get(j).contains(result)) {
-						if(!D1k.contains(D1.get(j))) {
-							D1k.add(D1.get(j)); // Only if it is not contained yet? TODO
-						}
-					}
-				}
-			}
-		}
-		logger.info("D1k: " + D1k);
-		return D1k;
-	}
-	
-	/**
-	 * Calculates the D2k corresponding to each of the alpha1s in E1
-	 * 
-	 * @param E The set E
-	 * @param S The DC traffic manipulation freedom
-	 * @return A list of matching intervals (D2k)
-	 */
-	private List<DInterval> calculateD2k(List<List<Long>> E, long S) {
-		logger.info("Creating D2k ...");
-		List<DInterval> D2k = new ArrayList<DInterval>();
-		for (int i = 0; i < alpha1.size(); i++) {
-			if (E.get(x1).get(i) != null) {
-
-				// S = X_V[x1] + X_V[x2]
-				long result = X_V[x1] + X_V[x2] - alpha1.get(i);
-				logger.info("x2 = " + result);
-				
-				for (int j = 0; j < D2.size(); j++) {
-					if (D2.get(j).contains(result)) {
-						if(!D2k.contains(D2.get(j))) {
-							D2k.add(D2.get(j));
-						}
-					}
-				}
-			}
-		}
-		logger.info("D2k: " + D2k);
-		return D2k;		
-	}
-
 }

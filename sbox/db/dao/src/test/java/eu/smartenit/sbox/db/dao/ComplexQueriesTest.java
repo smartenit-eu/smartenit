@@ -18,6 +18,7 @@ package eu.smartenit.sbox.db.dao;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.AfterClass;
@@ -187,6 +188,9 @@ public class ComplexQueriesTest {
 		// checking remote cloud
 		assertEquals(dc1.getRemoteCloud().getCloudDcName(), "dropbox");
 		assertEquals(dc1.getRemoteCloud().getAs().getAsNumber(), 2);
+		assertEquals(dc1.getRemoteCloud().getDcNetworks().size(), 1);
+		assertEquals(dc1.getRemoteCloud().getDcNetworks().size(), 1);
+		assertEquals(dc1.getRemoteCloud().getDcNetworks().get(0).getPrefix(), "2.2.1.0");
 
 		// checking local cloud
 		assertEquals(dc1.getLocalCloud().getCloudDcName(), "facebook");
@@ -208,9 +212,22 @@ public class ComplexQueriesTest {
 				.getLocalTunnelEndAddress().getPrefix(), "1.1.1.10");
 
 		assertEquals(dc1.getLocalCloud().getSdnController().getRestPort(), 8080);
+		assertEquals(dc1.getLocalCloud().getSdnController().getOpenflowHost()
+				.getPrefix(), "1.1.1.5");
+		assertEquals(dc1.getLocalCloud().getSdnController().getDaRouters().size(), 1);
+		assertEquals(dc1.getLocalCloud().getSdnController().getDaRouters().get(0)
+				.getOfSwitchDPID(), "abcdefg");
+		assertEquals(dc1.getLocalCloud().getSdnController().getDaRouters()
+				.get(0).getLocalDCOfSwitchPortNumbers().size(), 4);
+		assertEquals(dc1.getLocalCloud().getSdnController().getDaRouters()
+				.get(0).getLocalDCOfSwitchPortNumbers().get(1).intValue(), 63);
 		assertEquals(dc1.getLocalCloud().getDaRouter().getSnmpCommunity(),
 				"smartenit");
 		assertEquals(dc1.getLocalCloud().getDaRouter().getOfSwitchDPID(), "abcdefg");
+		assertEquals(dc1.getLocalCloud().getDaRouter()
+				.getLocalDCOfSwitchPortNumbers().size(), 4);
+		assertEquals(dc1.getLocalCloud().getDaRouter()
+				.getLocalDCOfSwitchPortNumbers().get(3).intValue(), 100);
 
 		// checking connecting tunnels
 		assertEquals(dc1.getConnectingTunnels().size(), 1);
@@ -246,6 +263,8 @@ public class ComplexQueriesTest {
 		// checking remote cloud
 		assertEquals(dc2.getRemoteCloud().getCloudDcName(), "google");
 		assertEquals(dc2.getRemoteCloud().getAs().getAsNumber(), 2);
+		assertEquals(dc2.getRemoteCloud().getDcNetworks().size(), 3);
+		assertEquals(dc2.getRemoteCloud().getDcNetworks().get(2).getPrefix(), "3.3.3.0");
 
 		// checking local cloud
 		assertEquals(dc2.getLocalCloud().getCloudDcName(), "facebook");
@@ -268,6 +287,15 @@ public class ComplexQueriesTest {
 		assertEquals(dc2.getLocalCloud().getSdnController().getRestPort(), 8080);
 		assertEquals(dc2.getLocalCloud().getDaRouter().getSnmpCommunity(),
 				"smartenit");
+		assertEquals(dc2.getLocalCloud().getSdnController().getDaRouters()
+				.get(0).getLocalDCOfSwitchPortNumbers().size(), 4);
+		assertEquals(dc2.getLocalCloud().getSdnController().getDaRouters()
+				.get(0).getLocalDCOfSwitchPortNumbers().get(1).intValue(), 63);
+		assertEquals(dc2.getLocalCloud().getDaRouter().getOfSwitchDPID(), "abcdefg");
+		assertEquals(dc2.getLocalCloud().getDaRouter()
+				.getLocalDCOfSwitchPortNumbers().size(), 4);
+		assertEquals(dc2.getLocalCloud().getDaRouter()
+				.getLocalDCOfSwitchPortNumbers().get(2).intValue(), 1);
 
 		// checking connecting tunnels
 		assertEquals(dc2.getConnectingTunnels().size(), 1);
@@ -326,6 +354,7 @@ public class ComplexQueriesTest {
 		da.setManagementAddress(new NetworkAddressIPv4("1.1.1.4", 0));
 		da.setSnmpCommunity("smartenit");
 		da.setOfSwitchDPID("abcdefg");
+		da.setLocalDCOfSwitchPortNumbers(Arrays.asList(52, 63, 1, 100));
 		dadao.insert(da);
 
 		// SDN Controller
@@ -409,18 +438,23 @@ public class ComplexQueriesTest {
 		cl1.setAs(as1);
 		cl1.setSdnController(sdn1);
 		cl1.setDaRouter(da);
+		cl1.setDcNetworks(Arrays.asList(new NetworkAddressIPv4("1.1.1.0", 24), 
+				new NetworkAddressIPv4("1.1.2.0", 24)));
 		cldao.insert(cl1);
 
 		// Insert remote cloud cl2
 		CloudDC cl2 = new CloudDC();
 		cl2.setCloudDcName("dropbox");
 		cl2.setAs(as2);
+		cl2.setDcNetworks(Arrays.asList(new NetworkAddressIPv4("2.2.1.0", 24)));
 		cldao.insert(cl2);
 
 		// Insert remote cloud cl3
 		CloudDC cl3 = new CloudDC();
 		cl3.setCloudDcName("google");
 		cl3.setAs(as2);
+		cl3.setDcNetworks(Arrays.asList(new NetworkAddressIPv4("3.3.1.0", 24), 
+				new NetworkAddressIPv4("3.3.2.0", 24), new NetworkAddressIPv4("3.3.3.0", 24)));
 		cldao.insert(cl3);
 
 		// Insert dc to dc communication dc1

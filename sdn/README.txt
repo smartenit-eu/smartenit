@@ -1,6 +1,6 @@
 The SBox-SDN interface allows to set and retrieve SDN configuration parameters.
 
-Currently (in v. 1.2), the interface is designed for DMT mechanism and allows to
+Currently (in v. 2.0), the interface is designed for DMT mechanism and allows to
 set:
 - R and C vectors,
 - C vectors,

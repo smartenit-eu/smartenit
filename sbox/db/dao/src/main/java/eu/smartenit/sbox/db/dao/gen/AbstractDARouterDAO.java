@@ -29,8 +29,8 @@ import eu.smartenit.sbox.db.dto.DARouter;
 /**
  * The abstract DARouterDAO class, including all SQL queries.
  *
- * @authors Antonis Makris, George Petropoulos
- * @version 1.2
+ * @author George Petropoulos
+ * @version 3.0
  * 
  */
 public abstract class AbstractDARouterDAO {
@@ -40,6 +40,7 @@ public abstract class AbstractDARouterDAO {
 			+ "SDNCONTROLLERADDRESS STRING, "
 			+ "SNMPCOMMUNITY STRING, "
             + "OFSWITCHDPID STRING, "
+            + "LOCALDCOFSWITCHPORTNUMBERS TEXT, "
 			+ "FOREIGN KEY (SDNCONTROLLERADDRESS) "
 			+ "REFERENCES SDNCONTROLLER(ADDRESS) ON DELETE CASCADE)")
 	public abstract void createTable();
@@ -50,22 +51,25 @@ public abstract class AbstractDARouterDAO {
 
 	
 	@SqlUpdate("INSERT INTO DAROUTER  "
-			+ "(ADDRESS, " 
-			+ "SNMPCOMMUNITY, OFSWITCHDPID) "
-			+ "VALUES (:d.address, :d.snmpCommunity, :d.ofSwitchDPID)")
+			+ "(ADDRESS, SNMPCOMMUNITY, OFSWITCHDPID, "
+			+ "LOCALDCOFSWITCHPORTNUMBERS) "
+			+ "VALUES (:d.address, :d.snmpCommunity, :d.ofSwitchDPID, "
+			+ ":d.localDCOfSwitchPortNumbers)")
 	public abstract void insert(@BindDARouter("d") DARouter d);
 	
 	@SqlUpdate("INSERT INTO DAROUTER  "
-			+ "(ADDRESS, " 
-			+ "SNMPCOMMUNITY, "
-			+ "SDNCONTROLLERADDRESS, OFSWITCHDPID) "
-			+ "VALUES (:d.address, :d.snmpCommunity, :sdnAddress, :d.ofSwitchDPID)")
+			+ "(ADDRESS, SNMPCOMMUNITY, "
+			+ "SDNCONTROLLERADDRESS, OFSWITCHDPID, "
+			+ "LOCALDCOFSWITCHPORTNUMBERS) "
+			+ "VALUES (:d.address, :d.snmpCommunity, :sdnAddress, :d.ofSwitchDPID, "
+			+ ":d.localDCOfSwitchPortNumbers)")
 	public abstract void insertBySDNControllerAddress(@BindDARouter("d") DARouter d, 
 			@Bind("sdnAddress") String sdnAddress);
 	
 	
 	@SqlUpdate("UPDATE DAROUTER  "
-			+ "SET SNMPCOMMUNITY=:d.snmpCommunity, OFSWITCHDPID = :d.ofSwitchDPID "
+			+ "SET SNMPCOMMUNITY=:d.snmpCommunity, OFSWITCHDPID = :d.ofSwitchDPID, "
+			+ "LOCALDCOFSWITCHPORTNUMBERS = :d.localDCOfSwitchPortNumbers "
 			+ "WHERE ADDRESS = :d.address")
 	public abstract void update(@BindDARouter("d") DARouter d);
 	
@@ -77,19 +81,21 @@ public abstract class AbstractDARouterDAO {
 			@Bind("sdnAddress") String sdnAddress);
 	
 	
-	@SqlQuery("SELECT ADDRESS, SNMPCOMMUNITY, OFSWITCHDPID FROM DAROUTER")
+	@SqlQuery("SELECT ADDRESS, SNMPCOMMUNITY, OFSWITCHDPID, LOCALDCOFSWITCHPORTNUMBERS "
+			+ "FROM DAROUTER")
 	@Mapper(DARouterMapper.class)
 	public abstract List<DARouter> findAll();
 	
-	@SqlQuery("SELECT ADDRESS, SNMPCOMMUNITY, OFSWITCHDPID "
+	@SqlQuery("SELECT ADDRESS, SNMPCOMMUNITY, OFSWITCHDPID, LOCALDCOFSWITCHPORTNUMBERS "
 			+ "FROM DAROUTER WHERE ADDRESS = :address")
 	@Mapper(DARouterMapper.class)
 	public abstract DARouter findById(@Bind("address") String address);
 	
-	@SqlQuery("SELECT ADDRESS, SNMPCOMMUNITY, OFSWITCHDPID "
+	@SqlQuery("SELECT ADDRESS, SNMPCOMMUNITY, OFSWITCHDPID, LOCALDCOFSWITCHPORTNUMBERS "
 			+ "FROM DAROUTER WHERE SDNCONTROLLERADDRESS = :sdnAddress")
 	@Mapper(DARouterMapper.class)
-	public abstract List<DARouter> findBySDNControllerAddress(@Bind("sdnAddress") String sdnAddress);
+	public abstract List<DARouter> findBySDNControllerAddress(@Bind("sdnAddress") 
+		String sdnAddress);
 	
 	@SqlUpdate("DELETE FROM DAROUTER "
 			+ "WHERE ADDRESS = :address")

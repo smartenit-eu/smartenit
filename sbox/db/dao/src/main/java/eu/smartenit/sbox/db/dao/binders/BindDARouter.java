@@ -33,7 +33,7 @@ import eu.smartenit.sbox.db.dto.DARouter;
  * into DARouter parameters.
  *
  * @authors George Petropoulos
- * @version 1.2
+ * @version 3.0
  * 
  */
 @BindingAnnotation(BindDARouter.DARouterBinderFactory.class)
@@ -49,6 +49,8 @@ public @interface BindDARouter {
 					q.bind(bind.value() + ".address", arg.getManagementAddress().getPrefix());
 					q.bind(bind.value() + ".snmpCommunity", arg.getSnmpCommunity());
                     q.bind(bind.value() + ".ofSwitchDPID", arg.getOfSwitchDPID());
+                    q.bind(bind.value() + ".localDCOfSwitchPortNumbers", 
+                    		arg.getLocalDCOfSwitchPortNumbers().toString());
 				}
 			};
 		}

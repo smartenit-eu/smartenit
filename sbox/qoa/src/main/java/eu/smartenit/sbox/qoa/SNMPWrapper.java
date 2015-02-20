@@ -20,10 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.snmp4j.CommunityTarget;
+import org.snmp4j.MessageDispatcher;
+import org.snmp4j.MessageDispatcherImpl;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
 import org.snmp4j.event.ResponseEvent;
+import org.snmp4j.mp.MPv2c;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
@@ -114,7 +117,10 @@ public class SNMPWrapper {
 	 */
 	public void startClient() throws IOException {
 		if(snmpClient == null) {
-			snmpClient = new Snmp(new DefaultUdpTransportMapping());
+			MessageDispatcher md = new MessageDispatcherImpl();
+			md.addMessageProcessingModel(new MPv2c());
+			DefaultUdpTransportMapping tp = new DefaultUdpTransportMapping();
+			snmpClient = new Snmp(md, tp);
 		}
 		snmpClient.listen();
 	}

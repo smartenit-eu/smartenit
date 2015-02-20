@@ -17,6 +17,8 @@ package eu.smartenit.sbox.db.dao.mappers;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
@@ -28,7 +30,7 @@ import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
  * The DARouterMapper class.
  * 
  * @authors George Petropoulos
- * @version 1.2
+ * @version 3.0
  * 
  */
 public class DARouterMapper implements ResultSetMapper<DARouter> {
@@ -51,7 +53,19 @@ public class DARouterMapper implements ResultSetMapper<DARouter> {
 		d.setManagementAddress(new NetworkAddressIPv4(r.getString("ADDRESS"), 0));
 		d.setSnmpCommunity(r.getString("SNMPCOMMUNITY"));
         d.setOfSwitchDPID(r.getString("OFSWITCHDPID"));
+        d.setLocalDCOfSwitchPortNumbers(
+        		stringToList(r.getString("LOCALDCOFSWITCHPORTNUMBERS")));
 		return d;
 
+	}
+	
+	private List<Integer> stringToList(String str) {
+		List<Integer> list = new ArrayList<Integer>();
+		String[] ints = str.substring(1, str.length()-1).split(",");
+		for (String s : ints) {
+			if (!s.isEmpty())
+				list.add(Integer.valueOf(s.trim()));
+		}
+		return list;
 	}
 }

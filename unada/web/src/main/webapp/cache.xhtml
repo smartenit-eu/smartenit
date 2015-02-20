@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:head>
+	<meta charset="utf-8" />
+	<meta http-equiv="cache-control" content="max-age=0" />
+	<meta http-equiv="cache-control" content="no-cache" />
+	<meta http-equiv="expires" content="0" />
+	<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+	<meta http-equiv="pragma" content="no-cache" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="" />
+	<meta name="author" content="" />
+	<link rel="shortcut icon" href="../../assets/ico/favicon.ico" />
+
+	<title>uNaDa Cache management</title>
+	<link href="css/bootstrap.min.css" rel="stylesheet" />
+	<link href="css/unada-main.css" rel="stylesheet" />
+	<link rel="stylesheet"
+		href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" />
+	<link
+		href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap-glyphicons.css"
+		rel="stylesheet" />
+	<script src="js/bootstrap-dropdown.js"></script>
+</h:head>
+
+<h:body>
+
+	<div class="container">
+		<!-- Static navbar -->
+		<div class="navbar navbar-default" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse"
+						data-target=".navbar-collapse">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#">SmartenIT</a>
+				</div>
+				<div class="navbar-collapse collapse">
+					<h:form>
+						<ul class="nav navbar-nav navbar-right">
+							<li><a href="index.xhtml">Settings</a></li>
+                            <li><a href="overlay.xhtml">Overlay</a></li>
+							<li><a href="social.xhtml">Social</a></li>
+							<li class="active"><a href="cache.xhtml">Cache</a></li>
+							<li class="dropdown"><a href="#" class="dropdown-toggle"
+								data-toggle="dropdown"><h:outputText
+										value="#{unadaSessionBean.name}" /><b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li><a href="admin.xhtml">Administration</a></li>
+                                    <li><a href="demo.xhtml">Demo</a></li>
+									<li><a href="#">Reports</a></li>
+									<li class="divider"></li>
+									<li><h:commandLink action="#{unadaSessionBean.logout}"
+											value="Logout" /></li>
+								</ul></li>
+						</ul>
+					</h:form>
+				</div>
+			</div>
+		</div>
+
+		<h:form class="form-horizontal" role="form" id="cache">
+			<div class="row marketing">
+				<h2>Cache Management</h2>
+				<br />
+				<div class="form-group">
+					<label for="size" class="col-xs-4 control-label">Cache Size
+						(MB)</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="size"
+							value="#{cacheBean.cache.size}">
+							<f:converter
+								converterId="eu.smartenit.unada.web.util.SizeConverter" />
+						</h:inputText>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="sizeThreshold" class="col-xs-4 control-label">Size
+						Threshold (MB)</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="sizeThreshold"
+							value="#{cacheBean.cache.sizeThreshold}">
+							<f:converter
+								converterId="eu.smartenit.unada.web.util.SizeConverter" />
+						</h:inputText>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="timeToLive" class="col-xs-4 control-label">Time
+						To Live (hours)</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="timeToLive"
+							value="#{cacheBean.cache.timeToLive}">
+							<f:converter
+								converterId="eu.smartenit.unada.web.util.HourConverter" />
+						</h:inputText>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="socialThreshold" class="col-xs-4 control-label">Social
+						Threshold</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="socialThreshold"
+							value="#{cacheBean.cache.socialThreshold}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="overlayThreshold" class="col-xs-4 control-label">Overlay
+						Threshold</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control"
+							id="overlayThreshold" value="#{cacheBean.cache.overlayThreshold}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="text-center">
+						<div class="btn-group">
+							<h:commandButton type="submit" class="btn btn-primary"
+								action="#{cacheBean.updateCache}" value="Update" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="row marketing">
+				<!-- Table -->
+				<div class="table-responsive">
+					<h:dataTable value="#{cacheBean.contentList}" var="c"
+						class="table table-striped" id="contentTable">
+						<h:column>
+							<f:facet name="header">ID</f:facet>
+                        <a href="#{c.url}">#{c.contentID}</a>
+                    </h:column>
+						<h:column>
+							<f:facet name="header">Size (MB)</f:facet>
+							<h:outputText type="text" value="#{c.size}">
+								<f:converter
+									converterId="eu.smartenit.unada.web.util.SizeConverter" />
+							</h:outputText>
+						</h:column>
+                        <h:column>
+                            <f:facet name="header">Cache Date</f:facet>
+                            <h:outputText value="#{c.cacheDate}">
+                                <f:convertDateTime dateStyle= "short" timeStyle="short" type="both"/>
+                            </h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Cache Hits</f:facet>
+                            #{c.accessList.size()}
+                        </h:column>
+						<h:column>
+							<f:facet name="header">Downloaded</f:facet>
+                        #{c.downloaded}
+                    </h:column>
+						<h:column>
+							<f:facet name="header">Prefetched</f:facet>
+                        #{c.prefetched}
+                    </h:column>
+                        <h:column>
+                            <f:facet name="header">Source</f:facet>
+                            <i class="#{c.prefetchedVimeo? 'fa fa-vimeo-square' : 'fa fa-vimeo-square hidden'}" style="color:dodgerblue"></i>
+                            <i class="#{not c.prefetchedVimeo? 'fa fa-spinner' : 'fa fa-spinner hidden'}" style="color:red"></i>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Action</f:facet>
+                            <div class="btn-group">
+                                <h:commandLink>
+                                    <i class="fa fa-trash-o fa-fw" style="color:red">
+										<f:ajax render="@all"
+                                                listener="#{cacheBean.delete(c)}" />
+                                    </i>
+                                </h:commandLink>
+                            </div>
+                        </h:column>
+					</h:dataTable>
+				</div>
+			</div>
+		</h:form>
+		<div class="footer">
+			<center>
+				<p>&copy; The SmartenIT Consortium 2015</p>
+			</center>
+		</div>
+	</div>
+	<!-- /container -->
+
+	<script>
+		$('.dropdown-toggle').dropdown()
+	</script>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="js/jquery.js"></script>
+	<script src="js/bootstrap.js"></script>
+	<script src="js/bootstrapValidator.js"></script>
+	<script src="js/validator/greaterThan.js"></script>
+	<script src="js/validator/between.js"></script>
+	<script src="js/validator/integer.js"></script>
+	<script src="js/validator/notEmpty.js"></script>
+    <script src="js/validator/numeric.js"></script>
+
+	<script>
+		$(document)
+				.ready(
+						function() {
+							$('#cache')
+									.bootstrapValidator(
+											{
+												feedbackIcons : {
+													valid : 'glyphicon glyphicon-ok',
+													invalid : 'glyphicon glyphicon-remove',
+													validating : 'glyphicon glyphicon-refresh'
+												},
+												fields : {
+													'cache:size' : {
+														validators : {
+															notEmpty : {
+																message : 'The Cache size must not be empty.'
+															},
+															between : {
+																min : 500,
+																max : 16000,
+																message : 'The Cache size must be between 500 and 16000 MB.'
+															}
+														}
+													},
+													'cache:sizeThreshold' : {
+														validators : {
+															notEmpty : {
+																message : 'The Cache size threshold must not be empty.'
+															},
+															between : {
+																min : 50,
+																max : 500,
+																message : 'The Cache size threshold must be between 50 and 500 MB.'
+															}
+														}
+													},
+													'cache:timeToLive' : {
+														validators : {
+															notEmpty : {
+																message : 'The Time to live must not be empty.'
+															},
+															integer : {
+																message : 'The Time to live must be an integer.'
+															},
+															greaterThan : {
+																value : 24,
+																message : 'The Time to live must be greater than 24 hours.'
+															}
+														}
+													},
+													'cache:overlayThreshold' : {
+														validators : {
+															notEmpty : {
+																message : 'The Overlay threshold must not be empty.'
+															},
+                                                            numeric : {
+                                                                message : 'The Overlay threshold must be a numeric.'
+                                                            }
+														}
+													},
+													'cache:socialThreshold' : {
+														validators : {
+															notEmpty : {
+																message : 'The Social threshold must not be empty.'
+															},
+                                                            numeric : {
+                                                                message : 'The Social threshold must be a numeric.'
+                                                            }
+														}
+													}
+												}
+											});
+						});
+	</script>
+</h:body>
+</html>

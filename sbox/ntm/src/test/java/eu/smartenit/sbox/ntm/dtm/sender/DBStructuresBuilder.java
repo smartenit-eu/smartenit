@@ -93,6 +93,7 @@ class DBStructuresBuilder {
 		SDNController controller1 = new SDNController(new NetworkAddressIPv4(sdnController1Address, 32), null, new NetworkAddressIPv4(sdnController1Address, 32), 30, null, 40);
 		DARouter daRouter1 = new DARouter(new NetworkAddressIPv4("100.1.2.1", 32), "testCommunity", localDARDPID1);
 		DARouter daRouter2 = new DARouter(new NetworkAddressIPv4("100.1.2.2", 32), "testCommunity", localDARDPID2);
+		controller1.setDaRouters(Arrays.asList(daRouter1, daRouter2));
 		CloudDC localCloud1 = new CloudDC("localCloud1", localAS100, daRouter1, controller1, null);
 		CloudDC localCloud2 = new CloudDC("localCloud2", localAS100, daRouter2, controller1, null);
 		CloudDC localCloud3 = new CloudDC("localCloud3", localAS100, daRouter2, controller1, null);
@@ -102,6 +103,8 @@ class DBStructuresBuilder {
 		localAS101.setLocal(true);
 		SDNController controller2 = new SDNController(new NetworkAddressIPv4(sdnController2Address, 32), null, new NetworkAddressIPv4(sdnController2Address, 32), 50, null, 60);
 		DARouter daRouter3 = new DARouter(new NetworkAddressIPv4("101.1.2.1", 32), "testCommunity", localDARDPID3);
+		daRouter3.setLocalDCOfSwitchPortNumbers(Arrays.asList(10, 11));
+		controller2.setDaRouters(Arrays.asList(daRouter3));
 		CloudDC localCloud4 = new CloudDC("localCloud4", localAS101, daRouter3, controller2, null);
 		
 		DC2DCCommunicationID id1 = new DC2DCCommunicationID(1, "localCloud1-remoteCloud1", 100, "localCloud1", 1, "remoteCloud1");

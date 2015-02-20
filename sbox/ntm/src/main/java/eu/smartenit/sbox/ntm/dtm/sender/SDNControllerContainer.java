@@ -35,7 +35,7 @@ import eu.smartenit.sbox.ntm.dtm.DAOFactory;
  * which tunnels were configured towards AS with given AS number.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.0
  * 
  */
 public class SDNControllerContainer {
@@ -80,7 +80,7 @@ public class SDNControllerContainer {
 	}
 	
 	private List<DC2DCCommunication> getAllCommunicationsFromDB() {
-		return DAOFactory.getDCDC2DCCommunicationDAOInstance().findAllDC2DCCommunicationsCloudsTunnels();
+		return DAOFactory.getDCDC2DCComDAOInstance().findAllDC2DCCommunicationsCloudsTunnels();
 	}
 
 	private void updateControllers(DC2DCCommunication communication) {

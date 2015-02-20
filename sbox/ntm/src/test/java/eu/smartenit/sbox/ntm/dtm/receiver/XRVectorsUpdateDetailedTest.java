@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -35,7 +36,10 @@ import eu.smartenit.sbox.commons.SBoxProperties;
 import eu.smartenit.sbox.commons.SBoxThreadHandler;
 import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.LinkDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
+import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.CVector;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.Link;
 import eu.smartenit.sbox.db.dto.LocalRVector;
 import eu.smartenit.sbox.db.dto.LocalVectorValue;
@@ -43,6 +47,8 @@ import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.RVector;
 import eu.smartenit.sbox.db.dto.SBox;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
+import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.interfaces.intersbox.client.InterSBoxClient;
 import eu.smartenit.sbox.ntm.dtm.DAOFactory;
@@ -56,7 +62,7 @@ import eu.smartenit.sbox.ntm.dtm.receiver.RemoteSBoxContainer;
  * Analyzer and Economic Analyzer component.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.0
  * 
  */
 public class XRVectorsUpdateDetailedTest {
@@ -68,6 +74,8 @@ public class XRVectorsUpdateDetailedTest {
 	private RemoteSBoxContainer container = mock(RemoteSBoxContainer.class);
 	private InterSBoxClient client = mock(InterSBoxClient.class);
 	private LinkDAO dao = mock(LinkDAO.class);
+	private SystemControlParametersDAO scpDAO = mock(SystemControlParametersDAO.class);
+	private TimeScheduleParametersDAO tspDAO = mock(TimeScheduleParametersDAO.class);
 	
 	@Before
 	public void setup() {
@@ -80,11 +88,11 @@ public class XRVectorsUpdateDetailedTest {
     	SBoxThreadHandler.threadService = 
     			Executors.newScheduledThreadPool(SBoxProperties.CORE_POOL_SIZE, new ThreadFactory());
     	
-		LocalVectorValue xValue1 = new LocalVectorValue(12, new SimpleLinkID("id1", "isp1"));
-		LocalVectorValue xValue2 = new LocalVectorValue(18, new SimpleLinkID("id2", "isp1"));
+		LocalVectorValue xValue1 = new LocalVectorValue(10, new SimpleLinkID("id1", "isp1"));
+		LocalVectorValue xValue2 = new LocalVectorValue(30, new SimpleLinkID("id2", "isp1"));
 		xVector1 = new XVector(Arrays.asList(xValue1, xValue2) , asNumber1);
 
-		LocalVectorValue xValue3 = new LocalVectorValue(14, new SimpleLinkID("id1", "isp1"));
+		LocalVectorValue xValue3 = new LocalVectorValue(35, new SimpleLinkID("id1", "isp1"));
 		LocalVectorValue xValue4 = new LocalVectorValue(10, new SimpleLinkID("id2", "isp1"));
 		xVector2 = new XVector(Arrays.asList(xValue3, xValue4) , asNumber1);
 		
@@ -98,7 +106,18 @@ public class XRVectorsUpdateDetailedTest {
 				new Link(null, null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("1.1.1.1", 24)));
 		when(dao.findById(linkID2)).thenReturn(
 				new Link(null, null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("2.2.2.2", 24)));
-		DAOFactory.setLinkDAO(dao);
+		
+    	SystemControlParameters scp = new SystemControlParameters(ChargingRule.volume, null, 0.1);
+    	when(scpDAO.findLast()).thenReturn(scp);
+    	TimeScheduleParameters tsp = new TimeScheduleParameters();
+    	tsp.setReportPeriodDTM(3);
+    	tsp.setCompensationPeriod(12);
+    	when(tspDAO.findLast()).thenReturn(tsp);
+    	
+    	DAOFactory.setSCPDAOInstance(scpDAO);
+    	DAOFactory.setTSPDAOInstance(tspDAO);
+		DAOFactory.setLinkDAOInstance(dao);
+
 	}
 	
 	@Test
@@ -106,6 +125,7 @@ public class XRVectorsUpdateDetailedTest {
 		DTMTrafficManager manager = new DTMTrafficManager();
 		manager.setSBoxContainer(container);
 		manager.initialize();
+		CVectorUpdateController.deactivate();
 		manager.updateXVector(xVector1);
 		manager.updateRVector(rVector);
 		
@@ -130,6 +150,7 @@ public class XRVectorsUpdateDetailedTest {
 		DTMTrafficManager manager = new DTMTrafficManager();
 		manager.setSBoxContainer(container);
 		manager.initialize();
+		CVectorUpdateController.deactivate();
 		manager.updateRVector(rVector);
 		manager.updateXVector(xVector2);
 		
@@ -138,8 +159,8 @@ public class XRVectorsUpdateDetailedTest {
 		
 		verify(client, times(1)).send(any(String.class), anyInt(), cVectorArgument.capture());
 		reset(client);
-		assertEquals(-4, cVectorArgument.getValue().getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
-		assertEquals(4, cVectorArgument.getValue().getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
+		assertEquals(-17, cVectorArgument.getValue().getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
+		assertEquals(17, cVectorArgument.getValue().getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
 	}
 	
 	@Test
@@ -147,8 +168,11 @@ public class XRVectorsUpdateDetailedTest {
 		DTMTrafficManager manager = new DTMTrafficManager();
 		manager.setSBoxContainer(container);
 		manager.initialize();
+		CVectorUpdateController.deactivate();
 		manager.updateRVector(rVector);
+		Thread.sleep(100);
 		manager.updateXVector(xVector1);
+		Thread.sleep(100);
 		manager.updateXVector(xVector2);
 		
 		Thread.sleep(1000);
@@ -156,8 +180,39 @@ public class XRVectorsUpdateDetailedTest {
 		
 		verify(client, times(2)).send(any(String.class), anyInt(), cVectorArgument.capture());
 		reset(client);
-		assertEquals(-5, cVectorArgument.getValue().getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
-		assertEquals(5, cVectorArgument.getValue().getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
+		assertEquals(5, cVectorArgument.getAllValues().get(0).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
+		assertEquals(-5, cVectorArgument.getAllValues().get(0).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
+		assertEquals(-12, cVectorArgument.getAllValues().get(1).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
+		assertEquals(12, cVectorArgument.getAllValues().get(1).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
+
+	}
+	
+	@Test
+	public void shouldDistributeCVectorBeforeAccountingPeriodEndWithCVectorController() throws Exception {
+		DTMTrafficManager manager = new DTMTrafficManager();
+		manager.setSBoxContainer(container);
+		manager.initialize();
+		manager.updateRVector(rVector);
+		Thread.sleep(100);
+		manager.updateXVector(xVector1);
+		Thread.sleep(100);
+		manager.updateXVector(xVector2);
+		
+		Thread.sleep(1000);
+		ArgumentCaptor<CVector> cVectorArgument = ArgumentCaptor.forClass(CVector.class);
+		
+		verify(client, times(2)).send(any(String.class), anyInt(), cVectorArgument.capture());
+		reset(client);
+		assertEquals(5, cVectorArgument.getAllValues().get(0).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
+		assertEquals(-5, cVectorArgument.getAllValues().get(0).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
+		assertEquals(-12, cVectorArgument.getAllValues().get(1).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
+		assertEquals(12, cVectorArgument.getAllValues().get(1).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
+	}
+
+	@After
+	public void after() {
+		CVectorUpdateController.deactivate();
+		CVectorUpdateController.getInstance().reset();
 	}
 	
 }

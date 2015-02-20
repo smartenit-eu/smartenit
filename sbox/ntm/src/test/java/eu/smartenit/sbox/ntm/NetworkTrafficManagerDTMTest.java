@@ -30,7 +30,7 @@ import eu.smartenit.sbox.ntm.dtm.DAOFactory;
  * modules in three modes as specified in {@link NetworkTrafficManagerDTMMode}.
  * 
  * @author Lukasz Lopatowski
- * @version 1.0
+ * @version 3.0
  * 
  */
 public class NetworkTrafficManagerDTMTest {
@@ -40,7 +40,7 @@ public class NetworkTrafficManagerDTMTest {
 		ASDAO asDAO = mock(ASDAO.class);
 		DC2DCCommunicationDAO dcDAO = mock(DC2DCCommunicationDAO.class);
     	DAOFactory.setASDAOInstance(asDAO);
-		DAOFactory.setDC2DCCommunicationDAO(dcDAO);
+		DAOFactory.setDC2DCComDAOInstance(dcDAO);
 	}
 	
 	@Test

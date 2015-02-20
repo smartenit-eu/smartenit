@@ -12,11 +12,11 @@ The SmartenIT project is composed of six modules:
 
 * **sbox**: This module includes all the sub-modules of the SBox entity. It implements the functionalities of the Dynamic Traffic Management mechanism.
 
-* **unada**: This module includes all the sub-modules of the uNaDa entity. 
+* **unada**: This module includes all the sub-modules of the uNaDa entity. It implements the functionalities of the RB-HORST mechanism.
 
 * **sdn**: This module provides the extension of Floodlight SDN controller, to offer the SmartenIT capabilities. It implements the functionalities of the Dynamic Traffic Management mechanism.
 
-* **enduser**: This module includes all the sub-modules of the end-user entity.
+* **enduser**: This module includes all the sub-modules of the end-user entity. It implements the functionalities of the RB-HORST mechanism.
 
 * **network**: This module includes all the sub-modules of the network entity.
 
@@ -25,9 +25,9 @@ The SmartenIT project is composed of six modules:
 
 ## Resources
 
-* The SmartenIT [web site](http://http://www.smartenit.eu/) where you can find the description and publications of the SmartenIT project.
+* The SmartenIT [web site](http://www.smartenit.eu/) where you can find the description and publications of the SmartenIT project.
 
 
 - - -
 
-Copyright 2014, the Members of the SmartenIT Consortium
+Copyright 2015, the Members of the SmartenIT Consortium

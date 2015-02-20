@@ -30,8 +30,8 @@ import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 /**
  * The abstract TimeScheduleParametersDAO class, including all SQL queries.
  *
- * @authors Antonis Makris, George Petropoulos
- * @version 1.1
+ * @author George Petropoulos
+ * @version 3.0
  * 
  */
 public abstract class AbstractTimeScheduleParametersDAO {
@@ -42,7 +42,11 @@ public abstract class AbstractTimeScheduleParametersDAO {
 			+ "accountingPeriod LONG, "
 			+ "reportingPeriod LONG, "
 			+ "tol1 REAL, "
-			+ "tol2 REAL)")
+			+ "tol2 REAL, "
+			+ "samplingPeriod LONG, "
+			+ "reportPeriodEA LONG, "
+			+ "reportPeriodDTM LONG, "
+			+ "compensationPeriod LONG)")
 	public abstract void createTable();
 
 	
@@ -51,26 +55,33 @@ public abstract class AbstractTimeScheduleParametersDAO {
 	
 	
 	@SqlUpdate("INSERT INTO TimeScheduleParameters "
-			+ "(startDate, accountingPeriod , reportingPeriod, tol1, tol2) "
-			+ "VALUES (:startDate , :accountingPeriod, :reportingPeriod, :tol1, :tol2 )")
+			+ "(startDate, accountingPeriod , reportingPeriod, tol1, tol2, "
+			+ "samplingPeriod, reportPeriodEA, reportPeriodDTM, compensationPeriod) "
+			+ "VALUES (:startDate, :accountingPeriod, :reportingPeriod, :tol1, :tol2, "
+			+ ":samplingPeriod, :reportPeriodEA, :reportPeriodDTM, :compensationPeriod)")
 	@GetGeneratedKeys
 	public abstract long insert(@BindBean TimeScheduleParameters tsp);
 
 	
-	@SqlQuery("SELECT id, startDate, accountingPeriod, reportingPeriod, tol1, tol2  "
+	@SqlQuery("SELECT id, startDate, accountingPeriod, reportingPeriod, tol1, tol2, "
+			+ "samplingPeriod, reportPeriodEA, reportPeriodDTM, compensationPeriod  "
 			+ "from TimeScheduleParameters")
 	@Mapper(TimeScheduleParametersMapper.class)
 	public abstract List<TimeScheduleParameters> findAll();
 
 	
-	@SqlQuery("SELECT * from TimeScheduleParameters where ID =:id")
+	@SqlQuery("SELECT id, startDate, accountingPeriod, reportingPeriod, tol1, tol2, "
+			+ "samplingPeriod, reportPeriodEA, reportPeriodDTM, compensationPeriod "
+			+ "from TimeScheduleParameters where ID =:id")
 	@Mapper(TimeScheduleParametersMapper.class)
 	public abstract TimeScheduleParameters findById(@Bind("id") long id);
 
 	
 	@SqlUpdate("UPDATE TimeScheduleParameters SET startDate = :startDate, "
-			+ "accountingPeriod = :accountingPeriod ,reportingPeriod = :reportingPeriod,"
-			+ "tol1 = :tol1, tol2 = :tol2 "
+			+ "accountingPeriod = :accountingPeriod, reportingPeriod = :reportingPeriod, "
+			+ "tol1 = :tol1, tol2 = :tol2, samplingPeriod = :samplingPeriod, "
+			+ "reportPeriodEA = :reportPeriodEA, reportPeriodDTM = :reportPeriodDTM, "
+			+ "compensationPeriod = :compensationPeriod "
 			+ "WHERE ID = :id")
 	public abstract void update(@Bind("id") long id, @BindBean TimeScheduleParameters tsp);
 

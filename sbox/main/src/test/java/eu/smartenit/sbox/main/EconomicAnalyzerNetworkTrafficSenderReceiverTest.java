@@ -47,10 +47,13 @@ import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
 import eu.smartenit.sbox.db.dao.DbConstants;
 import eu.smartenit.sbox.db.dao.LinkDAO;
 import eu.smartenit.sbox.db.dao.SDNControllerDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
 import eu.smartenit.sbox.db.dto.AS;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.SDNController;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.eca.EconomicAnalyzer;
@@ -75,8 +78,11 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 	
 	private static AS remoteAS;
 	
+	private static SystemControlParametersDAO scpDAO;
+	private static SystemControlParameters scp;
+	
 	@BeforeClass
-	public static void setupTests() {
+	public static void setupTests() throws Exception {
 		logger.info("Importing existing db schema and values.");
 		DbConstants.DBI_URL = "jdbc:sqlite:src/test/resources/remote.db";
 		
@@ -100,6 +106,12 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
         sdn.setRestHost(new NetworkAddressIPv4("127.0.0.1", 0));
         sdao.update(sdn);
         
+      	//modifying charging rule to ChargingRule.volume
+      	scpDAO = new SystemControlParametersDAO();
+      	scp = scpDAO.findLast();
+      	scp.setChargingRule(ChargingRule.volume);
+      	scpDAO.insert(scp);
+      	
 		logger.info("Initializing thread service.");
 		ThreadFactory threadFactory = new ThreadFactory();
 		SBoxThreadHandler.threadService = 
@@ -142,8 +154,9 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 		DbConstants.DBI_URL = "jdbc:sqlite:src/test/resources/local.db";
 		//Modifying daofactory instances to get different db file.
 		DAOFactory.setASDAOInstance(new ASDAO());
-		DAOFactory.setDC2DCCommunicationDAO(new DC2DCCommunicationDAO());
-		DAOFactory.setLinkDAO(new LinkDAO());
+		DAOFactory.setDC2DCComDAOInstance(new DC2DCCommunicationDAO());
+		DAOFactory.setLinkDAOInstance(new LinkDAO());
+		DAOFactory.setSCPDAOInstance(new SystemControlParametersDAO());
 		
 		//modifying remote sbox address, to be 127.0.0.1
       	asdao = new ASDAO();
@@ -158,7 +171,7 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 
 		EconomicAnalyzer eca = new EconomicAnalyzer(ntm2.getDtmTrafficManager());
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 12; i++) {
 			XVector xVector = new XVector();
 			xVector.setSourceAsNumber(100);
 			xVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 500L);
@@ -192,7 +205,7 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 		
 	
 	@AfterClass
-	public static void cleanTests() {
+	public static void cleanTests() throws Exception {
 		DbConstants.DBI_URL = "jdbc:sqlite:src/test/resources/remote.db";
 		
 		sdao = new SDNControllerDAO();
@@ -200,6 +213,10 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
         sdn.setRestPort(8080);
         sdn.setRestHost(new NetworkAddressIPv4("192.168.122.105", 0));
         sdao.update(sdn);
+        
+      	scp = scpDAO.findLast();
+      	scp.setChargingRule(ChargingRule.volume);
+      	scpDAO.insert(scp);
 		
 		SBoxThreadHandler.shutdownNowThreads();
 	}

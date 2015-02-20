@@ -17,6 +17,7 @@ package eu.smartenit.sbox.qoa;
 
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 
 /**
@@ -36,6 +37,7 @@ public class DAOFactory {
 	private static ASDAO asDAO = new ASDAO();
 	private static DC2DCCommunicationDAO dc2dcCommunicationDAO = new DC2DCCommunicationDAO();
 	private static TimeScheduleParametersDAO timeScheduleParametersDAO = new TimeScheduleParametersDAO();
+	private static SystemControlParametersDAO systemControlParametersDAO = new SystemControlParametersDAO();
 	
 	/**
 	 * Method returns an instance of the {@link ASDAO}
@@ -95,5 +97,26 @@ public class DAOFactory {
 	 */
 	public static void setTimeScheduleParametersDAO(TimeScheduleParametersDAO dao) {
 		timeScheduleParametersDAO = dao;
+	}
+	
+	/**
+	 * Method used to set a given instance of {@link SystemControlParametersDAO}
+	 * to be returned on each request.
+	 * 
+	 * @param dao
+	 *            specific instance of {@link SystemControlParametersDAO}
+	 */
+	public static void setSCPDAOInstance(SystemControlParametersDAO dao) {
+		systemControlParametersDAO = dao;
+	}
+	
+	/**
+	 * Returns locally stored instance of {@link SystemControlParametersDAO}.
+	 * Specific DAO instance can be set using appropriate static setter method.
+	 * 
+	 * @return locally stored {@link SystemControlParametersDAO} instance
+	 */
+	public static SystemControlParametersDAO getSCPDAOInstance() {
+		return systemControlParametersDAO;
 	}
 }

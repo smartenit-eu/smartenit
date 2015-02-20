@@ -47,8 +47,14 @@ public class TimeScheduleParametersMapper implements
 	 */
 	public TimeScheduleParameters map(int index, ResultSet r,
 			StatementContext ctx) throws SQLException {
-		TimeScheduleParameters t = new TimeScheduleParameters(r.getDate("startDate"),
-				r.getLong("accountingPeriod"), r.getLong("reportingPeriod"));
+		TimeScheduleParameters t = new TimeScheduleParameters();
+		t.setAccountingPeriod(r.getLong("accountingPeriod"));
+		t.setCompensationPeriod(r.getLong("compensationPeriod"));
+		t.setReportingPeriod(r.getLong("reportingPeriod"));
+		t.setReportPeriodDTM(r.getLong("reportPeriodDTM"));
+		t.setReportPeriodEA(r.getLong("reportPeriodEA"));
+		t.setSamplingPeriod(r.getLong("samplingPeriod"));
+		t.setStartDate(r.getDate("startDate"));
 		t.setTol1(r.getDouble("tol1"));
 		t.setTol2(r.getDouble("tol2"));
 		return t;

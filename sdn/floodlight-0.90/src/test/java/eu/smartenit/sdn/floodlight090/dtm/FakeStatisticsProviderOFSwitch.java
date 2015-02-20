@@ -108,7 +108,7 @@ public final class FakeStatisticsProviderOFSwitch implements IOFSwitch {
 	// <editor-fold defaultstate="collapsed" desc=" Not implemented methods ">
 	@Override
 	public void write(OFMessage m, FloodlightContext bc) throws IOException {
-		throw new UnsupportedOperationException("Not supported.");
+		//throw new UnsupportedOperationException("Not supported.");
 	}
 
 	@Override
@@ -219,7 +219,8 @@ public final class FakeStatisticsProviderOFSwitch implements IOFSwitch {
 
 	@Override
 	public String getStringId() {
-		throw new UnsupportedOperationException("Not supported.");
+		//throw new UnsupportedOperationException("Not supported.");
+            return "";
 	}
 
 	@Override
@@ -331,7 +332,7 @@ public final class FakeStatisticsProviderOFSwitch implements IOFSwitch {
 
 	@Override
 	public void flush() {
-		throw new UnsupportedOperationException("Not supported.");
+//		throw new UnsupportedOperationException("Not supported.");
 	}
 	// </editor-fold>
 }

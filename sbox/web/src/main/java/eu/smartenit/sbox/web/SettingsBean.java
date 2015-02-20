@@ -16,6 +16,7 @@
 package eu.smartenit.sbox.web;
 
 import java.io.Serializable;
+
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
 import javax.annotation.PostConstruct;
@@ -23,7 +24,9 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 
 /**
@@ -32,7 +35,7 @@ import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
  * It is the controlling class of the settings.xhtml page.
  * 
  * @author George Petropoulos
- * @version 1.2
+ * @version 3.0
  * 
  */
 @ManagedBean
@@ -45,14 +48,21 @@ public class SettingsBean implements Serializable {
 			.getLogger(SettingsBean.class);
 
 	private TimeScheduleParametersDAO tspdao;
+	
+	private SystemControlParametersDAO scpdao;
 
 	@PostConstruct
 	public void init() {	
 		tspdao = new TimeScheduleParametersDAO();
+		scpdao = new SystemControlParametersDAO();
 
 		timeParams = tspdao.findLast();
 		if (timeParams == null)
 			timeParams = new TimeScheduleParameters();
+		
+		systemParams = scpdao.findLast();
+		if (systemParams == null)
+			systemParams = new SystemControlParameters();
 		
 		logger.debug("Navigating to settings page.");
 	}
@@ -72,6 +82,8 @@ public class SettingsBean implements Serializable {
 	 * 
 	 */
 	public TimeScheduleParameters timeParams;
+	
+	public SystemControlParameters systemParams;
 
 	public TimeScheduleParameters getTimeParams() {
 		return timeParams;
@@ -79,6 +91,14 @@ public class SettingsBean implements Serializable {
 
 	public void setTimeParams(TimeScheduleParameters timeParams) {
 		this.timeParams = timeParams;
+	}
+
+	public SystemControlParameters getSystemParams() {
+		return systemParams;
+	}
+
+	public void setSystemParams(SystemControlParameters systemParams) {
+		this.systemParams = systemParams;
 	}
 
 	/**
@@ -95,6 +115,23 @@ public class SettingsBean implements Serializable {
 					+ "Probably primary key already exists.");
 		}
 		logger.debug("TimeParams " + timeParams + " was successfully updated.");
+		return "settings";
+	}
+	
+	/**
+	 * The method that inserts/updates the SystemControlParameters to the db.
+	 * 
+	 */
+	public String updateSystemParams() {
+		logger.debug("Updating SystemControlParameters " + systemParams + ".");
+		scpdao.deleteAll();
+		try {
+			scpdao.insert(systemParams);
+		} catch (Exception e) {
+			logger.warn("Error while inserting system parameters to database. "
+					+ "Probably primary key already exists.");
+		}
+		logger.debug("SystemControlParameters " + systemParams + " was successfully updated.");
 		return "settings";
 	}
 

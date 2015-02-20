@@ -16,7 +16,9 @@
 package eu.smartenit.sbox.qoa;
 
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +28,9 @@ import org.slf4j.LoggerFactory;
 
 import eu.smartenit.sbox.commons.SBoxThreadHandler;
 import eu.smartenit.sbox.db.dto.AS;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
@@ -51,6 +55,13 @@ public class SNMPTrafficCollector {
 	protected MonitoredTunnelsInventory monitoredTunnels = new MonitoredTunnelsInventory();
 	private DTMQosAnalyzer analyzer;
 	protected MonitoringDataProcessor monitoringDataProcessor;
+	protected SystemControlParameters systemControlParameters;
+	protected TimeScheduleParameters timeScheduleParameters;
+	protected long numberOfPeriods;
+	protected long period;
+	protected int reportingIterator = 1;
+	protected CounterValues lastReportPeriodEACounterValues = new CounterValues();
+	protected Map<Integer, Boolean> firstUpdate;
 	
 	/**
 	 * The constructor with arguments.
@@ -61,8 +72,16 @@ public class SNMPTrafficCollector {
 	 */
 	public SNMPTrafficCollector(DTMQosAnalyzer analyzer) {
 		this.analyzer = analyzer;
+		this.firstUpdate = new Hashtable<>();
+		this.timeScheduleParameters = loadTimeScheduleParametersFromDB();
+		this.systemControlParameters = loadSystemControlParametersFromDB();
+		this.period = timeScheduleParameters.getReportingPeriod();
+		if(this.systemControlParameters.getChargingRule().equals(ChargingRule.the95thPercentile)) {
+			this.numberOfPeriods = (long) timeScheduleParameters.getReportPeriodEA() / timeScheduleParameters.getReportPeriodDTM();
+			this.period = timeScheduleParameters.getReportPeriodDTM();
+		}
 	}
-	
+
 	/**
 	 * The constructor with arguments used in unit testing.
 	 */
@@ -112,20 +131,20 @@ public class SNMPTrafficCollector {
 	 * @param tsp
 	 *            time schedule parameters
 	 */
-	public void scheduleMonitoringTasks(TimeScheduleParameters tsp) {
+	public void scheduleMonitoringTasks() {
 		logger.info("Scheduling monitoring tasks ...");
 		if(validateAsNumbers()) {
 			for (int asNumber : monitoredLinks.getAllAsNumbers()) {
 				SBoxThreadHandler.getThreadService().scheduleAtFixedRate(
 						new TrafficCollectorTask(this, asNumber),
-						calculateInitialDelay(tsp),
-						tsp.getReportingPeriod(),
-						tsp.getTimeUnit());
+						calculateInitialDelay(timeScheduleParameters),
+						period,
+						timeScheduleParameters.getTimeUnit());
 				logger.info(prepareLogForScheduleMonitoringTasks(
 						asNumber,
-						calculateInitialDelay(tsp),
-						tsp.getReportingPeriod(),
-						tsp.getTimeUnit()));
+						calculateInitialDelay(timeScheduleParameters),
+						period,
+						timeScheduleParameters.getTimeUnit()));
 			}
 		}
 		logger.info("... completed.");
@@ -142,15 +161,44 @@ public class SNMPTrafficCollector {
 	 *            counter values from monitored links in given AS
 	 */
 	public void notifyNewCounterValues(int asNumber, CounterValues counterValues) {
-		XVector xVector = monitoringDataProcessor.calculateXVector(asNumber, counterValues);
-		List<ZVector> zVectors = monitoringDataProcessor.calculateZVectors(asNumber, counterValues);
+		if(!firstUpdate.containsKey(asNumber)) {
+			firstUpdate.put(asNumber, false);
+		}
 		
-		// Aggregating all Z vectors (prepared one per DC2DCCommunication) into one.
-		// This is required by current implementation of Economic Analyzer.
-		ZVector aggregatedZVector = monitoringDataProcessor.aggregateZVectors(zVectors);
-		logCalculatedVectors(xVector, zVectors);
-		analyzer.updateXVector(xVector);
-		analyzer.updateXZVectors(xVector, Arrays.asList(aggregatedZVector));
+		XVector xVector = monitoringDataProcessor.calculateXVector(asNumber, null, counterValues);
+		if(firstUpdate.get(asNumber)) {
+			logCalculatedVectors(xVector, null);
+			analyzer.updateXVector(xVector);
+		}
+		
+		List<ZVector> zVectors = null;
+		ZVector aggregatedZVector = null;
+		boolean updateXZVectors = false;
+		
+		CounterValues collectedCounterValues = new CounterValues();
+		if(this.systemControlParameters.getChargingRule().equals(ChargingRule.the95thPercentile)) {
+			collectedCounterValues.updateLinksAndTunnels(counterValues);
+			if((reportingIterator -1) % numberOfPeriods == 0) {
+				xVector = monitoringDataProcessor.calculateXVector(asNumber, lastReportPeriodEACounterValues, collectedCounterValues);
+				zVectors = monitoringDataProcessor.calculateZVectors(asNumber, lastReportPeriodEACounterValues, collectedCounterValues);
+				updateXZVectors = true;
+				lastReportPeriodEACounterValues = collectedCounterValues;
+			}
+			reportingIterator++;
+		} else {
+			zVectors = monitoringDataProcessor.calculateZVectors(asNumber, null, counterValues);
+			updateXZVectors = true;
+		}
+
+		if(updateXZVectors) {
+			aggregatedZVector = monitoringDataProcessor.aggregateZVectors(zVectors);
+			if(firstUpdate.get(asNumber)) {
+				logCalculatedVectors(xVector, zVectors);
+				analyzer.updateXZVectors(xVector, Arrays.asList(aggregatedZVector));
+			}
+		}
+		
+		firstUpdate.put(asNumber, true);
 	}
 	
 	void logCalculatedVectors(XVector xVector, List<ZVector> zVectors) {
@@ -220,5 +268,14 @@ public class SNMPTrafficCollector {
 		error.append("\n\t AS numbers for tunnels: ").append(asNumbersForTunnels.toString());
 		error.append("\n");
 		return error.toString();
+	}
+	
+	private TimeScheduleParameters loadTimeScheduleParametersFromDB() {
+		return DAOFactory.getTimeScheduleParametersDAOInstance().findLast();
+	}
+	
+	
+	private SystemControlParameters loadSystemControlParametersFromDB() {
+		return DAOFactory.getSCPDAOInstance().findLast();
 	}
 }

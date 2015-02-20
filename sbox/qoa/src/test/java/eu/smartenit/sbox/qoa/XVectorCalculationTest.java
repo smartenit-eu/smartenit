@@ -64,7 +64,7 @@ public class XVectorCalculationTest {
 	@Test
 	public void shouldCalculateFirstXVector() {
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, null);
-		XVector result = processor.calculateXVector(1, values1);
+		XVector result = processor.calculateXVector(1, null, values1);
 		
 		assertEquals(3, result.getVectorValues().size());
 		assertEquals(1, result.getVectorValueForLink(linkID1));
@@ -75,8 +75,8 @@ public class XVectorCalculationTest {
 	@Test
 	public void shouldCalculateSecondXVector() {
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, null);
-		processor.calculateXVector(1, values1);
-		XVector result = processor.calculateXVector(1, values2);
+		processor.calculateXVector(1, null, values1);
+		XVector result = processor.calculateXVector(1, null, values2);
 		
 		assertEquals(3, result.getVectorValues().size());
 		assertEquals(9, result.getVectorValueForLink(linkID1));
@@ -87,9 +87,9 @@ public class XVectorCalculationTest {
 	@Test
 	public void shouldCalculateLaterXVector() {
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, null);
-		processor.calculateXVector(1, values1);
-		processor.calculateXVector(1, values2);
-		XVector result = processor.calculateXVector(1, values3);
+		processor.calculateXVector(1, null, values1);
+		processor.calculateXVector(1, null, values2);
+		XVector result = processor.calculateXVector(1, null, values3);
 		
 		assertEquals(3, result.getVectorValues().size());
 		assertEquals(18, result.getVectorValueForLink(linkID1));
@@ -109,12 +109,30 @@ public class XVectorCalculationTest {
 		values2.storeCounterValue(linkID2, 190);
 		
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, null);
-		processor.calculateXVector(1, values1);
-		XVector result = processor.calculateXVector(1, values2);
+		processor.calculateXVector(1, null, values1);
+		XVector result = processor.calculateXVector(1, null, values2);
 		
 		assertEquals(2, result.getVectorValues().size());
 		assertEquals(10, result.getVectorValueForLink(linkID1));
 		assertEquals(0, result.getVectorValueForLink(linkID2));
+	}
+	
+	@Test
+	public void shouldCalculateXVectorWithLastXVector() {
+		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, null);
+		XVector result = processor.calculateXVector(1, values1, values2);
+		
+		assertEquals(3, result.getVectorValues().size());
+		assertEquals(9, result.getVectorValueForLink(linkID1));
+		assertEquals(13, result.getVectorValueForLink(linkID2));
+		assertEquals(13, result.getVectorValueForLink(linkID3));
+		
+		result = processor.calculateXVector(1, values2, values3);
+		
+		assertEquals(3, result.getVectorValues().size());
+		assertEquals(18, result.getVectorValueForLink(linkID1));
+		assertEquals(5, result.getVectorValueForLink(linkID2));
+		assertEquals(9, result.getVectorValueForLink(linkID3));
 	}
 
 }

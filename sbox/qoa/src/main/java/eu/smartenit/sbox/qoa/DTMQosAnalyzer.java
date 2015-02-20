@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import eu.smartenit.sbox.commons.SBoxProperties;
 import eu.smartenit.sbox.db.dto.AS;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
-import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.eca.EconomicAnalyzer;
@@ -79,7 +78,7 @@ public class DTMQosAnalyzer {
 		else
 			trafficCollector = new SNMPTrafficCollector(this);
 		if(trafficCollector.configure(loadAllLocalASsFromDB(), loadAllDCCommunicationsFromDB())) {
-			trafficCollector.scheduleMonitoringTasks(loadTimeScheduleParametersFromDB());
+			trafficCollector.scheduleMonitoringTasks();
 			logger.info("... QOA component initialization complete.");
 			return true;
 		}
@@ -116,9 +115,5 @@ public class DTMQosAnalyzer {
 	
 	private List<DC2DCCommunication> loadAllDCCommunicationsFromDB() {
 		return DAOFactory.getDCDC2DCCommunicationDAOInstance().findAllDC2DCCommunicationsCloudsTunnels();
-	}
-	
-	private TimeScheduleParameters loadTimeScheduleParametersFromDB() {
-		return DAOFactory.getTimeScheduleParametersDAOInstance().findLast();
 	}
 }

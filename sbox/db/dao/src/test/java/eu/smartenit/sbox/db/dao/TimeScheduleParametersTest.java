@@ -40,11 +40,10 @@ public class TimeScheduleParametersTest {
 	public void setupDb() {
 		logger.info("Creating all tables for tests.");
 		Tables tables = new Tables();
+		tables.deleteAll();
 		tables.createAll();
 		
-		logger.info("Preparing TimeScheduleParameters table.");
 		tdao = new TimeScheduleParametersDAO();
-		tdao.deleteAll();
 	}
 	
 	@After
@@ -62,24 +61,41 @@ public class TimeScheduleParametersTest {
 		
 		//Inserting TimeScheduleParameters.");
 		TimeScheduleParameters t = new TimeScheduleParameters();
-		t.setStartDate(new Date(System.currentTimeMillis()));
+		t.setStartDate(new Date(1000000));
 		t.setAccountingPeriod(300);
 		t.setReportingPeriod(30);
 		t.setTol1(0.2);
 		t.setTol2(0.553);
+		t.setCompensationPeriod(600);
+		t.setReportPeriodDTM(900);
+		t.setReportPeriodEA(1000);
+		t.setSamplingPeriod(100);
 		tdao.insert(t);
 		
 		//Checking non empty TimeScheduleParameters table
 		tList = tdao.findAll();
 		assertNotNull(tList);
 		assertEquals(tList.size(), 1);
+		assertEquals(tList.get(0).getAccountingPeriod(), 300);
+		assertEquals(tList.get(0).getReportingPeriod(), 30);
+		assertEquals(tList.get(0).getTol1(), 0.2, 0.001);
+		assertEquals(tList.get(0).getTol2(), 0.553, 0.001);
+		assertEquals(tList.get(0).getCompensationPeriod(), 600);
+		assertEquals(tList.get(0).getReportPeriodDTM(), 900);
+		assertEquals(tList.get(0).getReportPeriodEA(), 1000);
+		assertEquals(tList.get(0).getSamplingPeriod(), 100);
+		assertEquals(tList.get(0).getStartDate().getTime(), 1000000);
 		
 		t = new TimeScheduleParameters();
-		t.setStartDate(new Date(System.currentTimeMillis()));
-		t.setAccountingPeriod(4000);
-		t.setReportingPeriod(40);
-		t.setTol1(2.2);
-		t.setTol2(3.3);
+		t.setStartDate(new Date(2000000));
+		t.setAccountingPeriod(600);
+		t.setReportingPeriod(60);
+		t.setTol1(2.999);
+		t.setTol2(6.222);
+		t.setCompensationPeriod(600);
+		t.setReportPeriodDTM(2200);
+		t.setReportPeriodEA(4000);
+		t.setSamplingPeriod(600);
 		tdao.insert(t);
 		
 		tList = tdao.findAll();
@@ -88,9 +104,15 @@ public class TimeScheduleParametersTest {
 		
 		TimeScheduleParameters t2 = tdao.findLast();
 		assertNotNull(t2);
-		assertEquals(t2.getAccountingPeriod(), 4000);
-		assertEquals(t2.getTol1(), 2.2, 0.01);
-		assertEquals(t2.getTol2(), 3.3, 0.01);
+		assertEquals(t2.getAccountingPeriod(), 600);
+		assertEquals(t2.getReportingPeriod(), 60);
+		assertEquals(t2.getTol1(), 2.999, 0.001);
+		assertEquals(t2.getTol2(), 6.222, 0.001);
+		assertEquals(t2.getCompensationPeriod(), 600);
+		assertEquals(t2.getReportPeriodDTM(), 2200);
+		assertEquals(t2.getReportPeriodEA(), 4000);
+		assertEquals(t2.getSamplingPeriod(), 600);
+		assertEquals(t2.getStartDate().getTime(), 2000000);
 		
 		tdao.deleteAll();
 		tList = tdao.findAll();

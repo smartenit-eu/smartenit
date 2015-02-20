@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
 import javax.faces.bean.ViewScoped;
 import javax.annotation.PostConstruct;
 
@@ -41,7 +40,7 @@ import eu.smartenit.sbox.web.util.WebUtils;
  * It is the controlling class of the routers.xhtml page.
  * 
  * @author George Petropoulos
- * @version 1.2
+ * @version 3.0
  * 
  */
 @ManagedBean
@@ -72,6 +71,7 @@ public class RoutersBean implements Serializable {
 		bgRoutersList = bgdao.findAll();
 		
 		logger.debug("Navigating to routers page.");
+		//logger.info("DA routers = " + daRoutersList);
 	}
 
 	public boolean editable = true;

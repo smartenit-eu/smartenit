@@ -93,6 +93,47 @@ public class CounterValues {
 	}
 	
 	/**
+	 * Update the local structure with provided links and tunnels counters
+	 * data.
+	 * 
+	 * @param counterValues
+	 *            provided new {@link CounterValues} instance
+	 */
+	public void updateLinksAndTunnels(CounterValues newCounterValues) {
+		updateLinks(newCounterValues.getLinkCounterValues());
+		updateTunnels(newCounterValues.getTunnelCounterValues());
+	}
+
+	protected void updateLinks(Map<LinkID, Long> newLinkCounterValues) {
+		if(linkCounterValues.size() < 1)
+			linkCounterValues.putAll(newLinkCounterValues);
+		else {
+			for (LinkID linkId : newLinkCounterValues.keySet()) {
+				if(!linkCounterValues.containsKey(linkId)) {
+					linkCounterValues.put(linkId, newLinkCounterValues.get(linkId));
+				} else {
+					linkCounterValues.put(linkId, linkCounterValues.get(linkId) + newLinkCounterValues.get(linkId));
+				}
+			}
+		}
+	}
+	
+	protected void updateTunnels(Map<TunnelID, Long> newTunnelCounterValues) {
+		if(tunnelCounterValues.size() < 1) {
+			tunnelCounterValues.putAll(newTunnelCounterValues);
+		}
+		else {
+			for (TunnelID tunnelId : newTunnelCounterValues.keySet()) {
+				if(!tunnelCounterValues.containsKey(tunnelId)) {
+					tunnelCounterValues.put(tunnelId, newTunnelCounterValues.get(tunnelId));
+				} else {
+					tunnelCounterValues.put(tunnelId, tunnelCounterValues.get(tunnelId) + newTunnelCounterValues.get(tunnelId));
+				}
+			}
+		}
+	}
+
+	/**
 	 * Retrieves counter values for all links stored in the structure.
 	 * 
 	 * @return list of link identifier - counter value pairs

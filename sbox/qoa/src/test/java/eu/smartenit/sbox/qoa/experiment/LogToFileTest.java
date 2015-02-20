@@ -17,6 +17,8 @@ package eu.smartenit.sbox.qoa.experiment;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,10 +32,15 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import eu.smartenit.sbox.commons.SBoxProperties;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
+import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.EndAddressPairTunnelID;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
+import eu.smartenit.sbox.qoa.DAOFactory;
 import eu.smartenit.sbox.qoa.DBStructuresBuilder;
 import eu.smartenit.sbox.qoa.DTMQosAnalyzer;
 import eu.smartenit.sbox.qoa.MonitoredLinksInventory;
@@ -55,14 +62,16 @@ public class LogToFileTest {
 	
 	@Before
 	public void init() {
+		prepareSystemControlParameters();
+		prepareTimeScheduleParameters();
 		monitoredLinks.populate(DBStructuresBuilder.systems);
 		monitoredTunnels.populate(DBStructuresBuilder.communications);
 		
 		SBoxProperties.TRAFFIC_DETAILS_FILE_PATH = PATH;
 		SBoxProperties.TRAFFIC_DETAILS_FILE_NAME = FILE_NAME;
 
-		extendedSNMPTrafficCollector = new ExtendedSNMPTrafficCollector(dtmQosAnalyzer, monitoringDataProcessor, monitoredLinks, monitoredTunnels, prepareTimeScheduleParameters());
-		extendedSNMPTrafficCollector2 = new ExtendedSNMPTrafficCollector(dtmQosAnalyzer, null, monitoredLinks, monitoredTunnels, prepareTimeScheduleParameters());
+		extendedSNMPTrafficCollector = new ExtendedSNMPTrafficCollector(dtmQosAnalyzer, monitoringDataProcessor, monitoredLinks, monitoredTunnels, DAOFactory.getTimeScheduleParametersDAOInstance().findLast());
+		extendedSNMPTrafficCollector2 = new ExtendedSNMPTrafficCollector(dtmQosAnalyzer, null, monitoredLinks, monitoredTunnels, DAOFactory.getTimeScheduleParametersDAOInstance().findLast());
 		
 		log.append(extendedSNMPTrafficCollector2.logToFile(AS_NUMBER, prepareValues(100, 1000)));
 		log.append(extendedSNMPTrafficCollector2.logToFile(AS_NUMBER, prepareValues(200, 2000)));
@@ -105,14 +114,6 @@ public class LogToFileTest {
 		
 		input.close();
 		return content.toString();
-	}
-
-	private TimeScheduleParameters prepareTimeScheduleParameters() {
-		final TimeScheduleParameters tsp = new TimeScheduleParameters();
-		tsp.setAccountingPeriod(2);
-		tsp.setReportingPeriod(1);
-		tsp.setStartDate(new Date(DateTime.now().plusMillis(2000).getMillis()));
-		return tsp;
 	}
 	
 	protected ExtendedCounterValues prepareValues(int linkPackets, int tunnelPackets) {
@@ -178,5 +179,22 @@ public class LogToFileTest {
 		if(file.exists()) {
 			file.delete();
 		}
+	}
+	
+	private void prepareSystemControlParameters() {
+		SystemControlParametersDAO scpDAO = mock(SystemControlParametersDAO.class);
+		SystemControlParameters scp = new SystemControlParameters(ChargingRule.volume, null, 0.15);
+    	when(scpDAO.findLast()).thenReturn(scp);
+    	DAOFactory.setSCPDAOInstance(scpDAO);
+	}
+	
+	private void prepareTimeScheduleParameters() {
+		final TimeScheduleParameters tsp = new TimeScheduleParameters();
+		tsp.setAccountingPeriod(2);
+		tsp.setReportingPeriod(1);
+		tsp.setStartDate(new Date(DateTime.now().plusMillis(2000).getMillis()));
+		final TimeScheduleParametersDAO tspDAO = mock(TimeScheduleParametersDAO.class);
+		when(tspDAO.findLast()).thenReturn(tsp);
+		DAOFactory.setTimeScheduleParametersDAO(tspDAO);
 	}
 }

@@ -31,8 +31,10 @@
       <directory>..</directory>
       <outputDirectory>/</outputDirectory>
       <includes>
+	<include>README.md</include>
         <include>INSTALL.txt</include>
         <include>CHANGELOG.txt</include>
+	<include>LICENSE.txt</include>
       </includes>
     </fileSet>
 
@@ -62,7 +64,6 @@
       <outputDirectory>/sbox</outputDirectory>
       <includes>
         <include>smartenit.db</include>
-		<!-- <include>upgrade.sql</include> -->
       </includes>
     </fileSet>
 
@@ -90,15 +91,75 @@
       </includes>
     </fileSet>
 
+  <fileSet>
+      <directory>../unada/web/target</directory>
+      <outputDirectory>/unada</outputDirectory>
+      <includes>
+        <include>unada.war</include>
+      </includes>
+    </fileSet>
+  <fileSet>
+      <directory>../unada</directory>
+      <outputDirectory>/unada</outputDirectory>
+      <includes>
+          <include>unada.sh</include>
+      </includes>
+  </fileSet>
+
+  <fileSet>
+      <directory>../unada/ctm/main/target</directory>
+      <outputDirectory>/unada</outputDirectory>
+      <includes>
+        <include>root.war</include>
+      </includes>
+    </fileSet>
+
+  <fileSet>
+      <directory>../unada/ctm/main/src/main/resources</directory>
+      <outputDirectory>/unada/conf</outputDirectory>
+      <includes>
+        <include>jetty-unadaproxy.xml</include>
+      </includes>
+    </fileSet>
+
+  <fileSet>
+      <directory>../unada/db/dao/target</directory>
+      <outputDirectory>/unada/lib</outputDirectory>
+      <includes>
+        <include>unada-db.jar</include>
+      </includes>
+    </fileSet>
+  <fileSet>
+      <directory>../unada/web/target/web-${project.version}/WEB-INF/lib</directory>
+      <outputDirectory>/unada/lib</outputDirectory>
+      <includes>
+        <include>jsf-*.jar</include>
+	    <include>jersey-*.jar</include>
+	    <include>jackson-*.jar</include>
+	    <include>javax.*.jar</include>
+	    <include>validation-*.jar</include>
+	    <include>httpclient-*.jar</include>
+	    <include>httpcore-*.jar</include>
+	    <include>hk2-*.jar</include>
+	    <include>restfb-*.jar</include>
+            <include>commons-codec-*.jar</include>
+            <include>commons-logging-*.jar</include>
+      </includes>
+    </fileSet>
     <fileSet>
-      <directory>../enduser/app/target</directory>
+      <directory>../unada/ctm/main/target/main-${project.version}/WEB-INF/lib</directory>
+      <outputDirectory>/unada/lib</outputDirectory>
+      <includes>
+        <include>netty-*.jar</include>
+      </includes>
+    </fileSet>
+
+  <fileSet>
+      <directory>../enduser/app/SIT/target</directory>
       <outputDirectory>/enduser</outputDirectory>
       <includes>
         <include>*.apk</include>
       </includes>
     </fileSet>
   </fileSets>
-
-  <!-- TODO Add uNaDa executable and configuration files! -->
-
 </assembly>

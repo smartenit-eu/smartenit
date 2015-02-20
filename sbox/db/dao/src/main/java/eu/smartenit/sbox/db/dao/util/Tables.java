@@ -29,6 +29,7 @@ import eu.smartenit.sbox.db.dao.LinkDAO;
 import eu.smartenit.sbox.db.dao.PrefixDAO;
 import eu.smartenit.sbox.db.dao.SDNControllerDAO;
 import eu.smartenit.sbox.db.dao.SegmentDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dao.TunnelDAO;
 
@@ -90,6 +91,9 @@ public class Tables {
 		SegmentDAO segdao = new SegmentDAO();
 		segdao.createTable();
 		
+		SystemControlParametersDAO scdao = new SystemControlParametersDAO();
+		scdao.createTable();
+		
 		TimeScheduleParametersDAO tidao = new TimeScheduleParametersDAO();
 		tidao.createTable();
 		
@@ -136,6 +140,9 @@ public class Tables {
 		
 		SegmentDAO segdao = new SegmentDAO();
 		segdao.deleteTable();
+		
+		SystemControlParametersDAO scdao = new SystemControlParametersDAO();
+		scdao.deleteTable();
 		
 		TimeScheduleParametersDAO tidao = new TimeScheduleParametersDAO();
 		tidao.deleteTable();

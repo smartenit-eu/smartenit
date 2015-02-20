@@ -18,14 +18,17 @@ package eu.smartenit.sbox.ntm.dtm;
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
 import eu.smartenit.sbox.db.dao.LinkDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
+import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 
 /**
  * Static factory class used to obtain an instance of specific DAO class.
- * Following DAO classes are supported: {@link DC2DCCommunicationDAO}, 
- * {@link ASDAO} and {@link LinkDAO}.
+ * Following DAO classes are supported: {@link DC2DCCommunicationDAO},
+ * {@link ASDAO}, {@link LinkDAO}, {@link SystemControlParametersDAO} and
+ * {@link TimeScheduleParametersDAO}.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.0
  * 
  */
 public class DAOFactory {
@@ -33,6 +36,8 @@ public class DAOFactory {
 	private static ASDAO asDAO = new ASDAO();
 	private static DC2DCCommunicationDAO dc2dcCommunicationDAO = new DC2DCCommunicationDAO();
 	private static LinkDAO linkDAO = new LinkDAO();
+	private static SystemControlParametersDAO scpDAO = new SystemControlParametersDAO();
+	private static TimeScheduleParametersDAO tspDAO = new TimeScheduleParametersDAO();
 	
 	/**
 	 * Returns locally stored instance of {@link ASDAO}. Specific DAO instance
@@ -50,7 +55,7 @@ public class DAOFactory {
 	 * 
 	 * @return locally stored {@link DC2DCCommunicationDAO} instance
 	 */
-	public static DC2DCCommunicationDAO getDCDC2DCCommunicationDAOInstance() {
+	public static DC2DCCommunicationDAO getDCDC2DCComDAOInstance() {
 		return dc2dcCommunicationDAO;
 	}
 
@@ -62,6 +67,26 @@ public class DAOFactory {
 	 */
 	public static LinkDAO getLinkDAOInstance() {
 		return linkDAO;
+	}
+	
+	/**
+	 * Returns locally stored instance of {@link SystemControlParametersDAO}.
+	 * Specific DAO instance can be set using appropriate static setter method.
+	 * 
+	 * @return locally stored {@link SystemControlParametersDAO} instance
+	 */
+	public static SystemControlParametersDAO getSCPDAOInstance() {
+		return scpDAO;
+	}
+	
+	/**
+	 * Returns locally stored instance of {@link TimeScheduleParametersDAO}.
+	 * Specific DAO instance can be set using appropriate static setter method.
+	 * 
+	 * @return locally stored {@link TimeScheduleParametersDAO} instance
+	 */
+	public static TimeScheduleParametersDAO getTSPDAOInstance() {
+		return tspDAO;
 	}
 	
 	/**
@@ -82,7 +107,7 @@ public class DAOFactory {
 	 * @param dao
 	 *            specific instance of {@link DC2DCCommunicationDAO}
 	 */
-	public static void setDC2DCCommunicationDAO(DC2DCCommunicationDAO dao) {
+	public static void setDC2DCComDAOInstance(DC2DCCommunicationDAO dao) {
 		dc2dcCommunicationDAO = dao;
 	}
 
@@ -93,8 +118,29 @@ public class DAOFactory {
 	 * @param dao
 	 *            specific instance of {@link LinkDAO}
 	 */
-	public static void setLinkDAO(LinkDAO dao) {
+	public static void setLinkDAOInstance(LinkDAO dao) {
 		linkDAO = dao;
 	}
+	
+	/**
+	 * Method used to set a given instance of {@link SystemControlParametersDAO}
+	 * to be returned on each request.
+	 * 
+	 * @param dao
+	 *            specific instance of {@link SystemControlParametersDAO}
+	 */
+	public static void setSCPDAOInstance(SystemControlParametersDAO dao) {
+		scpDAO = dao;
+	}
 
+	/**
+	 * Method used to set a given instance of {@link TimeScheduleParametersDAO}
+	 * to be returned on each request.
+	 * 
+	 * @param dao
+	 *            specific instance of {@link TimeScheduleParametersDAO}
+	 */
+	public static void setTSPDAOInstance(TimeScheduleParametersDAO dao) {
+		tspDAO = dao;
+	}
 }

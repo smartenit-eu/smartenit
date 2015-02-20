@@ -22,7 +22,7 @@ import java.util.List;
  * The ConfigData class.
  *
  * @author George Petropoulos
- * @version 1.2
+ * @version 3.0
  * 
  */
 public final class ConfigData implements Serializable {
@@ -45,13 +45,33 @@ public final class ConfigData implements Serializable {
 	 * @param entries
 	 */
 	public ConfigData(List<ConfigDataEntry> entries) {
-		super();
+		
 		this.entries = entries;
 	}
 
 
+	/**
+	 * The constructor with arguments.
+	 * 
+	 * @param entries
+	 * @param operationModeSDN
+	 * @param localDCPortsConfig
+	 */
+	public ConfigData(List<ConfigDataEntry> entries,
+			OperationModeSDN operationModeSDN,
+			List<LocalDCOfSwitchPorts> localDCPortsConfig) {
+		
+		this.entries = entries;
+		this.operationModeSDN = operationModeSDN;
+		this.localDCPortsConfig = localDCPortsConfig;
+	}
+
 
 	private List<ConfigDataEntry> entries;
+	
+	private OperationModeSDN operationModeSDN;
+	
+	private List<LocalDCOfSwitchPorts> localDCPortsConfig;
 
 	public List<ConfigDataEntry> getEntries() {
 		return entries;
@@ -61,11 +81,28 @@ public final class ConfigData implements Serializable {
 		this.entries = entries;
 	}
 
+	public OperationModeSDN getOperationModeSDN() {
+		return operationModeSDN;
+	}
+
+	public void setOperationModeSDN(OperationModeSDN operationModeSDN) {
+		this.operationModeSDN = operationModeSDN;
+	}
+
+	public List<LocalDCOfSwitchPorts> getLocalDCPortsConfig() {
+		return localDCPortsConfig;
+	}
+
+	public void setLocalDCPortsConfig(List<LocalDCOfSwitchPorts> localDCPortsConfig) {
+		this.localDCPortsConfig = localDCPortsConfig;
+	}
+
+	
 	@Override
 	public String toString() {
-		return "ConfigData [entries=" + entries + "]";
+		return "ConfigData [entries=" + entries + ", operationModeSDN="
+				+ operationModeSDN + ", localDCPortsConfig="
+				+ localDCPortsConfig + "]";
 	}
-	
-	
 
 }

@@ -25,6 +25,7 @@ import eu.smartenit.sbox.commons.SBoxProperties;
 import eu.smartenit.sbox.commons.SBoxThreadHandler;
 import eu.smartenit.sbox.db.dto.AS;
 import eu.smartenit.sbox.db.dto.BGRouter;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.DARouter;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
 import eu.smartenit.sbox.db.dto.Link;
@@ -32,7 +33,6 @@ import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.Tunnel;
 import eu.smartenit.sbox.qoa.CounterValues;
-import eu.smartenit.sbox.qoa.DAOFactory;
 import eu.smartenit.sbox.qoa.DTMQosAnalyzer;
 import eu.smartenit.sbox.qoa.MonitoredLinksInventory;
 import eu.smartenit.sbox.qoa.MonitoredTunnelsInventory;
@@ -53,8 +53,8 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 	private static final Logger logger = LoggerFactory.getLogger(ExtendedSNMPTrafficCollector.class);
 	private ExtendedCounterValues prevAccountingPeriodValues;
 	private ExtendedCounterValues prevReportingPeriodValues;
-	private long numberOfPeriods;
-	private long reportingIterator = 1;
+	private int reportingIteratorTrafficDetails;
+	private long numberOfPeriodsForTrafficDetails;
 
 	/**
 	 * The constructor with arguments.
@@ -65,8 +65,7 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 	 */
 	public ExtendedSNMPTrafficCollector(DTMQosAnalyzer analyzer) {
 		super(analyzer);
-		final TimeScheduleParameters tsp = DAOFactory.getTimeScheduleParametersDAOInstance().findLast();
-		numberOfPeriods = tsp.getAccountingPeriod() / tsp.getReportingPeriod();
+		initilaizeCounters();
 	}
 	
 	/**
@@ -78,7 +77,7 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 			MonitoredTunnelsInventory monitoredTunnels,
 			TimeScheduleParameters tsp) {
 		super(analyzer, monitoringDataProcessor, monitoredLinks, monitoredTunnels);
-		numberOfPeriods = tsp.getAccountingPeriod() / tsp.getReportingPeriod();
+		initilaizeCounters();
 	}
 
 	/**
@@ -119,20 +118,20 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 	 *            time schedule parameters
 	 */
 	@Override
-	public void scheduleMonitoringTasks(TimeScheduleParameters tsp) {
+	public void scheduleMonitoringTasks() {
 		logger.info("Scheduling monitoring tasks ...");
 		if(validateAsNumbers()) {
 			for (int asNumber : monitoredLinks.getAllAsNumbers()) {
 				SBoxThreadHandler.getThreadService().scheduleAtFixedRate(
 						new ExtendedTrafficCollectorTask(this, asNumber),
-						calculateInitialDelay(tsp),
-						tsp.getReportingPeriod(),
-						tsp.getTimeUnit());
+						calculateInitialDelay(timeScheduleParameters),
+						period,
+						timeScheduleParameters.getTimeUnit());
 				logger.info(prepareLogForScheduleMonitoringTasks(
 						asNumber,
-						calculateInitialDelay(tsp),
-						tsp.getReportingPeriod(),
-						tsp.getTimeUnit()));
+						calculateInitialDelay(timeScheduleParameters),
+						period,
+						timeScheduleParameters.getTimeUnit()));
 			}
 		}
 		logger.info("... completed.");
@@ -162,7 +161,7 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 		record.append("**************************************************\n");
 		record.append("Timestamp : ").append(new Date(System.currentTimeMillis()).toString()).append("\n");
 		record.append("AS : ").append(asNumber).append("\n");
-		if(reportingIterator % numberOfPeriods == 0) {
+		if(reportingIteratorTrafficDetails % numberOfPeriodsForTrafficDetails == 0) {
 			record.append("New accounting period").append("\n");
 			record.append(generateRecordForLinks(asNumber, counterValues, calculateDiffValues(prevAccountingPeriodValues, counterValues)));
 			record.append(generateRecordForTunnels(asNumber, counterValues, calculateDiffValues(prevAccountingPeriodValues, counterValues)));
@@ -172,7 +171,7 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 		record.append(generateRecordForLinks(asNumber, counterValues, calculateDiffValues(prevReportingPeriodValues, counterValues)));
 		record.append(generateRecordForTunnels(asNumber, counterValues, calculateDiffValues(prevReportingPeriodValues, counterValues)));
 		prevReportingPeriodValues = counterValues;
-		reportingIterator++;
+		reportingIteratorTrafficDetails++;
 		return record.toString();
 	}
 	
@@ -215,5 +214,12 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 			return counterValues.calculateDifference(prevValues);
 		}
 	}
-
+	
+	private void initilaizeCounters() {
+		if(this.systemControlParameters.getChargingRule().equals(ChargingRule.the95thPercentile))
+			this.numberOfPeriodsForTrafficDetails = timeScheduleParameters.getAccountingPeriod() - timeScheduleParameters.getReportPeriodDTM();
+		else
+			this.numberOfPeriodsForTrafficDetails = timeScheduleParameters.getAccountingPeriod() - timeScheduleParameters.getReportingPeriod();
+		this.reportingIteratorTrafficDetails = 1;
+	}
 }

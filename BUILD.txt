@@ -3,7 +3,7 @@ Prerequisites
 
 * Oracle JDK 1.7.0_51. Set environment variables JAVA_HOME (<jdk-installation-directory>) and Path (<jdk-installation-directory>/bin)
 * Apache Maven 3.1.1. Set environment variables M2_HOME (<maven-installation-directory>) and Path (<maven-installation-directory>/bin)
-* Android Developer Tools (Add Android SDK platforms and packages - API 14). Set environment variables ANDROID_HOME (<sdk-installation-directory>) and Path (<sdk-installation-directory>/tools and <sdk-installation-directory>/platform-tools)
+* Android Developer Tools (Add Android SDK platforms and packages - API 9 and 19). Set environment variables ANDROID_HOME (<sdk-installation-directory>) and Path (<sdk-installation-directory>/tools and <sdk-installation-directory>/platform-tools)
 
 
 Build Commands

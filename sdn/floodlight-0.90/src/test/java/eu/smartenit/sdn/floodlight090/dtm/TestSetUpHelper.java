@@ -28,12 +28,14 @@ import org.openflow.protocol.OFPacketIn;
 import eu.smartenit.sbox.db.dto.ConfigData;
 import eu.smartenit.sbox.db.dto.ConfigDataEntry;
 import eu.smartenit.sbox.db.dto.EndAddressPairTunnelID;
+import eu.smartenit.sbox.db.dto.LocalDCOfSwitchPorts;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
+import eu.smartenit.sbox.db.dto.OperationModeSDN;
 import eu.smartenit.sbox.db.dto.TunnelInfo;
 
 public class TestSetUpHelper {
-   
-	public static final String[] TUNNEL_NAMES = {
+
+    public static final String[] TUNNEL_NAMES = {
         "tunnel11",
         "tunnel12",
         "tunnel21",
@@ -76,94 +78,107 @@ public class TestSetUpHelper {
         "10.10.2.100"
     };
     public static final String DA_ROUTER_OF_DPID1 = "00:00:00:00:00:00:00:01";
-    
+
     public static final ConfigData CONFIG_DATA_1DC;
     public static final ConfigData CONFIG_DATA_2DC;
-    
-	static {
-		CONFIG_DATA_1DC = new ConfigData();
+
+    static {
+        CONFIG_DATA_1DC = new ConfigData();
         ConfigDataEntry entry1 = new ConfigDataEntry();
         entry1.setRemoteDcPrefix(new NetworkAddressIPv4(REMOTE_DC_PREFIXES[0], REMOTE_DC_PREFIX_LENGTHS[0]));
         entry1.setDaRouterOfDPID(DA_ROUTER_OF_DPID1);
         TunnelInfo tunnel11 = new TunnelInfo(
-        		new EndAddressPairTunnelID(
-        				TUNNEL_NAMES[0], 
-        				new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[0], 32), 
-        				new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[0], 32)),
-        				1);
+                new EndAddressPairTunnelID(
+                        TUNNEL_NAMES[0],
+                        new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[0], 32),
+                        new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[0], 32)),
+                1);
         TunnelInfo tunnel12 = new TunnelInfo(
-        		new EndAddressPairTunnelID(
-        				TUNNEL_NAMES[1], 
-        				new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[1], 32), 
-        				new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[1], 32)), 
-        				2);
+                new EndAddressPairTunnelID(
+                        TUNNEL_NAMES[1],
+                        new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[1], 32),
+                        new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[1], 32)),
+                2);
         entry1.setTunnels(Arrays.asList(tunnel11, tunnel12));
 
+        LocalDCOfSwitchPorts localDCOfSwitchPort1 = new LocalDCOfSwitchPorts();
+        localDCOfSwitchPort1.setDaRouterOfDPID(DA_ROUTER_OF_DPID1);
+        localDCOfSwitchPort1.setLocalDCOfSwitchPortNumbers(Arrays.asList(3));
+        CONFIG_DATA_1DC.setLocalDCPortsConfig(Arrays.asList(localDCOfSwitchPort1));
+
+        CONFIG_DATA_1DC.setOperationModeSDN(OperationModeSDN.reactiveWithReferenceVector);
         CONFIG_DATA_1DC.setEntries(Arrays.asList(entry1));
-	}
-	
-	static {
-		CONFIG_DATA_2DC = new ConfigData();
+        CONFIG_DATA_1DC.setLocalDCPortsConfig(Arrays.asList(localDCOfSwitchPort1));
+    }
+
+    static {
+        CONFIG_DATA_2DC = new ConfigData();
         ConfigDataEntry entry1 = new ConfigDataEntry();
         entry1.setRemoteDcPrefix(new NetworkAddressIPv4(REMOTE_DC_PREFIXES[0], REMOTE_DC_PREFIX_LENGTHS[0]));
         entry1.setDaRouterOfDPID(DA_ROUTER_OF_DPID1);
         TunnelInfo tunnel11 = new TunnelInfo(
-        		new EndAddressPairTunnelID(
-        				TUNNEL_NAMES[0], 
-        				new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[0], 32), 
-        				new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[0], 32)),
-        				1);
+                new EndAddressPairTunnelID(
+                        TUNNEL_NAMES[0],
+                        new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[0], 32),
+                        new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[0], 32)),
+                1);
         TunnelInfo tunnel12 = new TunnelInfo(
-        		new EndAddressPairTunnelID(
-        				TUNNEL_NAMES[1], 
-        				new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[1], 32), 
-        				new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[1], 32)), 
-        				2);
+                new EndAddressPairTunnelID(
+                        TUNNEL_NAMES[1],
+                        new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[1], 32),
+                        new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[1], 32)),
+                2);
         entry1.setTunnels(Arrays.asList(tunnel11, tunnel12));
-        
+
         ConfigDataEntry entry2 = new ConfigDataEntry();
         entry2.setRemoteDcPrefix(new NetworkAddressIPv4(REMOTE_DC_PREFIXES[1], REMOTE_DC_PREFIX_LENGTHS[1]));
         entry2.setDaRouterOfDPID(DA_ROUTER_OF_DPID1);
         TunnelInfo tunnel13 = new TunnelInfo(
-        		new EndAddressPairTunnelID(
-        				TUNNEL_NAMES[2], 
-        				new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[2], 32), 
-        				new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[2], 32)),
-        				3);
+                new EndAddressPairTunnelID(
+                        TUNNEL_NAMES[2],
+                        new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[2], 32),
+                        new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[2], 32)),
+                3);
         TunnelInfo tunnel14 = new TunnelInfo(
-        		new EndAddressPairTunnelID(
-        				TUNNEL_NAMES[3], 
-        				new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[3], 32), 
-        				new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[3], 32)), 
-        				4);
+                new EndAddressPairTunnelID(
+                        TUNNEL_NAMES[3],
+                        new NetworkAddressIPv4(LOCAL_TUNNEL_END_ADDRESSES[3], 32),
+                        new NetworkAddressIPv4(REMOTE_TUNNEL_END_ADDRESSES[3], 32)),
+                4);
         entry2.setTunnels(Arrays.asList(tunnel13, tunnel14));
-        
-        CONFIG_DATA_2DC.setEntries(Arrays.asList(entry1, entry2));
-	}
-	
-	public static OFPacketIn prepareOFPacketIn(String destAddress) {
-	    IPacket iPacket = new Ethernet()
-	            .setDestinationMACAddress("00:11:22:33:44:55")
-	            .setSourceMACAddress("00:44:33:22:11:00")
-	            .setEtherType(Ethernet.TYPE_IPv4)
-	            .setPayload(
-	                    new IPv4()
-	                    .setTtl((byte) 128)
-	                    .setSourceAddress("192.168.1.1")
-	                    .setDestinationAddress(destAddress)
-	                    .setPayload(new UDP()
-	                            .setSourcePort((short) 5000)
-	                            .setDestinationPort((short) 5001)
-	                            .setPayload(new Data(new byte[]{0x01}))));
 
-	    byte[] iPacketSerialized = iPacket.serialize();
-	    
-	    return new OFPacketIn()
-	            .setBufferId(-1)
-	            .setInPort((short) 1)
-	            .setPacketData(iPacketSerialized)
-	            .setReason(OFPacketIn.OFPacketInReason.NO_MATCH)
-	            .setTotalLength((short) iPacketSerialized.length);
-	}
-	
+        LocalDCOfSwitchPorts localDCOfSwitchPort1 = new LocalDCOfSwitchPorts();
+        localDCOfSwitchPort1.setDaRouterOfDPID(DA_ROUTER_OF_DPID1);
+        localDCOfSwitchPort1.setLocalDCOfSwitchPortNumbers(Arrays.asList(6));
+        CONFIG_DATA_2DC.setLocalDCPortsConfig(Arrays.asList(localDCOfSwitchPort1));
+
+        CONFIG_DATA_2DC.setOperationModeSDN(OperationModeSDN.reactiveWithReferenceVector);
+        CONFIG_DATA_2DC.setEntries(Arrays.asList(entry1, entry2));
+    }
+
+    public static OFPacketIn prepareOFPacketIn(String destAddress) {
+        IPacket iPacket = new Ethernet()
+                .setDestinationMACAddress("00:11:22:33:44:55")
+                .setSourceMACAddress("00:44:33:22:11:00")
+                .setEtherType(Ethernet.TYPE_IPv4)
+                .setPayload(
+                        new IPv4()
+                        .setTtl((byte) 128)
+                        .setSourceAddress("192.168.1.1")
+                        .setDestinationAddress(destAddress)
+                        .setPayload(new UDP()
+                                .setSourcePort((short) 5000)
+                                .setDestinationPort((short) 5001)
+                                .setPayload(new Data(new byte[]{0x01}))));
+
+        byte[] iPacketSerialized = iPacket.serialize();
+
+        return new OFPacketIn()
+                .setBufferId(-1)
+                .setInPort((short) 1)
+                .setPacketData(iPacketSerialized)
+                .setReason(OFPacketIn.OFPacketInReason.NO_MATCH)
+                .setTotalLength((short) iPacketSerialized.length);
+    }
+
 }

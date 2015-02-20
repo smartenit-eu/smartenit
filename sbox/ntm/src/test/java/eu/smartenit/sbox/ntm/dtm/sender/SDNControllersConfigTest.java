@@ -31,10 +31,14 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.ConfigData;
 import eu.smartenit.sbox.db.dto.ConfigDataEntry;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
+import eu.smartenit.sbox.db.dto.OperationModeSDN;
 import eu.smartenit.sbox.db.dto.SDNController;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.TunnelInfo;
 import eu.smartenit.sbox.interfaces.sboxsdn.SboxSdnClient;
 import eu.smartenit.sbox.ntm.dtm.DAOFactory;
@@ -44,13 +48,14 @@ import eu.smartenit.sbox.ntm.dtm.DAOFactory;
  * {@link DTMRemoteVectorsReceiver} initialization.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.0
  * 
  */
 public class SDNControllersConfigTest {
 
 	private static SboxSdnClient sdnClient = mock(SboxSdnClient.class);
 	private static DC2DCCommunicationDAO dao = mock(DC2DCCommunicationDAO.class);
+	private static SystemControlParametersDAO scpDAO = mock(SystemControlParametersDAO.class);
 	
 	@BeforeClass
 	public static void setup() {
@@ -58,7 +63,11 @@ public class SDNControllersConfigTest {
     	SDNClientFactory.setClientInstance(sdnClient);
     	
     	when(dao.findAllDC2DCCommunicationsCloudsTunnels()).thenReturn(DBStructuresBuilder.communicationsOnTrafficSender);
-    	DAOFactory.setDC2DCCommunicationDAO(dao);
+    	DAOFactory.setDC2DCComDAOInstance(dao);
+    	
+    	SystemControlParameters scp = new SystemControlParameters(ChargingRule.volume, OperationModeSDN.reactiveWithReferenceVector, 0.1);
+    	when(scpDAO.findLast()).thenReturn(scp);
+    	DAOFactory.setSCPDAOInstance(scpDAO);
 	}
 	
 	@Test
@@ -94,6 +103,9 @@ public class SDNControllersConfigTest {
 	private void verifyConfigDataForSDNCntr1(ConfigData configData) {
 		assertEquals(9, configData.getEntries().size());
 
+		assertEquals(OperationModeSDN.reactiveWithReferenceVector, configData.getOperationModeSDN());
+		assertEquals(2, configData.getLocalDCPortsConfig().size());
+		
 		ConfigDataEntry entry = getEntryFromConfigData(
 				new NetworkAddressIPv4(DBStructuresBuilder.remoteCloudDCNetwork11, 28), DBStructuresBuilder.localDARDPID1, configData);
 		assertNotNull(entry);
@@ -161,6 +173,11 @@ public class SDNControllersConfigTest {
 	private void verifyConfigDataForSDNCntr2(ConfigData configData) {
 		assertEquals(2, configData.getEntries().size());
 
+		assertEquals(OperationModeSDN.reactiveWithReferenceVector, configData.getOperationModeSDN());
+		assertEquals(1, configData.getLocalDCPortsConfig().size());
+		assertEquals("00:00:00:00:00:00:00:03", configData.getLocalDCPortsConfig().get(0).getDaRouterOfDPID());
+		assertEquals(2, configData.getLocalDCPortsConfig().get(0).getLocalDCOfSwitchPortNumbers().size());
+		
 		ConfigDataEntry entry = getEntryFromConfigData(
 				new NetworkAddressIPv4(DBStructuresBuilder.remoteCloudDCNetwork31, 28), DBStructuresBuilder.localDARDPID3, configData);
 		assertNotNull(entry);

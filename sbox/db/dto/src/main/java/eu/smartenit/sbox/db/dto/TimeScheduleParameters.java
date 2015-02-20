@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * The TimeScheduleParameters class.
  *
  * @author George Petropoulos
- * @version 1.1
+ * @version 3.0
  * 
  */
 public final class TimeScheduleParameters implements Serializable{
@@ -56,7 +56,39 @@ public final class TimeScheduleParameters implements Serializable{
 		this.accountingPeriod = accountingPeriod;
 		this.reportingPeriod = reportingPeriod;
 		this.timeUnit = TimeUnit.SECONDS;
+	}	
+
+	/**
+	 * The constructor with arguments.
+	 * 
+	 * @param startDate
+	 * @param accountingPeriod
+	 * @param reportingPeriod
+	 * @param timeUnit
+	 * @param tol1
+	 * @param tol2
+	 * @param samplingPeriod
+	 * @param reportPeriodEA
+	 * @param reportPeriodDTM
+	 * @param compensationPeriod
+	 */
+	public TimeScheduleParameters(Date startDate, long accountingPeriod,
+			long reportingPeriod, TimeUnit timeUnit, double tol1, double tol2,
+			long samplingPeriod, long reportPeriodEA, long reportPeriodDTM,
+			long compensationPeriod) {
+		
+		this.startDate = startDate;
+		this.accountingPeriod = accountingPeriod;
+		this.reportingPeriod = reportingPeriod;
+		this.timeUnit = timeUnit;
+		this.tol1 = tol1;
+		this.tol2 = tol2;
+		this.samplingPeriod = samplingPeriod;
+		this.reportPeriodEA = reportPeriodEA;
+		this.reportPeriodDTM = reportPeriodDTM;
+		this.compensationPeriod = compensationPeriod;
 	}
+
 
 	private Date startDate;
 	
@@ -69,6 +101,14 @@ public final class TimeScheduleParameters implements Serializable{
 	private double tol1;
 
 	private double tol2;
+	
+	private long samplingPeriod;
+	
+	private long reportPeriodEA;
+	
+	private long reportPeriodDTM;
+	
+	private long compensationPeriod;
 	
 	public Date getStartDate() {
 		return startDate;
@@ -118,12 +158,47 @@ public final class TimeScheduleParameters implements Serializable{
 		this.tol2 = tol2;
 	}
 
+	public long getSamplingPeriod() {
+		return samplingPeriod;
+	}
+
+	public void setSamplingPeriod(long samplingPeriod) {
+		this.samplingPeriod = samplingPeriod;
+	}
+
+	public long getReportPeriodEA() {
+		return reportPeriodEA;
+	}
+
+	public void setReportPeriodEA(long reportPeriodEA) {
+		this.reportPeriodEA = reportPeriodEA;
+	}
+
+	public long getReportPeriodDTM() {
+		return reportPeriodDTM;
+	}
+
+	public void setReportPeriodDTM(long reportPeriodDTM) {
+		this.reportPeriodDTM = reportPeriodDTM;
+	}
+
+	public long getCompensationPeriod() {
+		return compensationPeriod;
+	}
+
+	public void setCompensationPeriod(long compensationPeriod) {
+		this.compensationPeriod = compensationPeriod;
+	}
+
 	@Override
 	public String toString() {
 		return "TimeScheduleParameters [startDate=" + startDate
 				+ ", accountingPeriod=" + accountingPeriod
 				+ ", reportingPeriod=" + reportingPeriod + ", timeUnit="
-				+ timeUnit + ", tol1=" + tol1 + ", tol2=" + tol2 + "]";
+				+ timeUnit + ", tol1=" + tol1 + ", tol2=" + tol2
+				+ ", samplingPeriod=" + samplingPeriod + ", reportPeriodEA="
+				+ reportPeriodEA + ", reportPeriodDTM=" + reportPeriodDTM
+				+ ", compensationPeriod=" + compensationPeriod + "]";
 	}
 	
 	

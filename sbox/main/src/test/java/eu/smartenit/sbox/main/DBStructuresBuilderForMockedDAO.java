@@ -22,6 +22,7 @@ import java.util.List;
 
 import eu.smartenit.sbox.db.dto.AS;
 import eu.smartenit.sbox.db.dto.BGRouter;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.CloudDC;
 import eu.smartenit.sbox.db.dto.CostFunction;
 import eu.smartenit.sbox.db.dto.DARouter;
@@ -35,6 +36,7 @@ import eu.smartenit.sbox.db.dto.SBox;
 import eu.smartenit.sbox.db.dto.SDNController;
 import eu.smartenit.sbox.db.dto.Segment;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.Tunnel;
 
@@ -53,6 +55,11 @@ public class DBStructuresBuilderForMockedDAO {
 	
 	public static List<DC2DCCommunication> senderCommunications1DC;
 	public static List<DC2DCCommunication> senderCommunications2DCs;
+	
+	public static TimeScheduleParameters tspForVolumeRule;
+	public static TimeScheduleParameters tspFor95thPercentileRule;
+	public static SystemControlParameters scpWithVolumeRule;
+	public static SystemControlParameters scpWith95thPercentileRule;
 	
 	static {
 		List<Segment> segments1 = new ArrayList<Segment>();
@@ -84,11 +91,24 @@ public class DBStructuresBuilderForMockedDAO {
 		receiverCostFunction4.setSegments(segments4);
 	}
 
-	static TimeScheduleParameters generateReceiverTsp() {
-		TimeScheduleParameters receiverTsp = new TimeScheduleParameters(new Date(new Date().getTime() + 6*1000), 12, 4);
-		receiverTsp.setTol1(1.0);
-		receiverTsp.setTol2(1.0);
-		return receiverTsp;
+	static {
+		tspForVolumeRule = new TimeScheduleParameters(new Date(new Date().getTime() + 6*1000), 12, 4);
+		tspForVolumeRule.setCompensationPeriod(20);
+		tspForVolumeRule.setReportPeriodDTM(4);
+		tspForVolumeRule.setTol1(1.0);
+		tspForVolumeRule.setTol2(1.0);
+	
+		tspFor95thPercentileRule = new TimeScheduleParameters(new Date(new Date().getTime() + 6*1000), 24, 4);
+		tspFor95thPercentileRule.setCompensationPeriod(20);
+		tspFor95thPercentileRule.setSamplingPeriod(12);
+		tspFor95thPercentileRule.setReportPeriodEA(12);
+		tspFor95thPercentileRule.setReportPeriodDTM(4);
+		tspFor95thPercentileRule.setTol1(1.0);
+		tspFor95thPercentileRule.setTol2(1.0);
+	
+		scpWithVolumeRule = new SystemControlParameters(ChargingRule.volume, null, 0.12);
+
+		scpWith95thPercentileRule = new SystemControlParameters(ChargingRule.the95thPercentile, null, 0.12);
 	}
 	
 	static {
@@ -220,6 +240,7 @@ public class DBStructuresBuilderForMockedDAO {
 	static { 
 		SDNController controller1 = new SDNController(new NetworkAddressIPv4("2.1.1.1", 32), null, new NetworkAddressIPv4("2.1.1.1", 32), 30, null, 40);
 		DARouter daRouter1 = new DARouter(new NetworkAddressIPv4("2.1.1.2", 32), "testCommunity", "00:00:00:00:00:00:00:01");
+		controller1.setDaRouters(Arrays.asList(daRouter1));
 		
 		AS localAS = new AS();
 		localAS.setAsNumber(20);
@@ -246,6 +267,7 @@ public class DBStructuresBuilderForMockedDAO {
 	static { 
 		SDNController controller1 = new SDNController(new NetworkAddressIPv4("2.1.1.1", 32), null, new NetworkAddressIPv4("2.1.1.1", 32), 30, null, 40);
 		DARouter daRouter1 = new DARouter(new NetworkAddressIPv4("2.1.1.2", 32), "testCommunity", "00:00:00:00:00:00:00:01");
+		controller1.setDaRouters(Arrays.asList(daRouter1));
 		
 		AS localAS = new AS();
 		localAS.setAsNumber(20);
@@ -281,4 +303,5 @@ public class DBStructuresBuilderForMockedDAO {
 		
 		senderCommunications2DCs = new ArrayList<DC2DCCommunication>(Arrays.asList(communication1, communication2));
 	}
+
 }

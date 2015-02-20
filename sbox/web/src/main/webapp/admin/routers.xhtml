@@ -173,6 +173,19 @@
 							value="#{routersBean.daRouter.ofSwitchDPID}" />
 					</div>
 				</div>
+				
+				<div class="form-group">
+					<label for="localDCOfSwitchPortNumbers" class="col-xs-4 control-label"> Switch 
+						Port Numbers</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control"
+							id="localDCOfSwitchPortNumbers" 
+							value="#{routersBean.daRouter.localDCOfSwitchPortNumbers}" >
+								<f:converter
+									converterId="eu.smartenit.sbox.web.util.IntegerListConverter" />
+						</h:inputText>
+					</div>
+				</div>
 
 				<div class="form-group">
 					<div class="btn-group col-xs-6 col-xs-offset-4">
@@ -198,6 +211,14 @@
 						<h:column>
 							<f:facet name="header">OF Switch ID</f:facet>
 								#{da.ofSwitchDPID}
+							</h:column>
+						<h:column>
+							<f:facet name="header">Switch Ports</f:facet>
+								<h:outputText type="text"
+									value="#{da.localDCOfSwitchPortNumbers}" >
+									<f:converter converterId=
+										"eu.smartenit.sbox.web.util.IntegerListConverter" />
+								</h:outputText>
 							</h:column>
 						<h:column>
 							<f:facet name="header">Actions</f:facet>
@@ -229,6 +250,7 @@
 	<script src="../js/bootstrapValidator.js"></script>
 	<script src="../js/validator/ip.js"></script>
 	<script src="../js/validator/notEmpty.js"></script>
+	<script src="../js/validator/regexp.js"></script>
 
 	<script>
 		$(document)
@@ -308,8 +330,18 @@
 																message : 'The OF Switch ID must not be empty.'
 															}
 														}
+													},
+													'darouters:localDCOfSwitchPortNumbers' : {
+														validators : {
+															notEmpty : {
+																message : 'The list of switch port numbers must not be empty.'
+															},
+															regexp: {
+																	regexp: /^\[( *\d+,)*( *\d+)\]$/ ,
+											                        message: 'The list of switch port numbers must be a comma-delimitered list of integers inside brackets, e.g. [], [1], [1,2, 33].'
+											                    }
+														}
 													}
-													
 												}
 											});
 						});

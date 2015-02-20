@@ -45,6 +45,8 @@ import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
 import eu.smartenit.sbox.db.dao.DbConstants;
 import eu.smartenit.sbox.db.dao.LinkDAO;
 import eu.smartenit.sbox.db.dao.SDNControllerDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
+import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.AS;
 import eu.smartenit.sbox.db.dto.LocalRVector;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
@@ -139,8 +141,10 @@ public class NetworkTrafficSenderReceiverTest {
 		DbConstants.DBI_URL = "jdbc:sqlite:src/test/resources/local.db";
 		//Modifying daofactory instances to get different db file.
 		DAOFactory.setASDAOInstance(new ASDAO());
-		DAOFactory.setDC2DCCommunicationDAO(new DC2DCCommunicationDAO());
-		DAOFactory.setLinkDAO(new LinkDAO());
+		DAOFactory.setDC2DCComDAOInstance(new DC2DCCommunicationDAO());
+		DAOFactory.setLinkDAOInstance(new LinkDAO());
+		DAOFactory.setTSPDAOInstance(new TimeScheduleParametersDAO());
+		DAOFactory.setSCPDAOInstance(new SystemControlParametersDAO());
 		
 		//modifying remote sbox address, to be 127.0.0.1
       	asdao = new ASDAO();

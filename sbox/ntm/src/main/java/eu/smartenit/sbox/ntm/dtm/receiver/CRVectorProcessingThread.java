@@ -86,12 +86,12 @@ public class CRVectorProcessingThread extends VectorProcessingThread {
 			CVector cVector = new CVectorConstructor().construct(xVector, rVector);
 			RVector rVector = createRVectorForRemoteSBox();
 
-			if (cVector != null) {
-				CVectorHistory.storeInHistory(cVector);
-				for (SBox remoteSbox : remoteSboxes) {
-					logger.info("Sending C and R vectors to remote SBox: {}", remoteSbox.getManagementAddress().getPrefix());
-					sender.send(remoteSbox, cVector, rVector);
-				}
+			CVectorHistory.storeInHistory(cVector);
+			CVectorUpdateController.getInstance().sent(cVector);
+			
+			for (SBox remoteSbox : remoteSboxes) {
+				logger.info("Sending C and R vectors to remote SBox: {}", remoteSbox.getManagementAddress().getPrefix());
+				sender.send(remoteSbox, cVector, rVector);
 			}
 		} catch (IllegalArgumentException e) {
 			logger.error("Compensation vector was not constructed properly: {}", e.getMessage());

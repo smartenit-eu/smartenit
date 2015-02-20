@@ -34,13 +34,18 @@ import eu.smartenit.sbox.commons.SBoxProperties;
 import eu.smartenit.sbox.commons.SBoxThreadHandler;
 import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.LinkDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
+import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.CVector;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.Link;
 import eu.smartenit.sbox.db.dto.LocalRVector;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.RVector;
 import eu.smartenit.sbox.db.dto.SBox;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
+import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.interfaces.intersbox.client.InterSBoxClient;
 import eu.smartenit.sbox.ntm.dtm.DAOFactory;
@@ -53,7 +58,7 @@ import eu.smartenit.sbox.ntm.dtm.receiver.RemoteSBoxContainer;
  * after receiving updated reference vector from Economic Analyzer component.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.0
  * 
  */
 public class RVectorUpdateTest {
@@ -69,6 +74,8 @@ public class RVectorUpdateTest {
 	private RemoteSBoxContainer container = mock(RemoteSBoxContainer.class);
 	private InterSBoxClient client = mock(InterSBoxClient.class);
 	private LinkDAO dao = mock(LinkDAO.class);
+	private SystemControlParametersDAO scpDAO = mock(SystemControlParametersDAO.class);
+	private TimeScheduleParametersDAO tspDAO = mock(TimeScheduleParametersDAO.class);
 	
 	@Before
 	public void setup() {
@@ -93,8 +100,14 @@ public class RVectorUpdateTest {
     			new Link(linkID1, null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("10.10.10.10", 24)));
     	when(dao.findById(linkID2)).thenReturn(
     			new Link(linkID2, null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("20.20.20.20", 24)));
+    	SystemControlParameters scp = new SystemControlParameters(ChargingRule.volume, null, 0);
+    	when(scpDAO.findLast()).thenReturn(scp);
+    	TimeScheduleParameters tsp = new TimeScheduleParameters();
+    	when(tspDAO.findLast()).thenReturn(tsp);
     	
-    	DAOFactory.setLinkDAO(dao);
+    	DAOFactory.setLinkDAOInstance(dao);
+    	DAOFactory.setSCPDAOInstance(scpDAO);
+    	DAOFactory.setTSPDAOInstance(tspDAO);
     	SBoxThreadHandler.threadService = 
     			Executors.newScheduledThreadPool(SBoxProperties.CORE_POOL_SIZE, new ThreadFactory());
 	}

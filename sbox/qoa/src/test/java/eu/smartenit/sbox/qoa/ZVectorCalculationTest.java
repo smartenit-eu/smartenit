@@ -96,7 +96,7 @@ public class ZVectorCalculationTest {
 	@Test
 	public void shouldCalculateFirstZVectors() {
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, monitoredTunnels);
-		List<ZVector> result = processor.calculateZVectors(1, values);
+		List<ZVector> result = processor.calculateZVectors(1, null, values);
 		assertNotNull(result);
 		assertEquals(2, result.size());
 		assertEquals(1, result.get(0).getSourceAsNumber());
@@ -107,7 +107,7 @@ public class ZVectorCalculationTest {
 		assertEquals(470, zVector.getVectorValueForLink(link121ID));
 		assertEquals(340, zVector.getVectorValueForLink(link122ID));
 		
-		result = processor.calculateZVectors(2, values3);
+		result = processor.calculateZVectors(2, null, values3);
 		assertNotNull(result);
 		assertEquals(1, result.size());
 		zVector = getZVectorForDC2DCCommunicationID(result, com3ID);
@@ -117,9 +117,9 @@ public class ZVectorCalculationTest {
 	@Test
 	public void shouldCalculateSecondRoundOfZVectors() {
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, monitoredTunnels);
-		processor.calculateZVectors(1, values);
+		processor.calculateZVectors(1, null, values);
 		
-		List<ZVector> result = processor.calculateZVectors(1, values2);
+		List<ZVector> result = processor.calculateZVectors(1, null, values2);
 		assertNotNull(result);
 		assertEquals(2, result.size());
 		assertEquals(1, result.get(0).getSourceAsNumber());
@@ -152,8 +152,8 @@ public class ZVectorCalculationTest {
 		values2.storeCounterValue(tunnel1223ID, 2352);
 		
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, monitoredTunnels);
-		processor.calculateZVectors(1, values);
-		List<ZVector> result = processor.calculateZVectors(1, values2);
+		processor.calculateZVectors(1, null, values);
+		List<ZVector> result = processor.calculateZVectors(1, null, values2);
 		
 		assertNotNull(result);
 		assertEquals(2, result.size());
@@ -162,6 +162,22 @@ public class ZVectorCalculationTest {
 		assertEquals(0, zVector.getVectorValueForLink(link111ID));
 		zVector = getZVectorForDC2DCCommunicationID(result, com2ID);
 		assertEquals(200, zVector.getVectorValueForLink(link121ID));
+	}
+	
+	@Test
+	public void shouldCalculateZVectorsWithLastZVectors() {
+		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, monitoredTunnels);
+		List<ZVector> result = processor.calculateZVectors(1, values, values2);
+		
+		assertNotNull(result);
+		assertEquals(2, result.size());
+		assertEquals(1, result.get(0).getSourceAsNumber());
+		ZVector zVector = getZVectorForDC2DCCommunicationID(result, com1ID);
+		assertEquals(0, zVector.getVectorValueForLink(link111ID));
+		assertEquals(20, zVector.getVectorValueForLink(link112ID));
+		zVector = getZVectorForDC2DCCommunicationID(result, com2ID);
+		assertEquals(418, zVector.getVectorValueForLink(link121ID));
+		assertEquals(2642, zVector.getVectorValueForLink(link122ID));
 	}
 
 	private ZVector getZVectorForDC2DCCommunicationID(List<ZVector> zVectors, DC2DCCommunicationID comID) {

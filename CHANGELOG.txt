@@ -1,3 +1,29 @@
+SmartenIT v3.0 - 12/02/2015
+==========================
+
+* Support for 95th percentile billing rule.
+* Added new system control variables and time schedule parameters.
+* Added SDN Controller operation modes (proactive vs reactive).
+* Compensation vector handling in Network Traffic Manager to reduce the number of updates sent towards remote domains.
+
+
+SmartenIT v2.1 - 11/02/2015
+==========================
+
+* Fixed social prediction algorithm candidates.
+* Introduced enhancements in content advertisement and neighboring in the overlay network.
+* Updated content prefetching to consider AS hops towards the overlay peers.
+* Added demonstration enhancements in uNaDa and enduser user interface.
+* Updated uNaDa database to h2 for better performance.
+* Fixed various minor issues in uNaDa and enduser entities.
+
+
+SmartenIT v2.0 - 20/11/2014
+==========================
+
+* Second version, implementing RB-HORST mechanism functionalities.
+
+
 SmartenIT v1.2 - 18/11/2014
 ==========================
 

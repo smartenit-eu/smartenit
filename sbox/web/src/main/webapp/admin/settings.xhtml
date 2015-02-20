@@ -78,7 +78,64 @@
 
 
 		<div class="row marketing">
-			<h2 class="page-header">DTM Settings</h2>
+			<h2 class="page-header">System Control Parameters</h2>
+			
+			<h:form class="form-horizontal" role="form" id="systemcontrol">
+
+				<div class="form-group">
+					<label for="chargingRule" class="col-xs-4 control-label">Charging Rule</label>
+					<div class="col-xs-6">
+						 <h:selectOneMenu id="chargingRule" class="form-control"
+							value="#{settingsBean.systemParams.chargingRule}">
+        					<f:selectItem id="the95thPercentile" 
+        						itemLabel="the95thPercentile" itemValue="the95thPercentile" />
+        					<f:selectItem id="volume" itemLabel="volume" itemValue="volume" />
+    					</h:selectOneMenu>
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="operationModeSDN" class="col-xs-4 control-label">Operation Mode SDN</label>
+					<div class="col-xs-6">
+						<h:selectOneMenu id="operationModeSDN" class="form-control"
+							value="#{settingsBean.systemParams.operationModeSDN}" >
+        					<f:selectItem id="proactiveWithoutReferenceVector" 
+        						itemLabel="proactiveWithoutReferenceVector" 
+        						itemValue="proactiveWithoutReferenceVector" />
+        					<f:selectItem id="reactiveWithoutReferenceVector" 
+        						itemLabel="reactiveWithoutReferenceVector" 
+        						itemValue="reactiveWithoutReferenceVector" />
+        					<f:selectItem id="proactiveWithReferenceVector" 
+        						itemLabel="proactiveWithReferenceVector" 
+        						itemValue="proactiveWithReferenceVector" />
+        					<f:selectItem id="reactiveWithReferenceVector" 
+        						itemLabel="reactiveWithReferenceVector" 
+        						itemValue="reactiveWithReferenceVector" />
+    					</h:selectOneMenu>
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="compensationThreshold" class="col-xs-4 control-label">Compensation 
+						Threshold</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="compensationThreshold"
+							value="#{settingsBean.systemParams.compensationThreshold}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="btn-group col-xs-6 col-xs-offset-4">
+						<h:commandButton type="submit" class="btn btn-primary"
+							action="#{settingsBean.updateSystemParams}" value="Submit" />
+						<h:commandButton type="reset" class="btn btn-default"
+							value="Cancel" />
+					</div>
+				</div>
+			</h:form>
+			
+			
+			<h2 class="page-header">Time Schedule Parameters</h2>
 			<h:form class="form-horizontal" role="form" id="settings">
 
 				<div class="form-group">
@@ -101,8 +158,7 @@
 					<label for="accountingPeriod" class="col-xs-4 control-label">Accounting
 						Period</label>
 					<div class="col-xs-6">
-						<h:inputText type="text" class="form-control"
-							id="accountingPeriod" placeholder="Accounting Period"
+						<h:inputText type="text" class="form-control" id="accountingPeriod" 
 							value="#{settingsBean.timeParams.accountingPeriod}" />
 					</div>
 				</div>
@@ -112,7 +168,6 @@
 						Period</label>
 					<div class="col-xs-6">
 						<h:inputText type="text" class="form-control" id="reportingPeriod"
-							placeholder="Reporting Period"
 							value="#{settingsBean.timeParams.reportingPeriod}" />
 					</div>
 				</div>
@@ -130,6 +185,42 @@
 					<div class="col-xs-6">
 						<h:inputText type="text" class="form-control" id="tol2"
 							value="#{settingsBean.timeParams.tol2}" />
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="samplingPeriod" class="col-xs-4 control-label">Sampling
+						Period</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="samplingPeriod"
+							value="#{settingsBean.timeParams.samplingPeriod}" />
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="reportPeriodEA" class="col-xs-4 control-label">Report
+						Period EA</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="reportPeriodEA"
+							value="#{settingsBean.timeParams.reportPeriodEA}" />
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="reportPeriodDTM" class="col-xs-4 control-label">Report
+						Period DTM</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="reportPeriodDTM"
+							value="#{settingsBean.timeParams.reportPeriodDTM}" />
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="compensationPeriod" class="col-xs-4 control-label">Compensation
+						Period</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="compensationPeriod"
+							value="#{settingsBean.timeParams.compensationPeriod}" />
 					</div>
 				</div>
 
@@ -179,19 +270,17 @@
 												fields : {
 													'settings:accountingPeriod' : {
 														validators : {
-															between : {
-																min : 300,
-																max : 90000,
-																message : 'The accounting period must be between 300 and 90000 (sec).'
+															greaterThan : {
+																value : 0,
+																message : 'The accounting period must be greater than 0.'
 															}
 														}
 													},
 													'settings:reportingPeriod' : {
 														validators : {
-															between : {
-																min : 30,
-																max : 60,
-																message : 'The reporting period must be between 30 and 60 (sec).'
+															greaterThan : {
+																value : 0,
+																message : 'The reporting period must be greater than 0.'
 															}
 														}
 													},
@@ -210,9 +299,61 @@
 																message : 'The weight #2 must be greater or equal than 0.0.'
 															}
 														}
+													},
+													'settings:samplingPeriod' : {
+														validators : {
+															greaterThan : {
+																value : 0,
+																message : 'The sampling period must be greater than 0.'
+															}
+														}
+													},
+													'settings:reportPeriodEA' : {
+														validators : {
+															greaterThan : {
+																value : 0,
+																message : 'The report period EA must be greater than 0.'
+															}
+														}
+													},
+													'settings:reportPeriodDTM' : {
+														validators : {
+															greaterThan : {
+																value : 0,
+																message : 'The report period DTM must be greater than 0.'
+															}
+														}
+													},
+													'settings:compensationPeriod' : {
+														validators : {
+															greaterThan : {
+																value : 0,
+																message : 'The compensation period must be greater than 0.'
+															}
+														}
 													}
 												}
 											});
+							$('#systemcontrol')
+							.bootstrapValidator(
+									{
+										feedbackIcons : {
+											valid : 'glyphicon glyphicon-ok',
+											invalid : 'glyphicon glyphicon-remove',
+											validating : 'glyphicon glyphicon-refresh'
+										},
+										fields : {
+											'systemcontrol:compensationThreshold' : {
+												validators : {
+													between : {
+														min : 0,
+														max : 1,
+														message : 'The compensation threshold must be between 0 and 1.'
+													}
+												}
+											}
+										}
+									});
 						});
 	</script>
 

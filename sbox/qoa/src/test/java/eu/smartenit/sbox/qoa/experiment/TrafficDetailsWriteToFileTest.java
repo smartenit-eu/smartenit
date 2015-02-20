@@ -46,9 +46,12 @@ import eu.smartenit.sbox.commons.SBoxThreadHandler;
 import eu.smartenit.sbox.commons.ThreadFactory;
 import eu.smartenit.sbox.db.dao.ASDAO;
 import eu.smartenit.sbox.db.dao.DC2DCCommunicationDAO;
+import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
 import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.AS;
+import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
+import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.eca.EconomicAnalyzer;
@@ -69,6 +72,7 @@ public class TrafficDetailsWriteToFileTest {
 	
 	@Before
 	public void init() {
+		prepareSystemControlParameters();
 		SBoxProperties.LOG_TRAFFIC_DETAILS = true;
 		SBoxProperties.TRAFFIC_DETAILS_FILE_PATH = PATH;
 		SBoxProperties.TRAFFIC_DETAILS_FILE_NAME = FILE_NAME;
@@ -107,10 +111,10 @@ public class TrafficDetailsWriteToFileTest {
 		Thread.sleep(7500);
 		
 		ArgumentCaptor<XVector> xVector = ArgumentCaptor.forClass(XVector.class);
-		verify(trafficManager, times(4)).updateXVector(xVector.capture());
+		verify(trafficManager, times(3)).updateXVector(xVector.capture());
 		
 		ArgumentCaptor<List> zVectors = ArgumentCaptor.forClass(List.class);
-		verify(economicAnalyzer, times(4)).updateXZVectors(xVector.capture(), zVectors.capture());
+		verify(economicAnalyzer, times(3)).updateXZVectors(xVector.capture(), zVectors.capture());
 		
 		//1.3.6.1.2.1.31.1.1.1.6.0 = 100
 		assertTrue(getRecordsFromFile().contains("IF_IN_OCTETS : 100 / 100"));
@@ -264,5 +268,12 @@ public class TrafficDetailsWriteToFileTest {
 			"1.3.6.1.2.1.31.1.1.1.1.5 = eth5",
 			"1.3.6.1.2.1.31.1.1.1.1.6 = eth6",
 			"1.3.6.1.2.1.31.1.1.1.1.7 = eth7");
+	}
+	
+	private void prepareSystemControlParameters() {
+		SystemControlParametersDAO scpDAO = mock(SystemControlParametersDAO.class);
+		SystemControlParameters scp = new SystemControlParameters(ChargingRule.volume, null, 0.15);
+    	when(scpDAO.findLast()).thenReturn(scp);
+    	DAOFactory.setSCPDAOInstance(scpDAO);
 	}
 }

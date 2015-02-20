@@ -16,12 +16,14 @@
 package eu.smartenit.sbox.db.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The DARouter class.
  *
  * @author George Petropoulos
- * @version 1.2
+ * @version 3.0
  * 
  */
 public final class DARouter implements Serializable{
@@ -36,26 +38,50 @@ public final class DARouter implements Serializable{
 	 */
 	public DARouter() {
 		this.managementAddress = new NetworkAddressIPv4();
+		this.localDCOfSwitchPortNumbers = new ArrayList<Integer>();
 	}
 
 	/**
+	 * The constructor with fields.
+	 * 
 	 * @param managementAddress
 	 * @param snmpCommunity
 	 * @param ofSwitchDPID
 	 */
 	public DARouter(NetworkAddressIPv4 managementAddress, String snmpCommunity,
 			String ofSwitchDPID) {
-		super();
+		
 		this.managementAddress = managementAddress;
 		this.snmpCommunity = snmpCommunity;
 		this.ofSwitchDPID = ofSwitchDPID;
 	}
+	
+
+	/**
+	 * The constructor with fields.
+	 * 
+	 * @param managementAddress
+	 * @param snmpCommunity
+	 * @param ofSwitchDPID
+	 * @param localDCOfSwitchPortNumbers
+	 */
+	public DARouter(NetworkAddressIPv4 managementAddress, String snmpCommunity,
+			String ofSwitchDPID, List<Integer> localDCOfSwitchPortNumbers) {
+		
+		this.managementAddress = managementAddress;
+		this.snmpCommunity = snmpCommunity;
+		this.ofSwitchDPID = ofSwitchDPID;
+		this.localDCOfSwitchPortNumbers = localDCOfSwitchPortNumbers;
+	}
+
 
 	private NetworkAddressIPv4 managementAddress;
 	
 	private String snmpCommunity;
 	
 	private String ofSwitchDPID;
+	
+	private List<Integer> localDCOfSwitchPortNumbers;
 
 	public NetworkAddressIPv4 getManagementAddress() {
 		return managementAddress;
@@ -81,13 +107,21 @@ public final class DARouter implements Serializable{
 		this.ofSwitchDPID = ofSwitchDPID;
 	}
 
+	public List<Integer> getLocalDCOfSwitchPortNumbers() {
+		return localDCOfSwitchPortNumbers;
+	}
+
+	public void setLocalDCOfSwitchPortNumbers(
+			List<Integer> localDCOfSwitchPortNumbers) {
+		this.localDCOfSwitchPortNumbers = localDCOfSwitchPortNumbers;
+	}
+
 	@Override
 	public String toString() {
 		return "DARouter [managementAddress=" + managementAddress
 				+ ", snmpCommunity=" + snmpCommunity + ", ofSwitchDPID="
-				+ ofSwitchDPID + "]";
+				+ ofSwitchDPID + ", localDCOfSwitchPortNumbers="
+				+ localDCOfSwitchPortNumbers + "]";
 	}
-	
-	
 
 }

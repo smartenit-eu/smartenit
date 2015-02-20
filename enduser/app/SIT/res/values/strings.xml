@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">HORST</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_facebook_login">FacebookLogin</string>
+    <string name="toast_service_controller_no_network">Currently no network available.</string>
+    <string name="toast_service_controller_bad_network">Please connect to Wifi or Mobil network.</string>
+    <string name="login_button">Log in with Facebook</string>
+    <string name="description_textfield">This application implements the SmartenIT RB-HORST end-user client. By logging in to Facebook this application can connect to RB-HORST accesspoints which are configured to share their connectivity with you. This is configured on the respective uNaDa or by manually configuring friend lists on Facebook.</string>
+	<string name="searching_for_horst">Seaching for the HORST-Wifi.</string>
+	<string name="app_id">1498548153749732</string>
+	<string name="debug">true</string>
+</resources>

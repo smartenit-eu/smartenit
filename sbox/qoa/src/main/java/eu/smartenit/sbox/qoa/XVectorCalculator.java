@@ -40,15 +40,22 @@ public class XVectorCalculator extends VectorCalculator {
 	 * 
 	 * @param asNumber
 	 *            number of the AS for which new vector is calculated
-	 * @param values
-	 *            counter values from all monitored links in given AS
+	 * @param lastValues
+	 *            last counter values from all monitored links in given AS
+	 *            represented by {@link CounterValues}
+	 * @param newValues
+	 *            new counter values from all monitored links in given AS
 	 *            represented by {@link CounterValues}
 	 * @return new value of link traffic vector ({@link XVector}) for given AS
 	 */
-	public XVector calculateXVector(int asNumber, CounterValues values) {
+	public XVector calculateXVector(int asNumber, CounterValues lastValues, CounterValues newValues) {
 		logger.debug("Calculating X vector for AS {} ...", asNumber);
-		CounterValues latestCounterValues = getOrCreateLatestVectorValues(asNumber);
-		XVector xVector = calculateXVector(values, latestCounterValues);
+		CounterValues latestCounterValues = null;
+		if(lastValues == null)
+			latestCounterValues = getOrCreateLatestVectorValues(asNumber);
+		else
+			latestCounterValues = lastValues;
+		XVector xVector = calculateXVector(newValues, latestCounterValues);
 		xVector.setSourceAsNumber(asNumber);
 		logger.debug("... done.");
 		return xVector;

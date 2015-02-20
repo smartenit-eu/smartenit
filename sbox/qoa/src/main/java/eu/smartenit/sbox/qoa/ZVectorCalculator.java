@@ -62,14 +62,21 @@ public class ZVectorCalculator extends VectorCalculator {
 	 * 
 	 * @param asNumber
 	 *            number of the AS for which new set of vectors is calculated
-	 * @param values
-	 *            counter values from all monitored tunnels in given AS
+	 * @param lastValues
+	 *            last counter values from all monitored tunnels in given AS
+	 *            represented by {@link CounterValues}
+	 * @param newValues
+	 *            new counter values from all monitored tunnels in given AS
 	 *            represented by {@link CounterValues}
 	 * @return new set of tunnel traffic vectors ({@link ZVector}) for given AS
 	 */
-	public List<ZVector> calculateZVectors(int asNumber, CounterValues values) {
-		CounterValues latestCounterValues = getOrCreateLatestVectorValues(asNumber);
-		return calculateZVectors(values, latestCounterValues, asNumber);
+	public List<ZVector> calculateZVectors(int asNumber, CounterValues lastValues, CounterValues newValues) {
+		CounterValues latestCounterValues = null;
+		if(lastValues == null)
+			latestCounterValues = getOrCreateLatestVectorValues(asNumber);
+		else
+			latestCounterValues = lastValues;
+		return calculateZVectors(newValues, latestCounterValues, asNumber);
 	}
 
 	private List<ZVector> calculateZVectors(CounterValues values, CounterValues latestCounterValues, int asNumber) {

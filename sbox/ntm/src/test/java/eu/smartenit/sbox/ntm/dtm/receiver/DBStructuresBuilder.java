@@ -34,13 +34,13 @@ import eu.smartenit.sbox.db.dto.SBox;
  * {@link DC2DCCommunicationDAO} and/or {@link ASDAO}.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.0
  * 
  */
 class DBStructuresBuilder {
 
-	public static List<DC2DCCommunication> communicationsOnTrafficReceiver;
-	public static List<AS> systemsOnTrafficReceiver;
+	public static List<DC2DCCommunication> communications;
+	public static List<AS> systems;
 	
 	static {
 		SBox sboxLocal1 = new SBox(new NetworkAddressIPv4("1.1.1.1", 32));
@@ -81,8 +81,8 @@ class DBStructuresBuilder {
 		DC2DCCommunication communication3 = new DC2DCCommunication(communnicationID3, Direction.incomingTraffic, 
 				cloudRemote2, asLocal2.getLocalClouds().get(0), null, null);
 		
-		systemsOnTrafficReceiver = new ArrayList<AS>(Arrays.asList(asLocal1, asLocal2, asRemote1, asRemote2));
-		communicationsOnTrafficReceiver = new ArrayList<DC2DCCommunication>(Arrays.asList(communication1, communication2, communication3));
+		systems = new ArrayList<AS>(Arrays.asList(asLocal1, asLocal2, asRemote1, asRemote2));
+		communications = new ArrayList<DC2DCCommunication>(Arrays.asList(communication1, communication2, communication3));
 	}
 	
 }
