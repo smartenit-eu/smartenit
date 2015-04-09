@@ -30,7 +30,7 @@ public class UnadaConstants {
 			+ "user_about_me,"
 			+ "user_friends,"
 			+ "read_stream";
-    public static final String UNADA_IP_ADDRESS = "192.168.40.1";
+    public static final String UNADA_IP_ADDRESS = "localhost";
     public static final String REDIRECT_URI = "http://" + UNADA_IP_ADDRESS + ":8080";
     public static final int INITIAL_DELAY = 0;
 
