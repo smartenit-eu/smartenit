@@ -65,6 +65,7 @@ public class LinkMapper implements ResultSetMapper<Link> {
 		l.setBgRouter(bgRouter);
 		l.setTunnelEndPrefix(new NetworkAddressIPv4(r.getString("TUNNELENDPREFIX"), 
 				r.getInt("TUNNELENDPREFIXLENGTH")));
+		l.setPolicerBandwidthLimitFactor(r.getDouble("POLICERBANDWIDTHLIMITFACTOR"));
 		return l;
 
 	}

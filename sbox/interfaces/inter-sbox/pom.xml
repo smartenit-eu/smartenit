@@ -21,7 +21,7 @@
 	<parent>
 		<groupId>eu.smartenit.sbox.interfaces</groupId>
 		<artifactId>interfaces</artifactId>
-		<version>3.0</version>
+		<version>3.1</version>
 	</parent>
 
 	<groupId>eu.smartenit.sbox.interfaces.intersbox</groupId>

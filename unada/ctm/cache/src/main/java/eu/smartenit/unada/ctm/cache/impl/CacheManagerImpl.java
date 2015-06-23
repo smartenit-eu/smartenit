@@ -21,8 +21,11 @@ import java.util.concurrent.*;
 
 import com.github.axet.vget.info.VideoInfo;
 
+import eu.smartenit.unada.commons.constants.UnadaConstants;
+import eu.smartenit.unada.commons.logging.UnadaLogger;
 import eu.smartenit.unada.commons.threads.UnadaThreadService;
 
+import eu.smartenit.unada.db.dto.SocialPredictionParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,12 +113,26 @@ public class CacheManagerImpl implements CacheManager {
 		int max = (socialListSize > overlayListSize) ? socialListSize
 				: overlayListSize;
 		int index = 0;
+		long currentTime = System.currentTimeMillis();
+
+        SocialPredictionParameters sp = DAOFactory.getSocialPredictionParametersDAO().findLast();
+        if (sp != null) {
+            UnadaLogger.overall.info("{}: Social prediction parameters @{}: ({}, {}, {}, {}, {}, {})",
+                    new Object[]{UnadaConstants.UNADA_OWNER_MD5, currentTime, sp.getLambda1(),
+                            sp.getLambda2(), sp.getLambda3(), sp.getLambda4(), sp.getLambda5(),
+                            sp.getLambda6()});
+        }
 
 		while (index < max) {
 
 			Content c;
 			if (index < socialListSize) {
 				c = socialContentList.get(index);
+				
+				UnadaLogger.overall.info("{}: Social prediction @ {}: ({}, {})", 
+						new Object[]{UnadaConstants.UNADA_OWNER_MD5, currentTime,
+						c.getContentID(), c.getCacheScore()});
+				
                 logger.debug("Checking content " + c.getContentID() + " with score " + c.getCacheScore());
                 //check if content already in to-be-prefetched list
                 logger.debug("Prefetched list " + toBePrefetched);
@@ -169,6 +186,11 @@ public class CacheManagerImpl implements CacheManager {
 
 			if (index < overlayListSize) {
 				c = overlayContentList.get(index);
+				
+				UnadaLogger.overall.info("{}: Overlay prediction @ {}: ({}, {})", 
+						new Object[]{UnadaConstants.UNADA_OWNER_MD5, currentTime,
+						c.getContentID(), c.getCacheScore()});
+				
                 logger.debug("Checking content " + c.getContentID() + " with score " + c.getCacheScore());
 				// check if already to be prefetched.
 				logger.debug("Prefetched list " + toBePrefetched);

@@ -16,6 +16,7 @@
 package eu.smartenit.sbox.eca;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
@@ -27,6 +28,10 @@ import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
 
+/**
+ * Includes tests methods for handling 95th percentile samples implemented by
+ * the {@link The95PercentileSamplesContainer}.
+ */
 public class The95thPercentileSamplesContainerTest {
 	
 	private SimpleLinkID link1;
@@ -62,10 +67,10 @@ public class The95thPercentileSamplesContainerTest {
 		long[] xResult = container.getTrafficValuesForLinks();
 		long[] zResult = container.getTrafficValuesForTunnels();
 		
-		assertEquals(1300, xResult[0]);
-		assertEquals(1200, xResult[1]);
-		assertEquals(900, zResult[0]);
-		assertEquals(11, zResult[1]);
+		assertEquals(1200, xResult[0]);
+		assertEquals(1100, xResult[1]);
+		assertEquals(700, zResult[0]);
+		assertEquals(10, zResult[1]);
 	}
 
 	@Test
@@ -82,9 +87,9 @@ public class The95thPercentileSamplesContainerTest {
 		long[] xResult = container.getTrafficValuesForLinks();
 		long[] zResult = container.getTrafficValuesForTunnels();
 		
-		assertEquals(1200, xResult[0]);
+		assertEquals(1100, xResult[0]);
 		assertEquals(1200, xResult[1]);
-		assertEquals(700, zResult[0]);
+		assertEquals(650, zResult[0]);
 		assertEquals(10, zResult[1]);
 	}
 	
@@ -92,6 +97,16 @@ public class The95thPercentileSamplesContainerTest {
 	public void shouldThrowExceptionOnInvalidInput() {
 		The95PercentileSamplesContainer container = new The95PercentileSamplesContainer(link1, link2);
 		container.storeTrafficValues(null, Arrays.asList(zVector2));
+	}
+	
+	@Test
+	public void shouldCalculate95thPercentileSampleIndex() {
+		int sampleCounter = 100;
+		assertTrue(94 == ((int)(sampleCounter*0.95)) - 1);
+		sampleCounter = 1000;
+		assertTrue(949 == ((int)(sampleCounter*0.95)) - 1);
+		sampleCounter = 99;
+		assertTrue(93 == ((int)(sampleCounter*0.95)) - 1);
 	}
 	
 }

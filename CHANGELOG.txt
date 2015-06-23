@@ -1,3 +1,11 @@
+SmartenIT v3.1 - 30/04/2015
+==========================
+
+* Added BG router configuration using NETCONF protocol.
+* Support for delay-tolerant traffic management.
+* Introduced new compensation vector calculation in the case when reference vector is achieved on one or more links.
+
+
 SmartenIT v3.0 - 12/02/2015
 ==========================
 

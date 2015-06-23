@@ -48,12 +48,14 @@ import eu.smartenit.sbox.db.dao.DbConstants;
 import eu.smartenit.sbox.db.dao.LinkDAO;
 import eu.smartenit.sbox.db.dao.SDNControllerDAO;
 import eu.smartenit.sbox.db.dao.SystemControlParametersDAO;
+import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.AS;
 import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 import eu.smartenit.sbox.db.dto.SDNController;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.SystemControlParameters;
+import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.eca.EconomicAnalyzer;
@@ -80,6 +82,8 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 	
 	private static SystemControlParametersDAO scpDAO;
 	private static SystemControlParameters scp;
+	private static TimeScheduleParametersDAO tspDAO;
+	private static TimeScheduleParameters tsp;
 	
 	@BeforeClass
 	public static void setupTests() throws Exception {
@@ -99,7 +103,7 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
         		.willReturn(aResponse()
         				.withStatus(200)));
         
-        //Modifying sdn controller address and port, to point to the mock
+        //modifying sdn controller address and port, to point to the mock
         sdao = new SDNControllerDAO();
         sdn = sdao.findById("192.168.122.105");
         sdn.setRestPort(8888);
@@ -118,7 +122,6 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 				Executors.newScheduledThreadPool(SBoxProperties.CORE_POOL_SIZE, threadFactory);
 		
 	}
-	
 
 	/**
 	 * This method initializes NTMs at sending and receiving domains,
@@ -157,13 +160,20 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 		DAOFactory.setDC2DCComDAOInstance(new DC2DCCommunicationDAO());
 		DAOFactory.setLinkDAOInstance(new LinkDAO());
 		DAOFactory.setSCPDAOInstance(new SystemControlParametersDAO());
+		DAOFactory.setTSPDAOInstance(new TimeScheduleParametersDAO());
 		
 		//modifying remote sbox address, to be 127.0.0.1
       	asdao = new ASDAO();
       	remoteAS = asdao.findByAsNumber(200);
       	remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("127.0.0.1", 0));
       	asdao.update(remoteAS);
-		
+      	
+      	//modifying accounting period length
+      	tspDAO = new TimeScheduleParametersDAO();
+      	tsp = tspDAO.findLast();
+      	tsp.setAccountingPeriod(300);
+      	tspDAO.insert(tsp);
+      	
       	logger.info("--Initializing economic analyzer and traffic receiver . --");
 		NetworkTrafficManager ntm2 = new NetworkTrafficManager();
 		ntm2.initialize(NetworkTrafficManagerDTMMode.TRAFFIC_RECEIVER);
@@ -171,7 +181,7 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 
 		EconomicAnalyzer eca = new EconomicAnalyzer(ntm2.getDtmTrafficManager());
 
-		for (int i = 0; i < 12; i++) {
+		for (int i = 0; i < 10; i++) {
 			XVector xVector = new XVector();
 			xVector.setSourceAsNumber(100);
 			xVector.addVectorValueForLink(new SimpleLinkID("1", "ISP-A"), 500L);
@@ -202,7 +212,6 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
 		remoteAS.getSbox().setManagementAddress(new NetworkAddressIPv4("150.254.160.143", 0));
 		asdao.update(remoteAS);
 	}
-		
 	
 	@AfterClass
 	public static void cleanTests() throws Exception {
@@ -217,6 +226,11 @@ public class EconomicAnalyzerNetworkTrafficSenderReceiverTest {
       	scp = scpDAO.findLast();
       	scp.setChargingRule(ChargingRule.volume);
       	scpDAO.insert(scp);
+      	
+      	tspDAO = new TimeScheduleParametersDAO();
+      	tsp = tspDAO.findLast();
+      	tsp.setAccountingPeriod(900);
+      	tspDAO.insert(tsp);
 		
 		SBoxThreadHandler.shutdownNowThreads();
 	}

@@ -25,44 +25,51 @@ import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
 /**
- * EconomicAnalyzer. Used to invoke the economic analyzer algorithm.
+ * Main class of the Economic Analyzer. Implements external interface method
+ * used by the QoS Analyzer to update traffic information. Uses
+ * {@link EconomicAnalyzerInternal} to handle traffic samples and trigger
+ * actions in scope of a single Autonomous System.
  * 
  * @author D. D&ouml;nni, K. Bhargav, T. Bocek
- *
  */
 public class EconomicAnalyzer {
 	
 	/**
-	 * The DTM traffic manager instance
+	 * The DTM traffic manager instance.
 	 */
 	final private DTMTrafficManager dtmTrafficManager;
 	
 	/**
-	 * Map that maps the Key (consisting of two link ids) to the corresponding EconomicAnalyzerInternal instance.
+	 * Map that maps the Key (consisting of two link ids) to the corresponding
+	 * EconomicAnalyzerInternal instance.
 	 */
 	final private Map<Key, EconomicAnalyzerInternal> map = new HashMap<Key, EconomicAnalyzerInternal>();
 	
 	/**
-	 * Constructor for the EconomicAnalyzer
+	 * Constructor for the EconomicAnalyzer.
 	 * 
-	 * @param dtmTrafficManager The DTM traffic manager instance
+	 * @param dtmTrafficManager
+	 *            instance of DTM traffic manager
 	 */
 	public EconomicAnalyzer(DTMTrafficManager dtmTrafficManager) {
 		this.dtmTrafficManager=dtmTrafficManager;
 	}
 	
 	/**
-	 * Updates the X_V and Z_V vectors
+	 * Economic Analyzer external interface method used to update information
+	 * about link traffic vector and tunnel traffic vectors.
 	 * 
-	 * @param X_in : The X_in vector
-	 * @param Z_in_list : The Z_in_list vector list
+	 * @param xVector
+	 *            new link traffic vector
+	 * @param zVectors
+	 *            new list of tunnel traffic vectors
 	 */
-	public void updateXZVectors(XVector X_in, List<ZVector> Z_in_list) {
-		makeSanityCheck(X_in);
-		makeSanityCheck(Z_in_list);
+	public void updateXZVectors(XVector xVector, List<ZVector> zVectors) {
+		makeSanityCheck(xVector);
+		makeSanityCheck(zVectors);
 		
-		SimpleLinkID link1 = (SimpleLinkID) X_in.getVectorValues().get(0).getLinkID();
-		SimpleLinkID link2 = (SimpleLinkID) X_in.getVectorValues().get(1).getLinkID();
+		SimpleLinkID link1 = (SimpleLinkID) xVector.getVectorValues().get(0).getLinkID();
+		SimpleLinkID link2 = (SimpleLinkID) xVector.getVectorValues().get(1).getLinkID();
 		
 		Key key = new Key(link1, link2);
 		EconomicAnalyzerInternal eca = map.get(key);
@@ -70,13 +77,17 @@ public class EconomicAnalyzer {
 			eca = new EconomicAnalyzerInternal(dtmTrafficManager, link1, link2);
 			map.put(key, eca);
 		}
-		eca.updateXZVectors(X_in, Z_in_list);
+		eca.updateXZVectors(xVector, zVectors);
 	}
 	
 	/**
-	 * Makes sure that all link ids in the {@link ZVector} {@link List} are of type {@link SimpleLinkID}. Otherwise, an {@link IllegalArgumentException} is thrown.
+	 * Makes sure that all link ids in the {@link ZVector} {@link List} are of
+	 * type {@link SimpleLinkID}. Otherwise, an {@link IllegalArgumentException}
+	 * is thrown.
 	 * 
-	 * @param z_in_list The {@link ZVector} {@link List} whose link ids are to be checked for  {@link SimpleLinkID} type.
+	 * @param z_in_list
+	 *            The {@link ZVector} {@link List} whose link ids are to be
+	 *            checked for {@link SimpleLinkID} type.
 	 */
 	private void makeSanityCheck(List<ZVector> z_in_list) {
 		for(int i = 0; i < z_in_list.size(); i++) {
@@ -90,9 +101,13 @@ public class EconomicAnalyzer {
 	}
 
 	/**
-	 * Makes sure that all link ids in the {@link XVector} are of type {@link SimpleLinkID}. Otherwise, an {@link IllegalArgumentException} is thrown.
+	 * Makes sure that all link ids in the {@link XVector} are of type
+	 * {@link SimpleLinkID}. Otherwise, an {@link IllegalArgumentException} is
+	 * thrown.
 	 * 
-	 * @param X_in The {@link XVector} whose link ids are to be checked for {@link SimpleLinkID} type.
+	 * @param X_in
+	 *            The {@link XVector} whose link ids are to be checked for
+	 *            {@link SimpleLinkID} type.
 	 */
 	private void makeSanityCheck(XVector X_in) {
 		for(int i = 0; i < X_in.getVectorValues().size(); i++) {
@@ -103,10 +118,11 @@ public class EconomicAnalyzer {
 	}
 
 	/**
-	 * Class used to map two {@link SimpleLinkID}s to the suitable {@link EconomicAnalyzerInternal} instance.
+	 * Class used to map two {@link SimpleLinkID}s to the suitable
+	 * {@link EconomicAnalyzerInternal} instance.
 	 * 
 	 * @author D. Dönni, K. Bhargav, T. Bocek
-	 *
+	 * 
 	 */
 	private static class Key {
 

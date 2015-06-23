@@ -84,6 +84,10 @@ public class ContentDAO {
 		return dao.findAllNotPrefetched();
 	}
 
+    public synchronized List<Content> findAllDownloaded() {
+        return dao.findAllDownloaded();
+    }
+
     public synchronized List<Content> findAllWithAccesses() {
         List<ContentAccessJoinRow> contentAccessJoinRows = dao.findAllWithAccesses();
         return joinRowsToContentList(contentAccessJoinRows);

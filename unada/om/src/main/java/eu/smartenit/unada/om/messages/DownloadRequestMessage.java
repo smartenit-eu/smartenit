@@ -29,6 +29,8 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.smartenit.unada.commons.constants.UnadaConstants;
+import eu.smartenit.unada.commons.logging.UnadaLogger;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.Content;
 import eu.smartenit.unada.om.OverlayManager;
@@ -42,8 +44,10 @@ public class DownloadRequestMessage extends BaseMessage {
 	private int bufferCapacity = (int) DAOFactory.getuNaDaConfigurationDAO().findLast().getChunkSize();
 	private int retries = 3;
 	
+	
 	@Override
 	public void execute(OverlayManager om) {
+		long startTime = System.currentTimeMillis();
 		
 		MessageDigest md;
 		log.debug("{} - Starting to serve content request.", om.getuNaDaInfo().getUnadaID());
@@ -89,6 +93,17 @@ public class DownloadRequestMessage extends BaseMessage {
 				}
 				chunkNo++;
 			}
+			
+			
+			//Study log #3 Video Serving Events (time, videoID, size, source, download time) 
+			UnadaLogger.overall.debug("{}: Video Serving Event ({}, {}, {}, {}, {})", new Object[]{
+					UnadaConstants.UNADA_OWNER_MD5, 
+					System.currentTimeMillis(), 
+					content.getContentID(), 
+					content.getSize(), 
+					(content.isPrefetchedVimeo() ? "vimeo" : "overlay"), 
+					(System.currentTimeMillis() - startTime)});
+			
 			om.sendMessage(this.getSender(), new DownloadCompleteMessage().setContentID(contentID).setMd5Digest(md.digest()));
 		} catch (IOException e) {
 			log.error("A problem occurred with reading the file: {}", contentPath, e);

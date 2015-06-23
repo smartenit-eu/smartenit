@@ -94,30 +94,47 @@ public class TrafficCollectorTask implements Runnable {
 			logger.warn("Caught InterruptedException while collecting counter values.\n" + e);
 		} catch (ExecutionException e) {
 			logger.warn("Caught ExecutionException while collecting counter values.\n" + e);
+			e.printStackTrace();
 		}
 	}
 
 	protected List<ScheduledFuture<CounterValues>> createThreadsForBGRouters() {
 		List<ScheduledFuture<CounterValues>> futures = new ArrayList<ScheduledFuture<CounterValues>>();
 		for (BGRouter bgRouter : getBGRoutersByAsNumber()) {
-			initilizeCollectedCounterValuesWithLinks(bgRouter);
-			futures.add(getThreadService().schedule(new CounterCollectorThread(getLinksByBGRouter(bgRouter), bgRouter), 0, TimeUnit.MICROSECONDS));
+			final List<Link> linksByBGRouter = getLinksByBGRouter(bgRouter);
+			if(linksByBGRouter != null && linksByBGRouter.size() > 0) {
+				initilizeCollectedCounterValuesWithLinks(bgRouter);
+				futures.add(getThreadService().schedule(new CounterCollectorThread(linksByBGRouter, null,  bgRouter), 0, TimeUnit.MICROSECONDS));
+			}
+			final List<Tunnel> tunnelsByBGRouter = getTunnelsByBGRouter(bgRouter);
+			if(tunnelsByBGRouter != null && tunnelsByBGRouter.size() > 0) {
+				initilizeCollectedCounterValuesWithTunnels(bgRouter);
+				futures.add(getThreadService().schedule(new CounterCollectorThread(null, tunnelsByBGRouter, bgRouter), 0, TimeUnit.MICROSECONDS));
+			}
 		}
-		logger.info("Waiting for counter values from {} BGRouters ...", futures.size());
+		logger.info("Waiting for counter values from {} BGRouters ...",  getBGRoutersByAsNumber().size());
 		return futures;
 	}
 
-	protected void initilizeCollectedCounterValuesWithLinks(BGRouter bgRouter) {
-		for (Link link : getLinksByBGRouter(bgRouter)) {
-			collectedCounterValues.storeCounterValue(link.getLinkID(), 0);
+	protected void initilizeCollectedCounterValuesWithTunnels(BGRouter bgRouter) {
+		for (Tunnel tunnel : getTunnelsByBGRouter(bgRouter)) {
+			collectedCounterValues.storeCounterValue(tunnel.getTunnelID(), 0);
 		}
+	}
+
+	protected void initilizeCollectedCounterValuesWithLinks(BGRouter bgRouter) {
+		for (Link link : getLinksByBGRouter(bgRouter))
+			collectedCounterValues.storeCounterValue(link.getLinkID(), 0);
 	}
 	
 	protected List<ScheduledFuture<CounterValues>> createThreadsForDARouters() {
 		List<ScheduledFuture<CounterValues>> futures = new ArrayList<ScheduledFuture<CounterValues>>();
 		for (DARouter daRouter : getDARoutersByAsNumber()) {
-			initilizeCollectedCounterValuesWithTunnels(daRouter);
-			futures.add(getThreadService().schedule(new CounterCollectorThread(getTunnelsByDARouter(daRouter), daRouter), 0, TimeUnit.MICROSECONDS));
+			final List<Tunnel> tunnelsByDARouter = getTunnelsByDARouter(daRouter);
+			if(tunnelsByDARouter != null && tunnelsByDARouter.size() > 0) {
+				initilizeCollectedCounterValuesWithTunnels(daRouter);
+				futures.add(getThreadService().schedule(new CounterCollectorThread(tunnelsByDARouter, daRouter), 0, TimeUnit.MICROSECONDS));
+			}
 		}
 		logger.info("Waiting for counter values from {} DARouters ...", futures.size());
 		return futures;
@@ -162,7 +179,15 @@ public class TrafficCollectorTask implements Runnable {
 		return trafficCollector.getMonitoredLinks().getLinks(bgRouter);
 	}
 	
+	protected List<Tunnel> getTunnelsByBGRouter(BGRouter bgRouter) {
+		return trafficCollector.getMonitoredTunnels().getTunnels(bgRouter);
+	}
+	
 	protected List<Tunnel> getTunnelsByDARouter(DARouter daRouter) {
 		return trafficCollector.getMonitoredTunnels().getTunnels(daRouter);
+	}
+
+	void setAsNumber(int asNumber) {
+		this.asNumber = asNumber;
 	}
 }

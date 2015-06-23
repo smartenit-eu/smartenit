@@ -28,7 +28,7 @@ import eu.smartenit.sbox.db.dto.XVector;
  * Base class to be extended.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.1
  * 
  */
 public abstract class VectorProcessingThread implements Runnable {
@@ -55,6 +55,17 @@ public abstract class VectorProcessingThread implements Runnable {
 		this.rVector = rVector;
 		this.remoteSboxes = remoteSboxes;
 		this.sender = new DTMVectorsSender();
+	}
+	
+	/**
+	 * The constructor with arguments.
+	 * 
+	 * @param remoteSboxes
+	 *            list of {@link SBox}es that should be updated with the new
+	 *            calculated compensation vector
+	 */
+	public VectorProcessingThread(List<SBox> remoteSboxes) {
+		this(null, null, remoteSboxes);
 	}
 
 }

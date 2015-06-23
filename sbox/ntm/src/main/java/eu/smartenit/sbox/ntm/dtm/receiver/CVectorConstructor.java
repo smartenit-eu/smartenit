@@ -61,6 +61,11 @@ public class CVectorConstructor {
 		validateInput(xVector, rVector);
 	
 		List<LocalVectorValue> cVectorValues = new CVectorValuesCalculator(xVector, rVector).calculate();
+		logger.info("VECTOR-VALUES-C:(" 
+				+ ((SimpleLinkID)cVectorValues.get(0).getLinkID()).getLocalLinkID() + ":" 
+				+ cVectorValues.get(0).getValue() + ")|(" 
+				+ ((SimpleLinkID)cVectorValues.get(1).getLinkID()).getLocalLinkID() + ":"
+				+ cVectorValues.get(1).getValue() + ")"); 
 		
 		CVector cVector = new CVector();
 		cVector.setSourceAsNumber(xVector.getSourceAsNumber());

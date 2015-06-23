@@ -15,14 +15,16 @@
  */
 package eu.smartenit.unada.ctm.cache.impl;
 
+import eu.smartenit.unada.commons.constants.UnadaConstants;
+import eu.smartenit.unada.commons.logging.UnadaLogger;
 import eu.smartenit.unada.commons.threads.UnadaThreadService;
 import eu.smartenit.unada.ctm.cache.VideoDownloader;
 import eu.smartenit.unada.ctm.cache.util.CacheConstants;
 import eu.smartenit.unada.ctm.cache.util.OverlayFactory;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.Content;
-
 import eu.smartenit.unada.om.IFutureDownload;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,8 +123,10 @@ public class OverlayDownloader implements VideoDownloader, Runnable{
                 // download content
                 logger.info("Prefetching video from the overlay with id " + content.getContentID()
                         + " and size " + (float) content.getSize()/1000000 +  "MB to " + content.getPath());
+                long timeBefore = System.currentTimeMillis();
                 IFutureDownload future = OverlayFactory.getOverlayManager().downloadContent(content);
                 future.get();
+                long timeAfter = System.currentTimeMillis();
 
                 if (!future.isSuccess()) {
                     logger.warn("Download from overlay failed! Will prefetch it from Vimeo.");
@@ -142,6 +146,10 @@ public class OverlayDownloader implements VideoDownloader, Runnable{
                 logger.info("Content " + content.getContentID() + " prefetching from the overlay "
                 		+ "completed successfully.");
                 DAOFactory.getContentDAO().update(content);
+                
+                UnadaLogger.overall.info("{}: Video prefetching ({}, {}, {}, overlay, {})", 
+                		new Object[]{UnadaConstants.UNADA_OWNER_MD5, timeAfter, 
+                		content.getContentID(), content.getSize(), timeAfter - timeBefore});
 
             } catch (Exception e) {
                 logger.error("Exception while downloading video {}", content.getContentID(), e);

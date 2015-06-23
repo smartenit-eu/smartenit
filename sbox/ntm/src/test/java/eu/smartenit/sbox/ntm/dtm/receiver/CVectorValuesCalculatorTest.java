@@ -120,7 +120,7 @@ public class CVectorValuesCalculatorTest
 	}
 	
 	@Test
-	public void shouldCalculateWithXVectorEqualRVactor() {
+	public void shouldCalculateWithXVectorEqualRVector() {
     	rVector.addVectorValueForLink(linkID1, 1500L);
     	rVector.addVectorValueForLink(linkID2, 2100L);
     	
@@ -156,7 +156,7 @@ public class CVectorValuesCalculatorTest
 		assertEquals(-436, getVectorValueForLink(cVectorValues, linkID5));
 	}
 	
-	public long getVectorValueForLink(List<LocalVectorValue> vectorValues, LinkID linkId) {
+	private long getVectorValueForLink(List<LocalVectorValue> vectorValues, LinkID linkId) {
 		for (LocalVectorValue v : vectorValues) {
 			if (v.getLinkID().equals(linkId))
 				return v.getValue();

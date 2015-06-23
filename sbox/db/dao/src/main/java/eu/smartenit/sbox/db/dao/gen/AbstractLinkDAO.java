@@ -32,7 +32,7 @@ import eu.smartenit.sbox.db.dto.SimpleLinkID;
  * The abstract LinkDAO class, including all SQL queries.
  *
  * @authors Antonis Makris, George Petropoulos
- * @version 1.2
+ * @version 3.1
  * 
  */
 public abstract class AbstractLinkDAO {
@@ -49,6 +49,7 @@ public abstract class AbstractLinkDAO {
 			+ "BGROUTERADDRESS STRING, "
 			+ "TUNNELENDPREFIX STRING, "
 			+ "TUNNELENDPREFIXLENGTH INTEGER, "
+			+ "POLICERBANDWIDTHLIMITFACTOR REAL, "
 			+ "PRIMARY KEY (LOCALLINKID, LOCALISPNAME), "
 			+ "FOREIGN KEY (BGROUTERADDRESS) "
 			+ "REFERENCES BGROUTER(managementAddressPrefix) ON DELETE CASCADE)")
@@ -62,18 +63,18 @@ public abstract class AbstractLinkDAO {
 			+ "(LOCALLINKID, LOCALISPNAME, ADDRESSPREFIX, "
 			+ "PHYSICALINTERFACENAME, VLAN, INBOUNDINTERFACECOUNTEROID, "
 			+ "OUTBOUNDINTERFACECOUNTEROID, BGROUTERADDRESS, "
-			+ "TUNNELENDPREFIX, TUNNELENDPREFIXLENGTH) "
+			+ "TUNNELENDPREFIX, TUNNELENDPREFIXLENGTH, POLICERBANDWIDTHLIMITFACTOR) "
 			+ "VALUES (:localLinkID, :localIspName, :addressPrefix, "
 			+ ":physicalInterfaceName, :vlan, :inboundInterfaceCounterOID, "
 			+ ":outboundInterfaceCounterOID, :bgRouterAddress, "
-			+ ":tunnelEndPrefix, :tunnelEndPrefixLength)")
+			+ ":tunnelEndPrefix, :tunnelEndPrefixLength, :policerBandwidthLimitFactor)")
 	public abstract void insert(@BindLink Link l);
 	
 	
 	@SqlQuery("SELECT LOCALLINKID, LOCALISPNAME, ADDRESSPREFIX, "
 			+ "PHYSICALINTERFACENAME, VLAN, INBOUNDINTERFACECOUNTEROID, "
 			+ "OUTBOUNDINTERFACECOUNTEROID, BGROUTERADDRESS, "
-			+ "TUNNELENDPREFIX, TUNNELENDPREFIXLENGTH "
+			+ "TUNNELENDPREFIX, TUNNELENDPREFIXLENGTH, POLICERBANDWIDTHLIMITFACTOR "
 			+ "FROM LINK")
 	@Mapper(LinkMapper.class)
 	public abstract List<Link> findAll();
@@ -81,7 +82,7 @@ public abstract class AbstractLinkDAO {
 	@SqlQuery("SELECT LOCALLINKID, LOCALISPNAME, ADDRESSPREFIX, "
 			+ "PHYSICALINTERFACENAME, VLAN, INBOUNDINTERFACECOUNTEROID, "
 			+ "OUTBOUNDINTERFACECOUNTEROID, BGROUTERADDRESS, "
-			+ "TUNNELENDPREFIX, TUNNELENDPREFIXLENGTH "
+			+ "TUNNELENDPREFIX, TUNNELENDPREFIXLENGTH, POLICERBANDWIDTHLIMITFACTOR "
 			+ "FROM LINK "
 			+ "WHERE LOCALLINKID = :localLinkID AND LOCALISPNAME = :localIspName")
 	@Mapper(LinkMapper.class)
@@ -96,7 +97,8 @@ public abstract class AbstractLinkDAO {
 			+ "OUTBOUNDINTERFACECOUNTEROID = :outboundInterfaceCounterOID, "
 			+ "BGROUTERADDRESS = :bgRouterAddress,"
 			+ "TUNNELENDPREFIX = :tunnelEndPrefix, "
-			+ "TUNNELENDPREFIXLENGTH = :tunnelEndPrefixLength "
+			+ "TUNNELENDPREFIXLENGTH = :tunnelEndPrefixLength,"
+			+ "POLICERBANDWIDTHLIMITFACTOR = :policerBandwidthLimitFactor "
 			+ "WHERE LOCALLINKID = :localLinkID AND LOCALISPNAME = :localIspName")
 	public abstract void update(@BindLink Link l);
 	
@@ -110,7 +112,7 @@ public abstract class AbstractLinkDAO {
 	@SqlQuery("SELECT LOCALLINKID, LOCALISPNAME, ADDRESSPREFIX, "
 			+ "PHYSICALINTERFACENAME, VLAN, INBOUNDINTERFACECOUNTEROID, "
 			+ "OUTBOUNDINTERFACECOUNTEROID, BGROUTERADDRESS, "
-			+ "TUNNELENDPREFIX, TUNNELENDPREFIXLENGTH "
+			+ "TUNNELENDPREFIX, TUNNELENDPREFIXLENGTH, POLICERBANDWIDTHLIMITFACTOR "
 			+ "FROM LINK "
 			+ "WHERE BGROUTERADDRESS = :bgAddress")
 	@Mapper(LinkMapper.class)

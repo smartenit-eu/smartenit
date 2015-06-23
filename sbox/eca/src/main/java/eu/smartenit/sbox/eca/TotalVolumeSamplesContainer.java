@@ -35,21 +35,30 @@ public class TotalVolumeSamplesContainer extends TrafficSamplesContainer {
 
 	private static final Logger logger = LoggerFactory.getLogger(TotalVolumeSamplesContainer.class);
 	
-	/**
-	 * Total volume traffic vector
-	 */
 	private final long[] X_V = new long[2];
 
-	/**
-	 * Total volume traffic vector received from the DC-B collected on DA-A
-	 * router
-	 */
 	private final long[] Z_V = new long[2];
 	
+	/**
+	 * The constructor with arguments.
+	 * 
+	 * @param link1
+	 *            identifier of the first link
+	 * @param link2
+	 *            identifier of the second link
+	 */
 	public TotalVolumeSamplesContainer(SimpleLinkID link1, SimpleLinkID link2) {
 		super(link1, link2);
 	}
 
+	/**
+	 * Accumulates and stores link and tunnel traffic values.
+	 * 
+	 * @param xVector
+	 *            link traffic vector
+	 * @param zVectors
+	 *            list of tunnel traffic vectors
+	 */
 	@Override
 	public void storeTrafficValues(XVector xVector, List<ZVector> zVectors) {
 		logger.info("Accumulating volume...");
@@ -66,6 +75,10 @@ public class TotalVolumeSamplesContainer extends TrafficSamplesContainer {
 		logger.info("Volume Z_V: [" + Z_V[EconomicAnalyzerInternal.x1] + " / " + Z_V[EconomicAnalyzerInternal.x2]  + "]");
 	}
 	
+	/**
+	 * Resets aggregated traffic information (after the accounting period has
+	 * expired)
+	 */
 	@Override
 	public void resetTrafficValues() {
 		X_V[EconomicAnalyzerInternal.x1] = 0;
@@ -75,11 +88,25 @@ public class TotalVolumeSamplesContainer extends TrafficSamplesContainer {
 		Z_V[EconomicAnalyzerInternal.x2] = 0;
 	}
 
+	/**
+	 * Returns a vector of link traffic values to be used in reference vector
+	 * calculation. These values correspond to traffic accumulated over the
+	 * whole accounting period.
+	 * 
+	 * @return table of samples (number of bytes per link)
+	 */
 	@Override
 	public long[] getTrafficValuesForLinks() {
 		return X_V;
 	}
 	
+	/**
+	 * Returns a vector of tunnel traffic samples to be used in reference vector
+	 * calculation. These values correspond to traffic accumulated over the
+	 * whole accounting period.
+	 * 
+	 * @return table of samples (number of bytes per tunnel)
+	 */
 	@Override
 	public long[] getTrafficValuesForTunnels() {
 		return Z_V;

@@ -30,7 +30,7 @@ import eu.smartenit.sbox.db.dto.BGRouter;
  * The abstract BGRouterDAO class, including all SQL queries.
  *
  * @authors Antonis Makris, George Petropoulos
- * @version 1.0
+ * @version 3.1
  * 
  */
 public abstract class AbstractBGRouterDAO {
@@ -39,6 +39,8 @@ public abstract class AbstractBGRouterDAO {
 			+ "(managementAddressPrefix String," 
 			+ "snmpCommunity String, "
 			+ "ASNUMBER INTEGER, "
+			+ "netconfUsername STRING, "
+			+ "netconfPassword STRING, "
 			+ "PRIMARY KEY (managementAddressPrefix), "
 			+ "FOREIGN KEY (ASNUMBER) REFERENCES ASYSTEM(ASNUMBER) ON DELETE CASCADE)")
 	public abstract void createTable();
@@ -46,12 +48,15 @@ public abstract class AbstractBGRouterDAO {
 	@SqlUpdate("drop table IF EXISTS BGRouter")
 	public abstract void deleteTable();
 
-	@SqlUpdate("INSERT INTO BGRouter (managementAddressPrefix, snmpCommunity)"
-			+ " VALUES (:b.address, :b.snmpCommunity )")
+	@SqlUpdate("INSERT INTO BGRouter (managementAddressPrefix, snmpCommunity, "
+			+ "netconfUsername, netconfPassword) "
+			+ "VALUES (:b.address, :b.snmpCommunity, :b.netconfUsername, :b.netconfPassword)")
 	public abstract void insert(@BindBGRouter("b") BGRouter bgrouter);
 	
-	@SqlUpdate("INSERT INTO BGRouter (managementAddressPrefix, snmpCommunity, ASNUMBER)"
-			+ " VALUES (:b.address, :b.snmpCommunity, :asNumber)")
+	@SqlUpdate("INSERT INTO BGRouter (managementAddressPrefix, snmpCommunity, ASNUMBER, "
+			+ "netconfUsername, netconfPassword) "
+			+ "VALUES (:b.address, :b.snmpCommunity, :asNumber, "
+			+ ":b.netconfUsername, :b.netconfPassword)")
 	public abstract void insertByASNumber(@BindBGRouter("b") BGRouter bgrouter, 
 			@Bind("asNumber") int asNumber);
 
@@ -65,7 +70,9 @@ public abstract class AbstractBGRouterDAO {
 	public abstract BGRouter findById(@Bind("address") String address);
 
 	@SqlUpdate("UPDATE BGRouter "
-			+ "SET snmpCommunity = :b.snmpCommunity "
+			+ "SET snmpCommunity = :b.snmpCommunity, "
+			+ "netconfUsername = :b.netconfUsername, "
+			+ "netconfPassword = :b.netconfPassword "
 			+ "WHERE managementAddressPrefix = :b.address")
 	public abstract void update(@BindBGRouter("b") BGRouter bgr);
 

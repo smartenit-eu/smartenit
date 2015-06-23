@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import eu.smartenit.sbox.db.dto.BGRouter;
 import eu.smartenit.sbox.db.dto.DARouter;
 import eu.smartenit.sbox.db.dto.DC2DCCommunicationID;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
@@ -28,24 +29,37 @@ import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
  * {@link MonitoredTunnelsInventory} class.
  * 
  * @author Lukasz Lopatowski
- * @version 1.0
+ * @version 3.1
  * 
  */
 public class MonitoredTunnelsInventoryTest {
 	
 	@Test
-	public void shouldPopulateInventory() {
+	public void shouldPopulateInventoryAndExecuteQueries() {
 		MonitoredTunnelsInventory inventory = new MonitoredTunnelsInventory();
 		inventory.populate(DBStructuresBuilder.communications);
 		
 		assertEquals(2, inventory.getDARoutersByAsNumber(1).size());
 		assertEquals(1, inventory.getDARoutersByAsNumber(2).size());
 		assertEquals(2, inventory.getTunnels(new DARouter(new NetworkAddressIPv4("1.1.1.1", 32), "", "")).size());
+		assertEquals(0, inventory.getTunnels(new BGRouter(new NetworkAddressIPv4("1.2.1.1", 32), "", null)).size());
 		assertEquals(7, inventory.getTunnels(1).size());
 		assertEquals(1, inventory.getTunnels(2).size());
 		assertEquals(2, inventory.getAllAsNumbers().size());
 		assertEquals(2, inventory.getTunnels(new DC2DCCommunicationID(1, "id1", 1, "cloudLocal11", 200, "remoteCloud200")).size());
 		assertEquals(5, inventory.getTunnels(new DC2DCCommunicationID(2, "id2", 1, "cloudLocal12", 300, "remoteCloud300")).size());
+	}
+	
+	@Test
+	public void shouldPopulateInventoryWithSomeTunnelsAtBGRouters() {
+		MonitoredTunnelsInventory inventory = new MonitoredTunnelsInventory();
+		inventory.populate(DBStructuresBuilder.communicationsWithTunnelsOnBGRouters);
+		
+		assertEquals(2, inventory.getDARoutersByAsNumber(1).size());
+		assertEquals(5, inventory.getTunnels(new DARouter(new NetworkAddressIPv4("2.1.1.1", 32), "", "")).size());
+		assertEquals(2, inventory.getTunnels(new BGRouter(new NetworkAddressIPv4("1.2.1.1", 32), "", null)).size());
+		assertEquals(7, inventory.getTunnels(1).size());
+		assertEquals(0, inventory.getTunnels(2).size());
 	}
 
 }

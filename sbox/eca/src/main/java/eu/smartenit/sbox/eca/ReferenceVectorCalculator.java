@@ -39,8 +39,9 @@ import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 
 /**
- * Class that implements the reference calculation algorithm.
+ * Class that implements the reference vector calculation algorithm.
  * 
+ * @author D. D&ouml;nni, K. Bhargav, T. Bocek
  * @author Lukasz Lopatowski
  * @version 3.0
  * 
@@ -115,15 +116,11 @@ public class ReferenceVectorCalculator {
 	private final Map<Long, Segment> costFunctionMap2 = new HashMap<Long, Segment>();
 	
 	/**
-	 * TODO Replace with actual values
-	 * 
 	 * Parameter which allows to influence on reference vector prediction by decreasing or increasing values for Z_V[x1]
 	 */
 	private final double tol1;
 	
 	/**
-	 * TODO Replace with actual values
-	 * 
 	 * Parameter which allows to influence on reference vector prediction by decreasing or increasing values for Z_V[x2]
 	 */
 	private final double tol2;	
@@ -134,12 +131,12 @@ public class ReferenceVectorCalculator {
 	private long[] X_V;
 	
 	/**
-	 * Contains the link IDs for links 1
+	 * Contains the identifier of the first link
 	 */
 	private final SimpleLinkID link1;
 	
 	/**
-	 * Contains the link IDs for links 2
+	 * Contains the identifier for the second link
 	 */
 	private final SimpleLinkID link2;
 
@@ -148,6 +145,18 @@ public class ReferenceVectorCalculator {
 	 */
 	private static final boolean SIMPLE_CALCULATION = false;
 	
+	/**
+	 * The constructor with arguments.
+	 * 
+	 * @param link1
+	 *            identifier of the first link
+	 * @param link2
+	 *            identified of the second link
+	 * @param costFunctions
+	 *            cost functions used for given links
+	 * @param timeScheduleParameters
+	 *            additional control parameters
+	 */
 	public ReferenceVectorCalculator(SimpleLinkID link1, SimpleLinkID link2, 
 			List<CostFunction> costFunctions, TimeScheduleParameters timeScheduleParameters) {
 		this.link1 = link1;
@@ -155,6 +164,7 @@ public class ReferenceVectorCalculator {
 		this.costFunctions = costFunctions;
 		
 		//initialize
+		logger.info("Initializing reference vector calculator structures.");
 		initializeAlpha();
 		alpha1 = alpha.get(x1);
 		alpha2 = alpha.get(x2);
@@ -175,26 +185,31 @@ public class ReferenceVectorCalculator {
 	}
 	
 	/**
-	 * Calculates the reference vector.
+	 * Calculates the reference vector for an AS.
 	 * 
-	 * @param sourceAsNumber The number of the source AS
-	 * 
-	 * @return Returns an RVector containing the reference vector values.
+	 * @param X_V
+	 *            aggregated link traffic value
+	 * @param Z_V
+	 *            aggregated tunnel traffic value
+	 * @param sourceAsNumber
+	 *            number of the AS with given links
+	 * @return calculated reference vector
 	 */
 	LocalRVector calculate(long[] X_V, long[] Z_V, int sourceAsNumber) {
+		logger.info("Calculating new reference vector for AS {}", sourceAsNumber);
 		this.X_V = X_V;
 		
-		logger.info("Calculating S: ");
+		logger.debug("Calculating S: ");
 		long S = Z_V[x1] + Z_V[x2];
-		logger.info("S: " + S);
+		logger.debug("S: " + S);
 
 		List<Area> areaList;
 		if(SIMPLE_CALCULATION) {
 			areaList = calculateAreaSimple(S);
-			logger.info("areaList: " + areaList);
+			logger.debug("areaList: " + areaList);
 		} else {
 			areaList = calculateAreaAdvanced(S);
-			logger.info("areaList: " + areaList);
+			logger.debug("areaList: " + areaList);
 		}
 		
 		double[] Z_V_comma = {Z_V[x1] * tol1, Z_V[x2] * tol2};
@@ -230,7 +245,7 @@ public class ReferenceVectorCalculator {
 		List<Area> areaList = new ArrayList<Area>();
 		//List<List<Long>> E = calculateSetE(S, areaList);
 
-		logger.info("Calculating set E ...");
+		logger.debug("Calculating set E ...");
 		
 		List<List<Long>> E = new ArrayList<List<Long>>();
 		E.add(new ArrayList<Long>());
@@ -243,35 +258,35 @@ public class ReferenceVectorCalculator {
 		//Calculates set E1
 		for (int i = 0; i < alpha1.size(); i++) {
 			
-			logger.info("Checking: " + alpha1.get(i) + ">=" + (X_V[x1] - S) + " && " + alpha1.get(i) +  "<=" + (X_V[x1] + S));
+			logger.debug("Checking: " + alpha1.get(i) + ">=" + (X_V[x1] - S) + " && " + alpha1.get(i) +  "<=" + (X_V[x1] + S));
 			
 			if ((alpha1.get(i) >= X_V[x1] - S) && (alpha1.get(i) <= X_V[x1] + S)) {
 				E.get(x1).add(alpha1.get(i));
 				
-				logger.info("Adding " + alpha1.get(i));
+				logger.debug("Adding " + alpha1.get(i));
 			} else {
 				E.get(x1).add(null);
 				nullCounter1++;
-				logger.info("Adding " + null);
+				logger.debug("Adding " + null);
 			}
 		}
 
 		//Calculates set E2
 		for (int i = 0; i < alpha2.size(); i++) {
 			
-			logger.info("Checking: " + alpha2.get(i) + ">=" + (X_V[x2] - S) + " && " + alpha2.get(i) +  "<=" + (X_V[x2] + S));
+			logger.debug("Checking: " + alpha2.get(i) + ">=" + (X_V[x2] - S) + " && " + alpha2.get(i) +  "<=" + (X_V[x2] + S));
 			
 			if ((alpha2.get(i) >= X_V[x2] - S) && (alpha2.get(i) <= X_V[x2] + S)) {
 				E.get(x2).add(alpha2.get(i));
 				
-				logger.info("Adding " + alpha2.get(i));
+				logger.debug("Adding " + alpha2.get(i));
 			} else {
 				E.get(x2).add(null);
 				nullCounter2++;
-				logger.info("Adding " + null);
+				logger.debug("Adding " + null);
 			}
 		}
-		logger.info("Set E: " + E);
+		logger.debug("Set E: " + E);
 		
 		//Deals with the special case where both E1 and E2 contain only null values (i.e. there is no intersection with any alpha)
 		if(nullCounter1 == E.get(x1).size() && nullCounter2 == E.get(x2).size()) {
@@ -332,7 +347,7 @@ public class ReferenceVectorCalculator {
 			}			
 			
 		}
-		logger.info("Area list size: " + areaList.size());
+		logger.debug("Area list size: " + areaList.size());
 		
 		return areaList;
 	}
@@ -388,12 +403,10 @@ public class ReferenceVectorCalculator {
 				double x = solution.getPoint()[0];
 				double y = solution.getPoint()[1];
 				double value = solution.getValue();
-				logger.info("\n");
 				logger.info("Area [" + x1Lower + ", " + x1Upper + ", " + x2Lower + ", " + x2Upper + "]");
 				logger.info("Cost function: " + segment1.getB() + "x1 " + segment2.getB() + "x2 " + " + " + (segment1.getA() + segment2.getA()));
 				logger.info("Reference vector x1=" + x + " x2=" + y + " f1(x1) + f2(x2)=" + value);
 			} catch (NoFeasibleSolutionException e) {
-				logger.info("\n");
 				logger.info("Area [" + x1Lower + ", " + x1Upper + ", " + x2Lower + ", " + x2Upper + "]");
 				logger.info("Cost function: " + segment1.getB() + "x1 " + segment2.getB() + "x2 " + " + " + (segment1.getA() + segment2.getA()));
 				logger.error("No feasible solution found: for area " + a);
@@ -409,6 +422,11 @@ public class ReferenceVectorCalculator {
 				+ " "
 				+ referenceVector.getVectorValues().get(1).getValue()
 				);
+		logger.info("VECTOR-VALUES-R:(" 
+				+ ((SimpleLinkID)referenceVector.getVectorValues().get(0).getLinkID()).getLocalLinkID() + ":" 
+				+ referenceVector.getVectorValues().get(0).getValue() + ")|(" 
+				+ ((SimpleLinkID)referenceVector.getVectorValues().get(1).getLinkID()).getLocalLinkID() + ":"
+				+ referenceVector.getVectorValues().get(1).getValue() + ")"); 
 		
 		return referenceVector;
 	}
@@ -457,15 +475,15 @@ public class ReferenceVectorCalculator {
 	 * @return A list of matching intervals (D1k)
 	 */
 	private List<DInterval> calculateD1k(List<List<Long>> E, long S) {
-		logger.info("Creating D1k ...");
+		logger.debug("Creating D1k ...");
 		List<DInterval> D1k = new ArrayList<DInterval>();
 		for (int i = 0; i < alpha2.size(); i++) {
 			if (E.get(x2).get(i) != null) {
 
 				// S = X_V[x1] + X_V[x2]
-				logger.info("alpha2: " + alpha2.get(i));
+				logger.debug("alpha2: " + alpha2.get(i));
 				long result = X_V[x1] + X_V[x2] - alpha2.get(i);
-				logger.info("x1 = " + result);
+				logger.debug("x1 = " + result);
 				
 				for (int j = 0; j < D1.size(); j++) {
 					if (D1.get(j).contains(result)) {
@@ -476,7 +494,7 @@ public class ReferenceVectorCalculator {
 				}
 			}
 		}
-		logger.info("D1k: " + D1k);
+		logger.debug("D1k: " + D1k);
 		return D1k;
 	}
 	
@@ -488,14 +506,14 @@ public class ReferenceVectorCalculator {
 	 * @return A list of matching intervals (D2k)
 	 */
 	private List<DInterval> calculateD2k(List<List<Long>> E, long S) {
-		logger.info("Creating D2k ...");
+		logger.debug("Creating D2k ...");
 		List<DInterval> D2k = new ArrayList<DInterval>();
 		for (int i = 0; i < alpha1.size(); i++) {
 			if (E.get(x1).get(i) != null) {
 
 				// S = X_V[x1] + X_V[x2]
 				long result = X_V[x1] + X_V[x2] - alpha1.get(i);
-				logger.info("x2 = " + result);
+				logger.debug("x2 = " + result);
 				
 				for (int j = 0; j < D2.size(); j++) {
 					if (D2.get(j).contains(result)) {
@@ -506,7 +524,7 @@ public class ReferenceVectorCalculator {
 				}
 			}
 		}
-		logger.info("D2k: " + D2k);
+		logger.debug("D2k: " + D2k);
 		return D2k;		
 	}
 	

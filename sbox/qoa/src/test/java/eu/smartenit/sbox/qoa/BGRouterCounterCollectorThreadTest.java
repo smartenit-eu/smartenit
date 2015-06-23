@@ -65,7 +65,7 @@ public class BGRouterCounterCollectorThreadTest {
 		when(snmpWrapper.prepareOID(IF_HC_IN_OCTETS_OID)).thenReturn(new OID(IF_HC_IN_OCTETS_OID));
 		when(snmpWrapper.prepareOID(IF_HC_OUT_OCTETS_OID)).thenReturn(new OID(IF_HC_OUT_OCTETS_OID));
 		when(snmpWrapper.prepareTarget(ROUTER_ADDRESS, bgRouter.getSnmpCommunity())).thenReturn(new CommunityTarget());
-		counterCollectorThread = new CounterCollectorThread(bgRouter.getInterDomainLinks(), bgRouter);
+		counterCollectorThread = new CounterCollectorThread(bgRouter.getInterDomainLinks(), null, bgRouter);
 	}
 
 	@Test
@@ -80,13 +80,13 @@ public class BGRouterCounterCollectorThreadTest {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void shouldThrowExceptionBecauseOfLackOfBGRouter() throws Exception {
-		counterCollectorThread = new CounterCollectorThread(Arrays.asList(new Link()), null);
+		counterCollectorThread = new CounterCollectorThread(Arrays.asList(new Link()), null, null);
 		counterCollectorThread.collectCounterValues();
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void shouldThrowExceptionBecauseOfLackOfLinks() throws Exception {
-		counterCollectorThread = new CounterCollectorThread(null, bgRouter);
+		counterCollectorThread = new CounterCollectorThread(null, null, bgRouter);
 		counterCollectorThread.collectCounterValues();
 	}
 	

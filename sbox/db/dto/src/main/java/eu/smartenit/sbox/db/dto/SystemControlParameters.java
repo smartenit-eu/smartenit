@@ -21,7 +21,7 @@ import java.io.Serializable;
  * The SystemControlParameters class.
  *
  * @author George Petropoulos
- * @version 3.0
+ * @version 3.1
  * 
  */
 public class SystemControlParameters implements Serializable{
@@ -60,6 +60,8 @@ public class SystemControlParameters implements Serializable{
 	private OperationModeSDN operationModeSDN;
 	
 	private double compensationThreshold;
+	
+	private boolean delayTolerantTrafficManagement;
 
 	public ChargingRule getChargingRule() {
 		return chargingRule;
@@ -85,11 +87,23 @@ public class SystemControlParameters implements Serializable{
 		this.compensationThreshold = compensationThreshold;
 	}
 
+	public boolean isDelayTolerantTrafficManagement() {
+		return delayTolerantTrafficManagement;
+	}
+
+	public void setDelayTolerantTrafficManagement(
+			boolean delayTolerantTrafficManagement) {
+		this.delayTolerantTrafficManagement = delayTolerantTrafficManagement;
+	}
+	
+
 	@Override
 	public String toString() {
 		return "SystemControlParameters [chargingRule=" + chargingRule
 				+ ", operationModeSDN=" + operationModeSDN
-				+ ", compensationThreshold=" + compensationThreshold + "]";
+				+ ", compensationThreshold=" + compensationThreshold
+				+ ", delayTolerantTrafficManagement="
+				+ delayTolerantTrafficManagement + "]";
 	}
 
 	

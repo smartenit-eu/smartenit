@@ -52,7 +52,7 @@ import java.util.List;
  * The UnadaSessionBean class. It handles the facebook login and access token retrieval.
  * 
  * @author George Petropoulos
- * @version 2.0
+ * @version 3.1
  * 
  */
 @ManagedBean

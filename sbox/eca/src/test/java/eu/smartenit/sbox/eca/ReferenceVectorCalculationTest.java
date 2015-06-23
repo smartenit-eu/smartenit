@@ -40,6 +40,10 @@ import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
+/**
+ * Includes a set of test methods for reference vector calculation logic
+ * implemented by the {@link ReferenceVectorCalculator}.
+ */
 public class ReferenceVectorCalculationTest {
 
 	private static final CostFunction costFunction1;

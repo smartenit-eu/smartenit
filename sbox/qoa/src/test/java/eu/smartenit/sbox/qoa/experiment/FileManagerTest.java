@@ -25,6 +25,12 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Test;
 
+/**
+ * Unit test checking file operations.
+ * 
+ *  @author <a href="mailto:jgutkow@man.poznan.pl">Jakub Gutkowski</a> (<a href="http://psnc.pl">PSNC</a>)
+ *
+ */
 public class FileManagerTest {
 	private static final String FILE_NAME = "packets.txt";
 	private static final String PATH = "." + File.separator;
@@ -32,7 +38,7 @@ public class FileManagerTest {
 	private FileManager fileManager = new FileManager();
 	
 	@Test
-	public void shouldCreteFile() throws IOException {
+	public void shouldCreateFile() throws IOException {
 		fileManager.updateFile(PATH, FILE_NAME, RECORD);
 		fileManager.updateFile(PATH, FILE_NAME, RECORD);
 		

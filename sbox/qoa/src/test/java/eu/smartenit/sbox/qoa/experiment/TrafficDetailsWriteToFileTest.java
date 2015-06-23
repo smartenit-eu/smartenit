@@ -33,6 +33,7 @@ import java.util.concurrent.Executors;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
@@ -62,6 +63,12 @@ import eu.smartenit.sbox.qoa.DTMQosAnalyzer;
 import eu.smartenit.sbox.qoa.SNMPWrapper;
 import eu.smartenit.sbox.qoa.SNMPWrapperFactory;
 
+/**
+ * Unit test checking traffic details log generation.
+ * 
+ *  @author <a href="mailto:jgutkow@man.poznan.pl">Jakub Gutkowski</a> (<a href="http://psnc.pl">PSNC</a>)
+ *
+ */
 public class TrafficDetailsWriteToFileTest {
 	private DTMQosAnalyzer dtmQosAnalyzer;
 	private DTMTrafficManager trafficManager;
@@ -103,7 +110,7 @@ public class TrafficDetailsWriteToFileTest {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Test
+	@Test @Ignore
 	public void shouldWriteTrafficDetailsToFile() throws InterruptedException, IOException {
 		prepareSnmpWrapper();
 		

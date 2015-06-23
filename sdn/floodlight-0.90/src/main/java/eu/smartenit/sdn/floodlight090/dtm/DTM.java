@@ -1,17 +1,17 @@
 /**
  * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package eu.smartenit.sdn.floodlight090.dtm;
 
@@ -208,19 +208,27 @@ public class DTM {
         return singleton;
     }
 
-	/**
-	 * Sets DTM instance to null. When the instance will be requested next time
-	 * it will be created. This method is mainly meant to be using in tests.
-	 * 
-	 */
+    /**
+     * Sets DTM instance to null. When the instance will be requested next time
+     * it will be created. This method is mainly meant to be using in tests.
+     *
+     */
     public static void resetInstance() {
-    	singleton = null;
+        singleton = null;
     }
     
+    /**
+     * Returns {@link IFloodlightProviderService}
+     * @return floodlightProvider
+     */
     public IFloodlightProviderService getFloodlightProvider() {
         return floodlightProvider;
     }
-
+    
+    /**
+    * Updates {@link IFloodlightProviderService}
+    * @param IFloodlightProviderService floodlightProvider
+    */
     public void setFloodlightProvider(IFloodlightProviderService floodlightProvider) {
         this.floodlightProvider = floodlightProvider;
     }
@@ -502,7 +510,11 @@ public class DTM {
             logger.debug("transmittedBytesMapUpdated() end");
         }
     }
-
+    
+    /**
+     * Calculates map of inverted {@link RVector}
+     * @param referenceVector 
+     */
     private synchronized void calculateRInvMap(RVector referenceVector) {
         long R[] = new long[2];
         int dcNumber = 0;
@@ -603,13 +615,21 @@ public class DTM {
                 + ((i >> 8) & 0xFF) + "."
                 + (i & 0xFF);
     }
-
+    
+    /**
+     * Sends static flow rule to switch mapping output IP address to switch output port
+     * @param dcPrefixOutOfPortMap 
+     */
     public void sendStaticFlowRule(Map<NetworkAddressIPv4, Short> dcPrefixOutOfPortMap) {
         for (NetworkAddressIPv4 netAddr : dcPrefixOutOfPortMap.keySet()) {
             Flows.mod(sw, floodlightProvider, null, netAddr.getPrefix(), netAddr.getPrefixLength(), dcPrefixOutOfPortMap.get(netAddr));
         }
     }
-
+    
+    /**
+     * Returns map of destination IP address with output OF port in {@link proactiveWithoutReference} mode
+     * @return 
+     */
     public synchronized Map<NetworkAddressIPv4, Short> getProactiveOutOfPortNumber() {
         logger.debug("getOutOfPortNumberProactiveWithoutReference() begin");
         if (configData == null) {
@@ -639,7 +659,7 @@ public class DTM {
     }
 
     /**
-     * Returns output port of switch for a new flow.
+     * Returns output port of switch for a new flow in {@link reactiveWithReference} mode.
      *
      * @return output port number
      */
@@ -754,7 +774,12 @@ public class DTM {
         logger.debug("getOutOfPortNumberReactiveWithReference() end");
         return (short) daRouterOfPortNumber;
     }
-
+    
+     /**
+     * Returns output port of switch for a new flow in {@link reactiveWithoutReference} mode.
+     *
+     * @return output port number
+     */
     public synchronized short getReactiveWithoutReferenceOutOfPortNumber() {
         logger.debug("getOutOfPortNumberReactiveWithoutReference() begin");
         if (configData == null) {
@@ -808,7 +833,12 @@ public class DTM {
         logger.debug("getOutOfPortNumberReactiveWithoutReference() end");
         return (short) daRouterOfPortNumber;
     }
-
+    
+    /**
+     * Validates {@link ConfigData}
+     * @param configData
+     * @throws IllegalArgumentException 
+     */
     private void validateConfigData(ConfigData configData) throws IllegalArgumentException {
         if (configData == null) {
             throw new IllegalArgumentException("Configuration data cannot be null");
@@ -854,7 +884,12 @@ public class DTM {
 
         }
     }
-
+    
+    /**
+     * Validates {@link RVector}
+     * @param referenceVector
+     * @throws IllegalArgumentException 
+     */
     private void validateReferenceVector(RVector referenceVector) throws IllegalArgumentException {
         if (referenceVector.getVectorValues() == null) {
             throw new IllegalArgumentException("Reference vector values cannot be null");
@@ -871,7 +906,11 @@ public class DTM {
             }
         }
     }
-
+    
+    /**
+     * Validates {@link CVector}
+     * @param compensationVector 
+     */
     private void validateCompensationVector(CVector compensationVector) {
         if (compensationVector == null) {
             throw new IllegalArgumentException("Compensation vector cannot be null");

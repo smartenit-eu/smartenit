@@ -33,7 +33,7 @@ public class OverlayTestUtils {
 		//make perfect bootstrap, the regular can take a while
 		for(int i=0;i<peers.length;i++) {
 			for(int j=0;j<peers.length;j++) {
-				peers[i].peerBean().peerMap().peerFound(peers[j].peerAddress(), null, null);
+				peers[i].peerBean().peerMap().peerFound(peers[j].peerAddress(), null, null, null);
 			}
 		}
 	}

@@ -41,19 +41,22 @@ public class CVectorValuesCalculator {
 	private final XVector xVector;
 	private final LocalRVector rVector;
 	
+	/**
+	 * The constructor with arguments.
+	 * 
+	 * @param xVector
+	 *            link traffic vector to be used during calculation
+	 * @param rVector
+	 *            reference vector to be used during calculation
+	 */
 	public CVectorValuesCalculator(XVector xVector, LocalRVector rVector) {
 		this.xVector = xVector;
 		this.rVector = rVector;
 	}
 	
 	/**
-	 * Calculates compensation vector values based on provided arguments: link
-	 * traffic vector and reference vector.
+	 * Calculates compensation vector values.
 	 * 
-	 * @param xVector
-	 *            link traffic vector to be used during calculation
-	 * @param rVector
-	 *            reference vector to be used during calculation
 	 * @return calculated list of compensation vector values
 	 */
 	public List<LocalVectorValue> calculate() {

@@ -31,7 +31,12 @@ public class SimpleTunnelIDToPortConverter {
 
     private SimpleTunnelIDToPortConverter() {
     }
-
+    
+    /**
+     * Converts {@link tunnelID} object to OpenFlow switch port number
+     * @param tunnelID
+     * @return short
+     */
     public static short toPort(TunnelID tunnelID) {
         logger.debug("toPort(TunnelID) begin");
         if (tunnelID == null) {

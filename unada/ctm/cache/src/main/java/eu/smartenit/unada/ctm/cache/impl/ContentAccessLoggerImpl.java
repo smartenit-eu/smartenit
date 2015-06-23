@@ -15,9 +15,12 @@
  */
 package eu.smartenit.unada.ctm.cache.impl;
 
+import eu.smartenit.unada.commons.constants.UnadaConstants;
+import eu.smartenit.unada.commons.logging.UnadaLogger;
 import eu.smartenit.unada.ctm.cache.ContentAccessLogger;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.ContentAccess;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +74,11 @@ public class ContentAccessLoggerImpl implements ContentAccessLogger, Runnable {
                         + " for content " + contentAccess.getContentID()
                         + " is served from local HTTP server.");
                 logger.debug("Inserting content access " + contentAccess + " from IP " + ipAddress);
+                
+                UnadaLogger.overall.info("{}: Video request ({}, {})", 
+                		new Object[]{UnadaConstants.UNADA_OWNER_MD5, 
+                		System.currentTimeMillis(), contentID});
+                
                 return true;
             } catch (Exception e) {
                 logger.error("Error inserting content access for "

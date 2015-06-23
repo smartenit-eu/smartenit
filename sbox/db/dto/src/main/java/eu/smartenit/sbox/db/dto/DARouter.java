@@ -117,6 +117,34 @@ public final class DARouter implements Serializable{
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime
+				* result
+				+ ((managementAddress == null) ? 0 : managementAddress
+						.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DARouter other = (DARouter) obj;
+		if (managementAddress == null) {
+			if (other.managementAddress != null)
+				return false;
+		} else if (!managementAddress.equals(other.managementAddress))
+			return false;
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		return "DARouter [managementAddress=" + managementAddress
 				+ ", snmpCommunity=" + snmpCommunity + ", ofSwitchDPID="

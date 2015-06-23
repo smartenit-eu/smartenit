@@ -68,11 +68,13 @@ public class DBStructuresBuilderForLogicTest {
 				new NetworkAddressIPv4("10.1.1.2", 32)),
 				link111, null, null, null, 0);
 		tunnel1111.setPhysicalLocalInterfaceName("eth0");
+		tunnel1111.setLocalRouterAddress(new NetworkAddressIPv4("1.1.1.1", 32));
 		Tunnel tunnel1211 = new Tunnel(new EndAddressPairTunnelID("tunnel1211", 
 				new NetworkAddressIPv4("10.2.1.1", 32), 
 				new NetworkAddressIPv4("10.2.1.2", 32)),
 				link121, null, null, null, 0);
 		tunnel1211.setPhysicalLocalInterfaceName("eth1");
+		tunnel1211.setLocalRouterAddress(new NetworkAddressIPv4("1.1.1.1", 32));
 
 		link111.setTraversingTunnels(Arrays.asList(tunnel1111));
 		link121.setTraversingTunnels(Arrays.asList(tunnel1211));
@@ -86,7 +88,7 @@ public class DBStructuresBuilderForLogicTest {
 		as1.setBgRouters(Arrays.asList(bgRouter11, bgRouter12));
 
 		DARouter daRouter1 = new DARouter(
-				new NetworkAddressIPv4("1.1.1.1", 32), "smit", "00:00:00:00:00:00:00:01");
+				new NetworkAddressIPv4("1.1.1.1", 0), "smit", "00:00:00:00:00:00:00:01");
 
 		CloudDC cloudLocal11 = new CloudDC("cloudLocal11", as1, daRouter1, null, null);
 		as1.setLocalClouds(Arrays.asList(cloudLocal11));

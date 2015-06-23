@@ -33,14 +33,40 @@ public class ExtendedCounterValues extends CounterValues {
 	private Map<LinkID, ReceivedPackets> linkReceivedPackets = new HashMap<LinkID, ReceivedPackets>();
 	private Map<TunnelID, ReceivedPackets> tunnelReceivedPackets = new HashMap<TunnelID, ReceivedPackets>();
 	
+	
+	/**
+	 * Method used to store amount of received packets for links.
+	 * 
+	 * @param linkID
+	 * 		identifier of the monitored link
+	 * @param packetsInfo
+	 * 		{@link ReceivedPackets} object
+	 */
 	public void storeReceivedPackets(LinkID linkID, ReceivedPackets packetsInfo) {
 		linkReceivedPackets.put(linkID, packetsInfo);
 	}
 
+	/**
+	 * Method used to store amount of received packets for tunnels.
+	 * 
+	 * @param tunnelID
+	 * 		identifier of the monitored tunnel
+	 * @param packetsInfo
+	 * 		{@link ReceivedPackets} object
+	 */
 	public void storeReceivedPackets(TunnelID tunnelID, ReceivedPackets packetsInfo) {
 		tunnelReceivedPackets.put(tunnelID, packetsInfo);
 	}
 
+	/**
+	 *  Method used to calculate difference between stored and provided values
+	 *  	for all links and tunnels.
+	 * 
+	 * @param toBeSubtracted
+	 * 		{@link ReceivedPackets} object
+	 * @return
+	 * 		{@link ExtendedCounterValues} object
+	 */
 	public ExtendedCounterValues calculateDifference(ExtendedCounterValues toBeSubtracted) {
 		ExtendedCounterValues result = new ExtendedCounterValues();
 		for(LinkID linkID : getAllLinkIds()) {
@@ -65,10 +91,22 @@ public class ExtendedCounterValues extends CounterValues {
 		tunnelReceivedPackets.putAll(extendedCounterValues.getTunnelReceivedPackets());
 	}
 	
+	/**
+	 * Returns map with amount of packets for all links.
+	 * 
+	 * @return
+	 * 		map
+	 */
 	public Map<LinkID, ReceivedPackets> getLinkReceivedPackets() {
 		return this.linkReceivedPackets;
 	}
 	
+	/**
+	 * Returns map with amount of packets for all tunnels.
+	 * 
+	 * @return
+	 * 		map
+	 */
 	public Map<TunnelID, ReceivedPackets> getTunnelReceivedPackets() {
 		return this.tunnelReceivedPackets;
 	}

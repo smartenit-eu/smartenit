@@ -16,7 +16,9 @@
 package eu.smartenit.unada.om;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,6 +37,9 @@ import net.tomp2p.rpc.SimpleBloomFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.smartenit.unada.commons.constants.UnadaConstants;
+import eu.smartenit.unada.commons.logging.UnadaLogger;
+import eu.smartenit.unada.commons.threads.UnadaThreadService;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.Content;
 import eu.smartenit.unada.db.dto.UNaDaConfiguration;
@@ -78,33 +83,60 @@ public class OverlayManager implements IOverlayManager {
 	private Map<Long, ContentDownloadHandler> downloadHandlers = new HashMap<>();
 	
 	private Overlay overlay;
+	
+	InetSocketAddress addr2 = new InetSocketAddress("emanicslab2.man.poznan.pl", 4001);
+	InetSocketAddress addr3 = new InetSocketAddress("emanicslab2.ps.tu-darmstadt.de", 4001);
+	InetSocketAddress addr4 = new InetSocketAddress("emanicslab2.ewi.utwente.nl", 4001);
+	InetSocketAddress addr5 = new InetSocketAddress("emanicslab2.eecs.jacobs-university.de", 4001);
+	InetSocketAddress addr6 = new InetSocketAddress("moscu.upc.es", 4001);
+	InetSocketAddress addr7 = new InetSocketAddress("emanicslab1.ps.tu-darmstadt.de", 4001);
+	InetSocketAddress addr8 = new InetSocketAddress("emanicslab1.man.poznan.pl", 4001);
+	InetSocketAddress addr9 = new InetSocketAddress("emanicslab1.informatik.unibw-muenchen.de", 4001);
+	InetSocketAddress addr10 = new InetSocketAddress("emanicslab1.csg.uzh.ch", 4001);
+	InetSocketAddress addr11 = new InetSocketAddress("planck232ple.test.iminds.be", 4001);
+	InetSocketAddress addr12 = new InetSocketAddress("emanicslab1.ewi.utwente.nl",4001);
 
 	public OverlayManager(String uNadaId) {
 		getuNaDaInfo().setUnadaID(uNadaId);
 		setOverlay(new Overlay(this));
+		
+		//this is added for study logging
+		UnadaThreadService.getThreadService().scheduleAtFixedRate(new Runnable() {
+					@Override
+					public void run() {
+						logNeighbors();;
+					}
+				}, 1, 1, TimeUnit.HOURS);
+		
+		// Overlay info mapping Unada ID with user ID md5 hash
+		UnadaLogger.overall.debug("{}: Overlay Created ({}, {})", new Object[]{
+				UnadaConstants.UNADA_OWNER_MD5,
+				System.currentTimeMillis(),
+				uNadaId}
+				);
 	}
 
 	/* (non-Javadoc)
 	 * @see eu.smartenit.unada.om.IOverlayManager#joinOverlay(java.net.InetAddress, int)
 	 */
 	public void joinOverlay(InetAddress bootstrapNode, int port) throws OverlayException {
-		getOverlay().joinOverlay(bootstrapNode, port);
+		
+		InetSocketAddress addr = new InetSocketAddress(bootstrapNode, port);
+		
+		getOverlay().joinOverlay(new Bindings(), addr, addr2, addr3, addr4, addr5, addr6, addr7, addr8, addr9, addr10, addr11, addr12);
 	}
-
+	
+	
 	/* (non-Javadoc)
 	 * @see eu.smartenit.unada.om.IOverlayManager#createOverlay()
 	 */
 	public void createOverlay() throws OverlayException{
-		
-		Bindings bindings = new Bindings();
-		try {
-			for(InetAddress inet : getOverlay().getPublicAddresses()){
-				bindings.addAddress(inet);
-			}
-		} catch (SocketException e) {
-			throw new OverlayException("Error getting public addresses", e);
+		Bindings bind = new Bindings();
+		bind.listenAny();
+		if(!tryBootstrapNodes(bind)){
+			log.warn("No node could be reached, creating new overlay network");
+			getOverlay().createOverlay(bind);
 		}
-		getOverlay().createOverlay(bindings);
 	}
 
 	/* (non-Javadoc)
@@ -121,6 +153,16 @@ public class OverlayManager implements IOverlayManager {
 	@Override
 	public void createOverlay(String interfaceHint) throws OverlayException {
 		getOverlay().createOverlay(new Bindings().addInterface(interfaceHint));
+	}
+	
+	private boolean tryBootstrapNodes(Bindings bindings){
+		try {
+			getOverlay().joinOverlay(bindings, addr2, addr3, addr4, addr5, addr6, addr7, addr8, addr9, addr10, addr11, addr12);
+			return true;
+		}catch(OverlayException e){
+			log.warn("No default bootstrap node could be reached. Message: {}", e.getMessage());
+		}
+		return false;
 	}
 
 	
@@ -381,6 +423,24 @@ public class OverlayManager implements IOverlayManager {
 		}
 
 		return list;
+	}
+	
+	void logNeighbors(){
+		StringBuffer neighbors = new StringBuffer();
+		neighbors.append("[");
+		for(UnadaInfo info : neighborDatabase.getNeighbors().values()){
+			neighbors.append("{");
+			neighbors.append(info.getUnadaID()).append(", ");
+			neighbors.append(info.getUnadaAddress());
+			neighbors.append("}");
+		}
+		neighbors.append("]");
+		
+		//5. Overlay neighbors (ip, userID, fascebookID) in fixed time intervals e.g. every hour
+		UnadaLogger.overall.debug("{}: Overlay Neighbors ({}, {})", new Object[]{
+				UnadaConstants.UNADA_OWNER_MD5, 
+				System.currentTimeMillis(),
+				neighbors.toString()});
 	}
 
 	/* (non-Javadoc)

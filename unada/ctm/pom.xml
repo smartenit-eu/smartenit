@@ -21,7 +21,7 @@
   <parent>
     <groupId>eu.smartenit.unada</groupId>
     <artifactId>unada</artifactId>
-    <version>3.0</version>
+    <version>3.1</version>
   </parent>
   
   <groupId>eu.smartenit.unada.ctm</groupId>
@@ -42,8 +42,6 @@
     </dependency>
   </dependencies>
   <modules>
-    <module>proxy</module>
     <module>cache</module>
-    <module>main</module>
   </modules>
 </project>

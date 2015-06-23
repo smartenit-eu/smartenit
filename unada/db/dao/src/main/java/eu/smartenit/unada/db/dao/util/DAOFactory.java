@@ -15,16 +15,7 @@
  */
 package eu.smartenit.unada.db.dao.util;
 
-import eu.smartenit.unada.db.dao.impl.CacheDAO;
-import eu.smartenit.unada.db.dao.impl.ContentAccessDAO;
-import eu.smartenit.unada.db.dao.impl.ContentDAO;
-import eu.smartenit.unada.db.dao.impl.FeedItemDAO;
-import eu.smartenit.unada.db.dao.impl.FriendDAO;
-import eu.smartenit.unada.db.dao.impl.OwnerDAO;
-import eu.smartenit.unada.db.dao.impl.SocialPredictionParametersDAO;
-import eu.smartenit.unada.db.dao.impl.TrustedUserDAO;
-import eu.smartenit.unada.db.dao.impl.UNaDaConfigurationDAO;
-import eu.smartenit.unada.db.dao.impl.VideoInfoDAO;
+import eu.smartenit.unada.db.dao.impl.*;
 
 
 public class DAOFactory {
@@ -43,6 +34,8 @@ public class DAOFactory {
     
     private static SocialPredictionParametersDAO socialPredictionParametersDAO = new SocialPredictionParametersDAO();
     
+    private static SocialScoresDAO socialScoresDAO = new SocialScoresDAO();
+
     private static TrustedUserDAO trustedUserDAO = new TrustedUserDAO();
     
     private static UNaDaConfigurationDAO uNaDaConfigurationDAO = new UNaDaConfigurationDAO();
@@ -130,8 +123,12 @@ public class DAOFactory {
 	public static void setVideoInfoDAO(VideoInfoDAO videoInfoDAO) {
 		DAOFactory.videoInfoDAO = videoInfoDAO;
 	}
-	
-	
-    
-    
+
+    public static SocialScoresDAO getSocialScoresDAO() {
+        return socialScoresDAO;
+    }
+
+    public static void setSocialScoresDAO(SocialScoresDAO socialScoresDAO) {
+        DAOFactory.socialScoresDAO = socialScoresDAO;
+    }
 }

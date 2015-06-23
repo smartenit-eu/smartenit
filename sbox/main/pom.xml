@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>eu.smartenit.sbox</groupId>
 		<artifactId>sbox</artifactId>
-		<version>3.0</version>
+		<version>3.1</version>
 	</parent>
 
 	<groupId>eu.smartenit.sbox.main</groupId>
@@ -95,11 +95,12 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
+                            <descriptors>
+                                <descriptor>src/main/assembly/assembly.xml</descriptor>
+                            </descriptors>
                             <finalName>sbox</finalName>
         					<appendAssemblyId>false</appendAssemblyId>
+                            <attach>false</attach>
                             <archive>
                                 <manifest>
                                     <mainClass>eu.smartenit.sbox.main.SBox</mainClass>

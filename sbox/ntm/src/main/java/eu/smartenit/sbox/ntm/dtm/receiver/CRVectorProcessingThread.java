@@ -76,7 +76,7 @@ public class CRVectorProcessingThread extends VectorProcessingThread {
 	}
 
 	/**
-	 * Method launched when thread is started. Calculates compensation vector
+	 * Method launched when thread is started. Constructs compensation vector
 	 * with {@link CVectorConstructor} and sends both vectors to remote
 	 * {@link SBox}es using instance of {@link DTMVectorsSender}.
 	 */

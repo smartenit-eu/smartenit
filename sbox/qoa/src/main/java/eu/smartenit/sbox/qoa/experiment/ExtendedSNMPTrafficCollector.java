@@ -29,9 +29,11 @@ import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.DARouter;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
 import eu.smartenit.sbox.db.dto.Link;
+import eu.smartenit.sbox.db.dto.LinkID;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.Tunnel;
+import eu.smartenit.sbox.db.dto.TunnelID;
 import eu.smartenit.sbox.qoa.CounterValues;
 import eu.smartenit.sbox.qoa.DTMQosAnalyzer;
 import eu.smartenit.sbox.qoa.MonitoredLinksInventory;
@@ -55,6 +57,9 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 	private ExtendedCounterValues prevReportingPeriodValues;
 	private int reportingIteratorTrafficDetails;
 	private long numberOfPeriodsForTrafficDetails;
+	private static boolean PUT_HEADLINE_TO_FILE = true;
+	private static LinkID[] linkIds;
+	private static TunnelID[] tunnelIds;
 
 	/**
 	 * The constructor with arguments.
@@ -97,6 +102,7 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 			logger.info("Running initial configuration ...");
 			monitoredLinks.populate(systems);
 			monitoredTunnels.populate(communications);
+			
 			monitoringDataProcessor = new MonitoringDataProcessor(monitoredLinks, monitoredTunnels);
 			
 			ExtendedSNMPOIDCollector oidCollector = new ExtendedSNMPOIDCollector(monitoredLinks, monitoredTunnels);
@@ -150,9 +156,86 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 	 */
 	@Override
 	public void notifyNewCounterValues(int asNumber, CounterValues counterValues) {
+//		new FileManager().updateFile(
+//				SBoxProperties.TRAFFIC_DETAILS_FILE_PATH, SBoxProperties.TRAFFIC_DETAILS_FILE_NAME, logToFile(asNumber, (ExtendedCounterValues) counterValues));
 		new FileManager().updateFile(
-				SBoxProperties.TRAFFIC_DETAILS_FILE_PATH, SBoxProperties.TRAFFIC_DETAILS_FILE_NAME, logToFile(asNumber, (ExtendedCounterValues) counterValues));
+				SBoxProperties.TRAFFIC_DETAILS_FILE_PATH, SBoxProperties.TRAFFIC_DETAILS_FILE_NAME, logToFileSecondVersion(asNumber, (ExtendedCounterValues) counterValues));
 		super.notifyNewCounterValues(asNumber, counterValues);
+	}
+	
+	protected String logToFileSecondVersion(int asNumber, ExtendedCounterValues counterValues) {
+		logger.debug("Writing traffic details to file...");
+		final StringBuilder record = new StringBuilder();
+		
+		//HEADLINE
+		if(PUT_HEADLINE_TO_FILE) {
+			int numberOfLinks = monitoredLinks.getLinks(asNumber).size();
+			int numberOfTunnels = monitoredTunnels.getTunnels(asNumber).size();
+			linkIds = new LinkID[numberOfLinks];
+			tunnelIds = new TunnelID[numberOfTunnels];
+			record.append(setupHeadline(asNumber, linkIds, tunnelIds));
+			PUT_HEADLINE_TO_FILE = false;
+		}
+		
+		//RECORD		
+		if(reportingIteratorTrafficDetails % numberOfPeriodsForTrafficDetails == 0) {
+			record.append("\nA\t");
+		} else {
+			record.append("\nR\t");
+		}
+		
+		record.append(System.currentTimeMillis());
+		
+		for(LinkID linkId : linkIds) {
+			record.append("\t").append(counterValues.getCounterValue(linkId));
+			record.append("\t").append(counterValues.getReceivedPackets(linkId).aggregate());
+		}
+		
+		for(TunnelID tunnelId : tunnelIds) {
+			record.append("\t").append(counterValues.getCounterValue(tunnelId));
+			record.append("\t").append(counterValues.getReceivedPackets(tunnelId).aggregate());
+		}
+		
+		reportingIteratorTrafficDetails++;
+		logger.debug(record.toString());
+		return record.toString();
+	}
+	
+	protected String setupHeadline(int asNumber, LinkID[] linkIds, TunnelID[] tunnelIds) {
+		int linkIdsIterator = 0;
+		int tunnelIdsIterator = 0;
+		final StringBuilder headline = new StringBuilder();
+		
+		headline.append("PERIOD\tTIMESTAMP");
+		for (BGRouter bgRouter  : monitoredLinks.getBGRoutersByAsNumber(asNumber)) {
+			if(monitoredLinks.getLinks(bgRouter).size() > 0) {
+				for (Link link : monitoredLinks.getLinks(bgRouter)) {
+					headline.append("\tLINK_B:").append(((SimpleLinkID)link.getLinkID()).getLocalLinkID());
+					headline.append("\tLINK_P:").append(((SimpleLinkID)link.getLinkID()).getLocalLinkID());
+					linkIds[linkIdsIterator++] = ((SimpleLinkID)link.getLinkID());
+				}
+			}
+		}
+		for (DARouter daRouter  : monitoredTunnels.getDARoutersByAsNumber(asNumber)) {
+			if(monitoredTunnels.getTunnels(daRouter).size() > 0) {
+				for (Tunnel tunnel : monitoredTunnels.getTunnels(daRouter)) {
+					headline.append("\tTUNNEL_B:").append(tunnel.getTunnelID().getTunnelName());
+					headline.append("\tTUNNEL_P:").append(tunnel.getTunnelID().getTunnelName());
+					tunnelIds[tunnelIdsIterator++] = tunnel.getTunnelID();
+				}
+			}
+		}
+		for (BGRouter bgRouter  : monitoredLinks.getBGRoutersByAsNumber(asNumber)) {
+			if(monitoredTunnels.getTunnels(bgRouter).size() > 0) {
+				for (Tunnel tunnel : monitoredTunnels.getTunnels(bgRouter)) {
+					headline.append("\tTUNNEL_B:").append(tunnel.getTunnelID().getTunnelName());
+					headline.append("\tTUNNEL_P:").append(tunnel.getTunnelID().getTunnelName());
+					tunnelIds[tunnelIdsIterator++] = tunnel.getTunnelID();
+				}
+			}
+		}
+		
+		return headline.toString();
 	}
 	
 	protected String logToFile(int asNumber, ExtendedCounterValues counterValues) {
@@ -178,14 +261,30 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 	protected String generateRecordForTunnels(int asNumber, ExtendedCounterValues counterValues, ExtendedCounterValues diffCounterValues) {
 		final StringBuilder tunnels = new StringBuilder();
 		for (DARouter daRouter  : monitoredTunnels.getDARoutersByAsNumber(asNumber)) {
-			tunnels.append("  ").append("DA router : ").append(daRouter.getManagementAddress().getPrefix()).append("\n");
-			for (Tunnel tunnel : monitoredTunnels.getTunnels(daRouter)) {
-				tunnels.append("    ").append("Tunnel : ").append(tunnel.getTunnelID().getTunnelName()).append("\n");
-				tunnels.append("      ").append("IF_IN_OCTETS : ").append(counterValues.getCounterValue(tunnel.getTunnelID())).append(" / ").append(diffCounterValues.getCounterValue(tunnel.getTunnelID())).append("\n");
-				tunnels.append("      ").append("IF_IN_PKTS_S : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).aggregate()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).aggregate()).append("\n");
-				tunnels.append("      ").append("IF_IN_PKTS_U : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).getUnicast()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).getUnicast()).append("\n");
-				tunnels.append("      ").append("IF_IN_PKTS_M : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).getMulticast()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).getMulticast()).append("\n");
-				tunnels.append("      ").append("IF_IN_PKTS_B : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).getBroadcast()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).getBroadcast()).append("\n");
+			if(monitoredTunnels.getTunnels(daRouter).size() > 0) {
+				tunnels.append("  ").append("DA router : ").append(daRouter.getManagementAddress().getPrefix()).append("\n");
+				for (Tunnel tunnel : monitoredTunnels.getTunnels(daRouter)) {
+					tunnels.append("    ").append("Tunnel : ").append(tunnel.getTunnelID().getTunnelName()).append("\n");
+					tunnels.append("      ").append("IF_IN_OCTETS : ").append(counterValues.getCounterValue(tunnel.getTunnelID())).append(" / ").append(diffCounterValues.getCounterValue(tunnel.getTunnelID())).append("\n");
+					tunnels.append("      ").append("IF_IN_PKTS_S : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).aggregate()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).aggregate()).append("\n");
+					tunnels.append("      ").append("IF_IN_PKTS_U : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).getUnicast()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).getUnicast()).append("\n");
+					tunnels.append("      ").append("IF_IN_PKTS_M : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).getMulticast()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).getMulticast()).append("\n");
+					tunnels.append("      ").append("IF_IN_PKTS_B : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).getBroadcast()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).getBroadcast()).append("\n");
+				}
+			}
+		}
+		
+		for (BGRouter bgRouter  : monitoredLinks.getBGRoutersByAsNumber(asNumber)) {
+			if(monitoredTunnels.getTunnels(bgRouter).size() > 0) {
+				tunnels.append("  ").append("BG router : ").append(bgRouter.getManagementAddress().getPrefix()).append("\n");
+				for (Tunnel tunnel : monitoredTunnels.getTunnels(bgRouter)) {
+					tunnels.append("    ").append("Tunnel : ").append((tunnel.getTunnelID()).getTunnelName()).append("\n");
+					tunnels.append("      ").append("IF_IN_OCTETS : ").append(counterValues.getCounterValue(tunnel.getTunnelID())).append(" / ").append(diffCounterValues.getCounterValue(tunnel.getTunnelID())).append("\n");
+					tunnels.append("      ").append("IF_IN_PKTS_S : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).aggregate()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).aggregate()).append("\n");
+					tunnels.append("      ").append("IF_IN_PKTS_U : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).getUnicast()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).getUnicast()).append("\n");
+					tunnels.append("      ").append("IF_IN_PKTS_M : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).getMulticast()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).getMulticast()).append("\n");
+					tunnels.append("      ").append("IF_IN_PKTS_B : ").append(counterValues.getReceivedPackets(tunnel.getTunnelID()).getBroadcast()).append(" / ").append(diffCounterValues.getReceivedPackets(tunnel.getTunnelID()).getBroadcast()).append("\n");
+				}
 			}
 		}
 		return tunnels.toString();
@@ -194,14 +293,16 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 	protected String generateRecordForLinks(int asNumber, ExtendedCounterValues counterValues, ExtendedCounterValues diffCounterValues) {
 		final StringBuilder links = new StringBuilder();
 		for (BGRouter bgRouter  : monitoredLinks.getBGRoutersByAsNumber(asNumber)) {
-			links.append("  ").append("BG router : ").append(bgRouter.getManagementAddress().getPrefix()).append("\n");
-			for (Link link : monitoredLinks.getLinks(bgRouter)) {
-				links.append("    ").append("Link : ").append(((SimpleLinkID)link.getLinkID()).getLocalLinkID()).append("\n");
-				links.append("      ").append("IF_IN_OCTETS : ").append(counterValues.getCounterValue(link.getLinkID())).append(" / ").append(diffCounterValues.getCounterValue(link.getLinkID())).append("\n");
-				links.append("      ").append("IF_IN_PKTS_S : ").append(counterValues.getReceivedPackets(link.getLinkID()).aggregate()).append(" / ").append(diffCounterValues.getReceivedPackets(link.getLinkID()).aggregate()).append("\n");
-				links.append("      ").append("IF_IN_PKTS_U : ").append(counterValues.getReceivedPackets(link.getLinkID()).getUnicast()).append(" / ").append(diffCounterValues.getReceivedPackets(link.getLinkID()).getUnicast()).append("\n");
-				links.append("      ").append("IF_IN_PKTS_M : ").append(counterValues.getReceivedPackets(link.getLinkID()).getMulticast()).append(" / ").append(diffCounterValues.getReceivedPackets(link.getLinkID()).getMulticast()).append("\n");
-				links.append("      ").append("IF_IN_PKTS_B : ").append(counterValues.getReceivedPackets(link.getLinkID()).getBroadcast()).append(" / ").append(diffCounterValues.getReceivedPackets(link.getLinkID()).getBroadcast()).append("\n");
+			if(monitoredLinks.getLinks(bgRouter).size() > 0) {
+				links.append("  ").append("BG router : ").append(bgRouter.getManagementAddress().getPrefix()).append("\n");
+				for (Link link : monitoredLinks.getLinks(bgRouter)) {
+					links.append("    ").append("Link : ").append(((SimpleLinkID)link.getLinkID()).getLocalLinkID()).append("\n");
+					links.append("      ").append("IF_IN_OCTETS : ").append(counterValues.getCounterValue(link.getLinkID())).append(" / ").append(diffCounterValues.getCounterValue(link.getLinkID())).append("\n");
+					links.append("      ").append("IF_IN_PKTS_S : ").append(counterValues.getReceivedPackets(link.getLinkID()).aggregate()).append(" / ").append(diffCounterValues.getReceivedPackets(link.getLinkID()).aggregate()).append("\n");
+					links.append("      ").append("IF_IN_PKTS_U : ").append(counterValues.getReceivedPackets(link.getLinkID()).getUnicast()).append(" / ").append(diffCounterValues.getReceivedPackets(link.getLinkID()).getUnicast()).append("\n");
+					links.append("      ").append("IF_IN_PKTS_M : ").append(counterValues.getReceivedPackets(link.getLinkID()).getMulticast()).append(" / ").append(diffCounterValues.getReceivedPackets(link.getLinkID()).getMulticast()).append("\n");
+					links.append("      ").append("IF_IN_PKTS_B : ").append(counterValues.getReceivedPackets(link.getLinkID()).getBroadcast()).append(" / ").append(diffCounterValues.getReceivedPackets(link.getLinkID()).getBroadcast()).append("\n");
+				}
 			}
 		}
 		return links.toString();
@@ -217,9 +318,9 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 	
 	private void initilaizeCounters() {
 		if(this.systemControlParameters.getChargingRule().equals(ChargingRule.the95thPercentile))
-			this.numberOfPeriodsForTrafficDetails = timeScheduleParameters.getAccountingPeriod() - timeScheduleParameters.getReportPeriodDTM();
+			this.numberOfPeriodsForTrafficDetails = (long) timeScheduleParameters.getAccountingPeriod() / timeScheduleParameters.getReportPeriodDTM();
 		else
-			this.numberOfPeriodsForTrafficDetails = timeScheduleParameters.getAccountingPeriod() - timeScheduleParameters.getReportingPeriod();
-		this.reportingIteratorTrafficDetails = 1;
+			this.numberOfPeriodsForTrafficDetails = (long) timeScheduleParameters.getAccountingPeriod() / timeScheduleParameters.getReportingPeriod();
+		this.reportingIteratorTrafficDetails = 0;
 	}
 }

@@ -31,13 +31,15 @@ import eu.smartenit.sbox.db.dto.XVector;
  * actions are performed in separate thread.
  * 
  * @author Lukasz Lopatowski
- * @version 1.2
+ * @version 3.1
  * 
  */
 public class CVectorProcessingThread extends VectorProcessingThread {
 	
 	private static final Logger logger = LoggerFactory.getLogger(CVectorProcessingThread.class);
 
+	private CVector preparedCVector = null;
+	
 	/**
 	 * The constructor with arguments.
 	 * 
@@ -69,14 +71,30 @@ public class CVectorProcessingThread extends VectorProcessingThread {
 	}
 
 	/**
+	 * The constructor with arguments used when new compensation vector to be
+	 * sent to remote SBoxes is already known and should not be calculated
+	 * within this thread.
+	 * 
+	 * @param preparedCVector
+	 *            compensation vector to be sent to remote SBoxes
+	 * @param remoteSBoxes
+	 *            list of target {@link SBox} which should be updated with
+	 *            calculated compensation vector
+	 */
+	public CVectorProcessingThread(CVector preparedCVector, List<SBox> remoteSBoxes) {
+		super(remoteSBoxes);
+		this.preparedCVector = preparedCVector;
+	}
+
+	/**
 	 * Method launched when thread is started. Constructs compensation vector
-	 * with {@link CVectorConstructor} and sends it to remote {@link SBox}es
-	 * using instance of {@link DTMVectorsSender}.
+	 * with {@link CVectorConstructor} or uses already prepared vector and sends
+	 * it to remote {@link SBox}es using instance of {@link DTMVectorsSender}.
 	 */
 	public void run() {
 		logger.info("Running CVector calculation thread.");
 		try { 
-			CVector cVector = new CVectorConstructor().construct(xVector, rVector);
+			CVector cVector = prepareCVectorToBeSent();
 			CVectorHistory.storeInHistory(cVector);
 			
 			if (!CVectorUpdateController.getInstance().updateRequired(cVector)) {
@@ -86,13 +104,27 @@ public class CVectorProcessingThread extends VectorProcessingThread {
 			
 			if (remoteSboxes == null || remoteSboxes.size() == 0)
 				logger.warn("List of remote SBoxes is null or empty. Will not send any updates.");
+			
+			CVectorUpdateController.getInstance().sent(cVector);
+			
 			for (SBox remoteSbox : remoteSboxes) {
 				logger.info("Sending CVector to remote SBox: {}", remoteSbox.getManagementAddress().getPrefix());
 				sender.send(remoteSbox, cVector);
 			}
 		} catch (IllegalArgumentException e) {
 			logger.error("Compensation vector was not constructed properly: {}", e.getMessage());
+		} finally {
+			preparedCVector = null;
 		}
+	}
+
+	private CVector prepareCVectorToBeSent() {
+		if (preparedCVector != null) {
+			logger.info("Using prepared compensation vector.");
+			return preparedCVector;
+		}
+		else
+			return new CVectorConstructor().construct(xVector, rVector);
 	}
 
 }

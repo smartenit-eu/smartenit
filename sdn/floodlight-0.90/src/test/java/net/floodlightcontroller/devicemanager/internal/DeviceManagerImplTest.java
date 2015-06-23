@@ -1274,19 +1274,19 @@ public class DeviceManagerImplTest extends FloodlightTestCase {
         doTestDeviceQuery();
     }
     
-    @Ignore
-    @Test
-    public void testDeviceQuery() throws Exception {
-        ITopologyService mockTopology = createMock(ITopologyService.class);
-        deviceManager.topology = mockTopology;
-        expect(mockTopology.isAttachmentPointPort(anyLong(),
-                                                  anyShort())).
-                                                  andReturn(true).anyTimes();
-        expect(mockTopology.getL2DomainId(EasyMock.anyLong())).andReturn(1L).anyTimes();
-        replay(mockTopology);
-        
-        doTestDeviceQuery();
-    }
+//    @Ignore
+//    @Test
+//    public void testDeviceQuery() throws Exception {
+//        ITopologyService mockTopology = createMock(ITopologyService.class);
+//        deviceManager.topology = mockTopology;
+//        expect(mockTopology.isAttachmentPointPort(anyLong(),
+//                                                  anyShort())).
+//                                                  andReturn(true).anyTimes();
+//        expect(mockTopology.getL2DomainId(EasyMock.anyLong())).andReturn(1L).anyTimes();
+//        replay(mockTopology);
+//        
+//        doTestDeviceQuery();
+//    }
 
     protected void doTestDeviceClassQuery() throws Exception {
         Entity entity1 = new Entity(1L, (short)1, 1, 1L, 1, new Date());

@@ -38,10 +38,10 @@ import eu.smartenit.sbox.db.dto.VectorValue;
 import eu.smartenit.sbox.ntm.dtm.DAOFactory;
 
 /**
- * Tests compensation vector updates handling logic.
+ * Tests compensation vector updates management logic.
  * 
  * @author Lukasz Lopatowski
- * @version 3.0
+ * @version 3.1
  * 
  */
 public class CVectorUpdateControllerTest {
@@ -85,21 +85,27 @@ public class CVectorUpdateControllerTest {
     	
     	DAOFactory.setSCPDAOInstance(scpDAO);
     	DAOFactory.setTSPDAOInstance(tspDAO);
+    	CVectorUpdateController.deactivate();
 	}
 	
 	@Test
 	public void shouldUpdateAfterCompensationPeriod() {
 		CVectorUpdateController.activate();
-		CVectorUpdateController.getInstance().increaseCount();
-		assertTrue(CVectorUpdateController.getInstance().updateRequired(first));
-		CVectorUpdateController.getInstance().increaseCount();
-		assertFalse(CVectorUpdateController.getInstance().updateRequired(first));
-		CVectorUpdateController.getInstance().increaseCount();
-		assertFalse(CVectorUpdateController.getInstance().updateRequired(first));
-		CVectorUpdateController.getInstance().increaseCount();
-		assertTrue(CVectorUpdateController.getInstance().updateRequired(first));
-		CVectorUpdateController.getInstance().increaseCount();
-		assertFalse(CVectorUpdateController.getInstance().updateRequired(first));
+		CVectorUpdateController controller = CVectorUpdateController.getInstance(); 
+		controller.increaseCount();
+		assertTrue(controller.updateRequired(first));
+		controller.sent(first);
+		controller.increaseCount();
+		assertFalse(controller.updateRequired(first));
+		controller.sent(first);
+		controller.increaseCount();
+		assertFalse(controller.updateRequired(first));
+		controller.sent(first);
+		controller.increaseCount();
+		assertTrue(controller.updateRequired(first));
+		controller.sent(first);
+		controller.increaseCount();
+		assertFalse(controller.updateRequired(first));
 	}
 	
 	@Test
@@ -137,7 +143,6 @@ public class CVectorUpdateControllerTest {
 	@After
 	public void after() {
 		CVectorUpdateController.deactivate();
-		CVectorUpdateController.getInstance().reset();
 	}
 	
 }

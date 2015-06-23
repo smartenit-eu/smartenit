@@ -161,19 +161,15 @@ public class SNMPTrafficCollector {
 	 *            counter values from monitored links in given AS
 	 */
 	public void notifyNewCounterValues(int asNumber, CounterValues counterValues) {
-		if(!firstUpdate.containsKey(asNumber)) {
-			firstUpdate.put(asNumber, false);
-		}
-		
+		List<ZVector> zVectors = null;
+		ZVector aggregatedZVector = null;
+		boolean zVectorsReady = false;
+
 		XVector xVector = monitoringDataProcessor.calculateXVector(asNumber, null, counterValues);
-		if(firstUpdate.get(asNumber)) {
+		if(shouldUpdateVectors(asNumber)) {
 			logCalculatedVectors(xVector, null);
 			analyzer.updateXVector(xVector);
 		}
-		
-		List<ZVector> zVectors = null;
-		ZVector aggregatedZVector = null;
-		boolean updateXZVectors = false;
 		
 		CounterValues collectedCounterValues = new CounterValues();
 		if(this.systemControlParameters.getChargingRule().equals(ChargingRule.the95thPercentile)) {
@@ -181,24 +177,26 @@ public class SNMPTrafficCollector {
 			if((reportingIterator -1) % numberOfPeriods == 0) {
 				xVector = monitoringDataProcessor.calculateXVector(asNumber, lastReportPeriodEACounterValues, collectedCounterValues);
 				zVectors = monitoringDataProcessor.calculateZVectors(asNumber, lastReportPeriodEACounterValues, collectedCounterValues);
-				updateXZVectors = true;
+				zVectorsReady = true;
 				lastReportPeriodEACounterValues = collectedCounterValues;
 			}
 			reportingIterator++;
 		} else {
 			zVectors = monitoringDataProcessor.calculateZVectors(asNumber, null, counterValues);
-			updateXZVectors = true;
+			zVectorsReady = true;
 		}
 
-		if(updateXZVectors) {
+		if(shouldUpdateVectors(asNumber) && zVectorsReady) {
 			aggregatedZVector = monitoringDataProcessor.aggregateZVectors(zVectors);
-			if(firstUpdate.get(asNumber)) {
-				logCalculatedVectors(xVector, zVectors);
-				analyzer.updateXZVectors(xVector, Arrays.asList(aggregatedZVector));
-			}
+			logCalculatedVectors(xVector, zVectors);
+			analyzer.updateXZVectors(xVector, Arrays.asList(aggregatedZVector));
 		}
 		
 		firstUpdate.put(asNumber, true);
+	}
+
+	private Boolean shouldUpdateVectors(int asNumber) {
+		return firstUpdate.get(asNumber) != null && firstUpdate.get(asNumber);
 	}
 	
 	void logCalculatedVectors(XVector xVector, List<ZVector> zVectors) {

@@ -17,6 +17,7 @@ package eu.smartenit.unada.om;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -38,6 +39,9 @@ import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureBootstrap;
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureDiscover;
+import net.tomp2p.nat.FutureNAT;
+import net.tomp2p.nat.PeerBuilderNAT;
+import net.tomp2p.nat.PeerNAT;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
@@ -53,29 +57,31 @@ import eu.smartenit.unada.om.messages.BaseMessage;
 
 public class Overlay {
 	private static final Logger log = LoggerFactory.getLogger(Overlay.class);
-	private static int UNADA_INFO_TTLs = 100;
-	
+	private static int UNADA_INFO_TTLs = 60*60*4;
+
 	private PeerDHT peer;
 	private int port = 8443;
 	private UnadaInfo uNaDaInfo = new UnadaInfo();
 	private ScheduledExecutorService executor = UnadaThreadService.getThreadService();
 	private OverlayManager manager;
-	
+
 	public Overlay(OverlayManager manager) {
 		this.manager = manager;
 		this.uNaDaInfo = manager.getuNaDaInfo();
 	}
-	
-	public void joinOverlay(InetAddress bootstrapNode, int port) throws OverlayException {
-		log.info("Joining Overlay Network with bootstrap node: {}:{}", bootstrapNode, port);
-		if ( peer == null ) {
-			connect(new Bindings());
-			discoverAndBootstrap(bootstrapNode, port);
 
+	public void joinOverlay(Bindings bindings, InetSocketAddress... bootstrapNodes) throws OverlayException {
+		log.info("Joining Overlay Network with bootstrap nodes: {}", bootstrapNodes, port);
+		if ( peer != null ) {
+			peer.shutdown().awaitUninterruptibly();
+			peer = null;
 		}
+
+		connect(bindings);
+		discoverAndBootstrap(bootstrapNodes);
 		updateOverlay(peer.peerAddress().inetAddress(), peer.peerAddress().tcpPort());
 	}
-	
+
 	public void updateOverlay(InetAddress newAddress, int port)	throws OverlayException {
 		log.info("Updating UNaDa information inside DHT.");
 		uNaDaInfo.setUnadaAddress(newAddress.getHostAddress());
@@ -83,7 +89,7 @@ public class Overlay {
 		manager.resolveGeoLocation(uNaDaInfo);
 		FuturePut futurePut;
 		try {
-			futurePut = peer.put(Number160.createHash(uNaDaInfo.getUnadaID())).data(new Data(uNaDaInfo).ttlSeconds(UNADA_INFO_TTLs)).start();
+			futurePut = peer.put(Number160.createHash(uNaDaInfo.getUnadaID())).data(new Data(uNaDaInfo).ttlSeconds(UNADA_INFO_TTLs + 30)).start();
 			futurePut.awaitUninterruptibly();
 			if(!futurePut.isSuccess()){
 				throw new OverlayException("Put for UNaDa info failed.");
@@ -92,11 +98,11 @@ public class Overlay {
 			throw new OverlayException("Unexpected Exception:", e);
 		}
 	}
-	
+
 	public void createOverlay(Bindings bindings)throws OverlayException{
 		log.info("Creating new DHT overlay with bindings: {}.", bindings.toString());
 		if ( peer != null ) {
-			peer.shutdown();
+			peer.shutdown().awaitUninterruptibly();
 			peer=null;
 		}
 		try {
@@ -104,11 +110,12 @@ public class Overlay {
 		} catch (OverlayException e) {
 			throw new OverlayException("Failed to create overlay due to a socket error", e);
 		}
+		log.info("Overlay created successfully.");
 		uNaDaInfo.setUnadaAddress(peer.peerAddress().inetAddress());
 		uNaDaInfo.setUnadaPort(peer.peerAddress().udpPort());
 	}
-	
-	
+
+
 	/**
 	 * Internal method used to bootstrap the peer to the DHT. The bootstrapNode can be
 	 * any node that is already connected to the DHT.
@@ -147,12 +154,12 @@ public class Overlay {
 			}
 		}, UNADA_INFO_TTLs, UNADA_INFO_TTLs, TimeUnit.SECONDS);
 	}
-	
+
 	public void advertiseContent(long... contentID) {
 		log.info("Advertising contents into DHT: ", contentID);
 		for(long id : contentID){
 			try {
-				FuturePut put = peer.add(Number160.createHash(id)).data(new Data(uNaDaInfo).ttlSeconds(UNADA_INFO_TTLs)).start();
+				FuturePut put = peer.add(Number160.createHash(id)).data(new Data(uNaDaInfo).ttlSeconds(UNADA_INFO_TTLs + 30)).start();
 				put.awaitUninterruptibly();
 				if(put.isSuccess()){
 					log.debug("{} - Successfully advertised conten {} to DHT.",uNaDaInfo.getUnadaID() , id);
@@ -166,10 +173,10 @@ public class Overlay {
 			manager.queryProviders(id, null);
 		}
 	}
-	
+
 	private void refreshData(){
 		log.info("Doing DHT data maintenance.");
-		for(Content content : DAOFactory.getContentDAO().findAll()){
+		for(Content content : DAOFactory.getContentDAO().findAllDownloaded()){
 			advertiseContent(content.getContentID());
 		}
 		try {
@@ -178,25 +185,73 @@ public class Overlay {
 			log.error("Failed to refresh UNaDa Info in DHT", e);
 		}
 	}
-	
-	private void discoverAndBootstrap(InetAddress bootstrapNode, int port) {
-		log.info("Discovering and bootstrapping to: {}:{}", bootstrapNode, port);
-		FutureDiscover futureDiscover = peer.peer().discover()
-				.inetAddress(bootstrapNode)
-				.ports(port).start();
-		futureDiscover.awaitUninterruptibly();
 
+	private void discoverAndBootstrap(InetSocketAddress... bootstrapNodes) throws OverlayException {
+		InetSocketAddress theAddress = null;
+		FutureDiscover futureDiscover = null;
+		PeerNAT pn = null;
+		for(InetSocketAddress addr : bootstrapNodes){
+			log.info("Discovering and bootstrapping to: {}", addr);
+			//loop
+			PeerAddress paOrig = peer.peerBean().serverPeerAddress();
+			futureDiscover = peer.peer().discover()
+					.inetAddress(addr.getAddress())
+					.ports(addr.getPort()).start();
+			futureDiscover.awaitUninterruptibly();
+
+			if(futureDiscover.isFailed()){
+				log.info("NAT or Firewall present, trying UPNP.");
+				pn = new PeerBuilderNAT(peer.peer()).start();
+				FutureNAT fn = pn.startSetupPortforwarding(futureDiscover);
+				fn.awaitUninterruptibly();
+
+				if(fn.isFailed()){
+					log.info("UPNP Failed, checking direct port forwarding.");
+					peer.peerBean().serverPeerAddress(paOrig);
+					futureDiscover = peer.peer().discover()
+							.expectManualForwarding()
+							.inetAddress(addr.getAddress())
+							.ports(addr.getPort()).start();
+					futureDiscover.awaitUninterruptibly();
+					
+				}
+				if(fn.isSuccess() || futureDiscover.isSuccess()){
+					theAddress = addr;
+					break;
+				}else{
+					log.info("Discovering failed trying next node.");
+				}
+			}else {
+				theAddress = addr;
+				break;
+			}
+
+//			if(futureDiscover.isSuccess()){
+//				theAddress = addr;
+//				break;
+//			}
+		}
+
+		if(theAddress == null){
+			throw new OverlayException("Could not discover to any bootstrap node!");
+		}
+
+
+		//add collection of peer addresses
 		FutureBootstrap futureBootstrap = peer.peer().bootstrap()
-				.inetAddress(bootstrapNode)
-				.ports(port).start();
+				.inetAddress(theAddress.getAddress())
+				.ports(theAddress.getPort()).start();
 		futureBootstrap.awaitUninterruptibly();
 
+		if(futureBootstrap.isFailed()){
+			throw new OverlayException("Could not bootstrap to any bootstrap node!");
+		}
 		uNaDaInfo.setUnadaAddress(peer.peerAddress().inetAddress());
 		uNaDaInfo.setUnadaPort(peer.peerAddress().udpPort());
 
 		log.info("Finished bootsrapping, local address: {}", peer.peerAddress());
 	}
-	
+
 	public List<InetAddress> getPublicAddresses() throws SocketException{
 		List<InetAddress> addrList = new ArrayList<InetAddress>();
 		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -245,7 +300,7 @@ public class Overlay {
 		}
 		return providers;
 	}
-	
+
 	public boolean sendMessage(UnadaInfo destination, BaseMessage message) {
 		message.setSender(uNaDaInfo);
 		try {
@@ -267,7 +322,7 @@ public class Overlay {
 		}
 		return false;
 	}
-	
+
 	public int getPort() {
 		return port;
 	}
@@ -275,7 +330,7 @@ public class Overlay {
 	public void setPort(int port) {
 		this.port = port;
 	}
-	
+
 	public void shutDown(){
 		if(peer != null){
 			log.info("Shutting down Overlay Manager.");
@@ -284,5 +339,5 @@ public class Overlay {
 			log.warn("Peer already shut down!");
 		}
 	}
-	
+
 }

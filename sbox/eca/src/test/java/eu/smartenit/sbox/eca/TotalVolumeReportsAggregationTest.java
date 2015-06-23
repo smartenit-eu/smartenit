@@ -41,10 +41,9 @@ import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
 /**
- * Test class for the {@link EconomicAnalyzerInternal} class.
- * 
- * @author D. D&ouml;nni, K. Bhargav, T. Bocek
- *
+ * Includes test methods for handling traffic updates when {@link ChargingRule}
+ * <code>.volume</code> is enabled. Traffic values are aggregated during an
+ * accounting period and then reset.
  */
 public class TotalVolumeReportsAggregationTest {
 	
@@ -89,7 +88,6 @@ public class TotalVolumeReportsAggregationTest {
 		costFunctions = new ArrayList<CostFunction>();
 		costFunctions.add(costFunction1);
 		costFunctions.add(costFunction2);
-		
 	}
 	
 	@Before

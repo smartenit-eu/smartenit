@@ -62,6 +62,7 @@ public class TunnelMapper implements ResultSetMapper<Tunnel> {
 		l.setLinkID(new SimpleLinkID(r.getString("LOCALLINKID"), r
 				.getString("LOCALISPNAME")));
 		t.setLink(l);
+		t.setLocalRouterAddress(new NetworkAddressIPv4(r.getString("LOCALROUTERADDRESS"), 32));
 		return t;
 
 	}

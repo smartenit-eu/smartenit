@@ -27,8 +27,10 @@ import eu.smartenit.unada.ctm.cache.impl.CacheManagerImpl;
 import eu.smartenit.unada.ctm.cache.impl.ContentManagerImpl;
 import eu.smartenit.unada.db.dao.impl.CacheDAO;
 import eu.smartenit.unada.db.dao.impl.ContentDAO;
+import eu.smartenit.unada.db.dao.impl.SocialPredictionParametersDAO;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.Content;
+import eu.smartenit.unada.db.dto.SocialPredictionParameters;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -43,8 +45,10 @@ public class CacheManagerTest {
     
 	private ContentDAO contentDAO = mock(ContentDAO.class);
 	private CacheDAO cacheDAO = mock(CacheDAO.class);
+	private SocialPredictionParametersDAO socialDAO = mock(SocialPredictionParametersDAO.class);
 	private ContentManager contentManager = mock(ContentManagerImpl.class);
 	private CacheManagerImpl cacheManager;
+	private SocialPredictionParameters socialParams;
 	
 	@Before
 	public void setup() throws Exception {
@@ -56,6 +60,14 @@ public class CacheManagerTest {
         c = new Content();
         c.setContentID(654321);
         contents.add(c);
+        
+        socialParams = new SocialPredictionParameters();
+        socialParams.setLambda1(1);
+        socialParams.setLambda2(1);
+        socialParams.setLambda3(1);
+        socialParams.setLambda4(1);
+        socialParams.setLambda5(1);
+        socialParams.setLambda6(1);
 	}
 
 
@@ -86,6 +98,9 @@ public class CacheManagerTest {
 		
 		when(cacheDAO.findLast()).thenReturn(null);
 		DAOFactory.setCacheDAO(cacheDAO);
+		
+		when(socialDAO.findLast()).thenReturn(socialParams);
+		DAOFactory.setSocialPredictionParametersDAO(socialDAO);
     	
     	List<Content> socialContentList = new ArrayList<Content>();
     	
@@ -118,6 +133,9 @@ public class CacheManagerTest {
 		
 		when(cacheDAO.findLast()).thenReturn(null);
 		DAOFactory.setCacheDAO(cacheDAO);
+		
+		when(socialDAO.findLast()).thenReturn(socialParams);
+		DAOFactory.setSocialPredictionParametersDAO(socialDAO);
     	
     	List<Content> socialContentList = new ArrayList<Content>();
     	
@@ -150,6 +168,9 @@ public class CacheManagerTest {
 		
 		when(cacheDAO.findLast()).thenReturn(null);
 		DAOFactory.setCacheDAO(cacheDAO);
+		
+		when(socialDAO.findLast()).thenReturn(socialParams);
+		DAOFactory.setSocialPredictionParametersDAO(socialDAO);
     	
     	List<Content> socialContentList = new ArrayList<Content>();
     	
@@ -182,6 +203,9 @@ public class CacheManagerTest {
 		
 		when(cacheDAO.findLast()).thenReturn(null);
 		DAOFactory.setCacheDAO(cacheDAO);
+		
+		when(socialDAO.findLast()).thenReturn(socialParams);
+		DAOFactory.setSocialPredictionParametersDAO(socialDAO);
     	
     	List<Content> socialContentList = new ArrayList<Content>();
     	
@@ -214,6 +238,9 @@ public class CacheManagerTest {
 		
 		when(cacheDAO.findLast()).thenReturn(null);
 		DAOFactory.setCacheDAO(cacheDAO);
+		
+		when(socialDAO.findLast()).thenReturn(socialParams);
+		DAOFactory.setSocialPredictionParametersDAO(socialDAO);
     	
     	List<Content> socialContentList = new ArrayList<Content>();
     	
@@ -246,6 +273,9 @@ public class CacheManagerTest {
 
         when(cacheDAO.findLast()).thenReturn(null);
         DAOFactory.setCacheDAO(cacheDAO);
+        
+        when(socialDAO.findLast()).thenReturn(socialParams);
+		DAOFactory.setSocialPredictionParametersDAO(socialDAO);
 
         List<Content> socialContentList = new ArrayList<Content>();
 
@@ -278,6 +308,9 @@ public class CacheManagerTest {
 		
 		when(cacheDAO.findLast()).thenReturn(null);
 		DAOFactory.setCacheDAO(cacheDAO);
+		
+		when(socialDAO.findLast()).thenReturn(socialParams);
+		DAOFactory.setSocialPredictionParametersDAO(socialDAO);
     	
     	List<Content> socialContentList = new ArrayList<Content>();
     	
@@ -325,6 +358,9 @@ public class CacheManagerTest {
 		
 		when(cacheDAO.findLast()).thenReturn(null);
 		DAOFactory.setCacheDAO(cacheDAO);
+		
+		when(socialDAO.findLast()).thenReturn(socialParams);
+		DAOFactory.setSocialPredictionParametersDAO(socialDAO);
     	
     	List<Content> socialContentList = new ArrayList<Content>();
     	
@@ -366,6 +402,9 @@ public class CacheManagerTest {
 		
 		when(cacheDAO.findLast()).thenReturn(null);
 		DAOFactory.setCacheDAO(cacheDAO);
+		
+		when(socialDAO.findLast()).thenReturn(socialParams);
+		DAOFactory.setSocialPredictionParametersDAO(socialDAO);
     	
     	List<Content> socialContentList = new ArrayList<Content>();
     	

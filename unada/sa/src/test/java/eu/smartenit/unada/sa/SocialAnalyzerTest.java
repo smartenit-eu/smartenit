@@ -204,8 +204,8 @@ public class SocialAnalyzerTest {
         SocialAnalyzer analyzer = new SocialAnalyzer(om);
         List<Content> sortedContentList = analyzer.predicting();
 
-        assertEquals(sortedContentList.get(0).getContentID(), 17);
-        assertEquals(sortedContentList.get(1).getContentID(), 18);
+        assertEquals(sortedContentList.get(0).getContentID(), 18);
+        assertEquals(sortedContentList.get(1).getContentID(), 17);
 
     }
 

@@ -39,12 +39,14 @@ public class ExtendedCounterCollectorThread extends CounterCollectorThread {
 	 * 
 	 * @param links
 	 *            list of links of a given BG router that will be monitored
+	 * @param tunnels
+	 *            list of tunnels of a given BG router that will be monitored
 	 * @param bgRouter
 	 *            target {@link BGRouter}
 	 */
-	public ExtendedCounterCollectorThread(List<Link> linksByBGRouter,
-			BGRouter bgRouter) {
-		super(linksByBGRouter, bgRouter);
+	public ExtendedCounterCollectorThread(List<Link> links,
+			List<Tunnel> tunnels, BGRouter bgRouter) {
+		super(links, tunnels, bgRouter);
 	}
 
 	/**
@@ -63,13 +65,25 @@ public class ExtendedCounterCollectorThread extends CounterCollectorThread {
 	@Override
 	protected CounterValues collectCounterValuesForBGRouter() throws Exception {
 		final ExtendedCounterValues counterValues = new ExtendedCounterValues();
-		for (Link link : links) {
-			counterValues.storeCounterValue(link.getLinkID(), getInboundLinkCounterValueFromBGRouter(link));
-			final ReceivedPackets receivedPackets = new ReceivedPackets(
-				getCounterValueFromBGRouter(link.getInboundInterfaceCounterOID_UcastPkts()),
-				getCounterValueFromBGRouter(link.getInboundInterfaceCounterOID_MulticastPkts()),
-				getCounterValueFromBGRouter(link.getInboundInterfaceCounterOID_BroadcastPkts()));
-			counterValues.storeReceivedPackets(link.getLinkID(), receivedPackets);
+		if(links != null) {
+			for (Link link : links) {
+				counterValues.storeCounterValue(link.getLinkID(), getInboundLinkCounterValueFromBGRouter(link));
+				final ReceivedPackets receivedPackets = new ReceivedPackets(
+					getCounterValueFromBGRouter(link.getInboundInterfaceCounterOID_UcastPkts()),
+					getCounterValueFromBGRouter(link.getInboundInterfaceCounterOID_MulticastPkts()),
+					getCounterValueFromBGRouter(link.getInboundInterfaceCounterOID_BroadcastPkts()));
+				counterValues.storeReceivedPackets(link.getLinkID(), receivedPackets);
+			}
+		}
+		if(tunnels != null) {
+			for (Tunnel tunnel : tunnels) {
+				counterValues.storeCounterValue(tunnel.getTunnelID(), getInboundTunnelCounterValueFromBGRouter(tunnel));
+				final ReceivedPackets receivedPackets = new ReceivedPackets(
+					getCounterValueFromBGRouter(tunnel.getInboundInterfaceCounterOID_UcastPkts()),
+					getCounterValueFromBGRouter(tunnel.getInboundInterfaceCounterOID_MulticastPkts()),
+					getCounterValueFromBGRouter(tunnel.getInboundInterfaceCounterOID_BroadcastPkts()));
+				counterValues.storeReceivedPackets(tunnel.getTunnelID(), receivedPackets);
+			}
 		}
 		return counterValues;
 	}
@@ -77,13 +91,15 @@ public class ExtendedCounterCollectorThread extends CounterCollectorThread {
 	@Override
 	protected CounterValues collectCounterValuesForDARouter() throws Exception {
 		final ExtendedCounterValues counterValues = new ExtendedCounterValues();
-		for (Tunnel tunnel : tunnels) {
-			counterValues.storeCounterValue(tunnel.getTunnelID(), getInboundTunnelCounterValueFromDARouter(tunnel));
-			final ReceivedPackets receivedPackets = new ReceivedPackets(
-					getCounterValueFromDARouter(tunnel.getInboundInterfaceCounterOID_UcastPkts()),
-					getCounterValueFromDARouter(tunnel.getInboundInterfaceCounterOID_MulticastPkts()),
-					getCounterValueFromDARouter(tunnel.getInboundInterfaceCounterOID_BroadcastPkts()));
-				counterValues.storeReceivedPackets(tunnel.getTunnelID(), receivedPackets);
+		if(tunnels != null) {
+			for (Tunnel tunnel : tunnels) {
+				counterValues.storeCounterValue(tunnel.getTunnelID(), getInboundTunnelCounterValueFromDARouter(tunnel));
+				final ReceivedPackets receivedPackets = new ReceivedPackets(
+						getCounterValueFromDARouter(tunnel.getInboundInterfaceCounterOID_UcastPkts()),
+						getCounterValueFromDARouter(tunnel.getInboundInterfaceCounterOID_MulticastPkts()),
+						getCounterValueFromDARouter(tunnel.getInboundInterfaceCounterOID_BroadcastPkts()));
+					counterValues.storeReceivedPackets(tunnel.getTunnelID(), receivedPackets);
+			}
 		}
 		return counterValues;
 	}

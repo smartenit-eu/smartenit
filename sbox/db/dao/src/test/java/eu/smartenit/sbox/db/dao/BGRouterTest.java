@@ -67,6 +67,8 @@ public class BGRouterTest {
 		b = new BGRouter();
 		b.setManagementAddress(new NetworkAddressIPv4("5.5.5.5", 0));
 		b.setSnmpCommunity("snmp");
+		b.setNetconfUsername("admin");
+		b.setNetconfPassword("1234");
 		
 		bgdao.insert(b);
 		
@@ -78,10 +80,14 @@ public class BGRouterTest {
 		b = bgdao.findById("5.5.5.5");
 		assertNotNull(b);
 		assertEquals(b.getSnmpCommunity(), "snmp");
+		assertEquals(b.getNetconfPassword(), "1234");
+		assertEquals(b.getNetconfUsername(), "admin");
 		
 		b = new BGRouter();
 		b.setManagementAddress(new NetworkAddressIPv4("1.1.1.1", 0));
 		b.setSnmpCommunity("abcd");
+		b.setNetconfUsername("admin2");
+		b.setNetconfPassword("123456");
 		
 		bgdao.insert(b);
 		
@@ -94,8 +100,11 @@ public class BGRouterTest {
 		b = bgdao.findById("1.1.1.1");
 		assertNotNull(b);
 		assertEquals(b.getSnmpCommunity(), "abcd");
+		assertEquals(b.getNetconfPassword(), "123456");
+		assertEquals(b.getNetconfUsername(), "admin2");
 		
-		b.setSnmpCommunity("efg");		
+		b.setSnmpCommunity("efg");	
+		b.setNetconfPassword("123456789");
 		bgdao.update(b);
 		
 		bglist = bgdao.findAll();
@@ -104,6 +113,8 @@ public class BGRouterTest {
 		b = bgdao.findById("1.1.1.1");
 		assertNotNull(b);
 		assertEquals(b.getSnmpCommunity(), "efg");
+		assertEquals(b.getNetconfPassword(), "123456789");
+		assertEquals(b.getNetconfUsername(), "admin2");
 		
 		bgdao.deleteById("1.1.1.1");
 		
@@ -133,6 +144,8 @@ public class BGRouterTest {
 		BGRouter b = new BGRouter();
 		b.setManagementAddress(new NetworkAddressIPv4("5.5.5.5", 0));
 		b.setSnmpCommunity("snmp");
+		b.setNetconfUsername("admin");
+		b.setNetconfPassword("1234");
 		
 		bgdao.insertByASNumber(b, a.getAsNumber());
 		

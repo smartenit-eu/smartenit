@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>eu.smartenit.unada</groupId>
 		<artifactId>unada</artifactId>
-		<version>3.0</version>
+		<version>3.1</version>
 	</parent>
 
 	<groupId>eu.smartenit.unada.om</groupId>
@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-all</artifactId>
-			<version>5.0-Alpha24</version>
+			<version>5.0-Beta7</version>
 		</dependency>
 
 		<dependency>

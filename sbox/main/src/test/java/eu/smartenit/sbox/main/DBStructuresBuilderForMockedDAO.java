@@ -40,6 +40,11 @@ import eu.smartenit.sbox.db.dto.SystemControlParameters;
 import eu.smartenit.sbox.db.dto.TimeScheduleParameters;
 import eu.smartenit.sbox.db.dto.Tunnel;
 
+/**
+ * 
+ * @author Lukasz Lopatowski
+ * @version 3.1
+ */
 public class DBStructuresBuilderForMockedDAO {
 	
 	public static CostFunction receiverCostFunction1;
@@ -58,6 +63,8 @@ public class DBStructuresBuilderForMockedDAO {
 	
 	public static TimeScheduleParameters tspForVolumeRule;
 	public static TimeScheduleParameters tspFor95thPercentileRule;
+	public static TimeScheduleParameters tspForLong95thPercentileRule;
+	
 	public static SystemControlParameters scpWithVolumeRule;
 	public static SystemControlParameters scpWith95thPercentileRule;
 	
@@ -105,6 +112,14 @@ public class DBStructuresBuilderForMockedDAO {
 		tspFor95thPercentileRule.setReportPeriodDTM(4);
 		tspFor95thPercentileRule.setTol1(1.0);
 		tspFor95thPercentileRule.setTol2(1.0);
+		
+		tspForLong95thPercentileRule = new TimeScheduleParameters(new Date(new Date().getTime() + 6*1000), 300, 1);
+		tspForLong95thPercentileRule.setCompensationPeriod(9);
+		tspForLong95thPercentileRule.setSamplingPeriod(3);
+		tspForLong95thPercentileRule.setReportPeriodEA(3);
+		tspForLong95thPercentileRule.setReportPeriodDTM(1);
+		tspForLong95thPercentileRule.setTol1(1.0);
+		tspForLong95thPercentileRule.setTol2(1.0);
 	
 		scpWithVolumeRule = new SystemControlParameters(ChargingRule.volume, null, 0.12);
 
@@ -115,6 +130,9 @@ public class DBStructuresBuilderForMockedDAO {
 		BGRouter bgRouter11 = new BGRouter(new NetworkAddressIPv4("1.2.1.1", 32), "smit", null);
 		BGRouter bgRouter12 = new BGRouter(new NetworkAddressIPv4("1.2.1.2", 32), "smit", null);
 
+		NetworkAddressIPv4 daRouterAddress = new NetworkAddressIPv4("1.1.1.1", 32); 
+		DARouter daRouter1 = new DARouter(daRouterAddress, "smit", "00:00:00:00:00:00:00:01");
+		
 		Link link111 = new Link();
 		link111.setLinkID(new SimpleLinkID("111", "isp1"));
 		link111.setBgRouter(bgRouter11);
@@ -133,11 +151,13 @@ public class DBStructuresBuilderForMockedDAO {
 		tunnel1111.setTunnelID(new EndAddressPairTunnelID("1111", new NetworkAddressIPv4("10.1.1.1", 32), null));
 		tunnel1111.setLink(link111);
 		tunnel1111.setPhysicalLocalInterfaceName("eth0");
+		tunnel1111.setLocalRouterAddress(daRouterAddress);
 		
 		Tunnel tunnel1211 = new Tunnel();
 		tunnel1211.setTunnelID(new EndAddressPairTunnelID("1211", new NetworkAddressIPv4("10.1.2.1", 32), null));
 		tunnel1211.setLink(link121);
 		tunnel1211.setPhysicalLocalInterfaceName("eth1");
+		tunnel1211.setLocalRouterAddress(daRouterAddress);
 				
 		link111.setTraversingTunnels(Arrays.asList(tunnel1111));
 		link121.setTraversingTunnels(Arrays.asList(tunnel1211));
@@ -155,8 +175,6 @@ public class DBStructuresBuilderForMockedDAO {
 		as2.setAsNumber(20);
 		as2.setSbox(new SBox(new NetworkAddressIPv4("127.0.0.1", 32)));
 		
-		DARouter daRouter1 = new DARouter(new NetworkAddressIPv4("1.1.1.1", 32), "smit", "00:00:00:00:00:00:00:01");
-
 		CloudDC cloudLocal11 = new CloudDC("cloudLocal11", as1, daRouter1, null, null);
 		as1.setLocalClouds(Arrays.asList(cloudLocal11));
 		
@@ -178,6 +196,9 @@ public class DBStructuresBuilderForMockedDAO {
 		BGRouter bgRouter31 = new BGRouter(new NetworkAddressIPv4("3.2.1.1", 32), "smit", null);
 		BGRouter bgRouter32 = new BGRouter(new NetworkAddressIPv4("3.2.1.2", 32), "smit", null);
 
+		NetworkAddressIPv4 daRouterAddress = new NetworkAddressIPv4("3.1.1.1", 32); 
+		DARouter daRouter3 = new DARouter(daRouterAddress, "smit", "00:00:00:00:00:00:00:03");
+
 		Link link311 = new Link();
 		link311.setLinkID(new SimpleLinkID("311", "isp3"));
 		link311.setBgRouter(bgRouter31);
@@ -196,12 +217,14 @@ public class DBStructuresBuilderForMockedDAO {
 		tunnel3111.setTunnelID(new EndAddressPairTunnelID("3111", new NetworkAddressIPv4("10.3.1.1", 32), null));
 		tunnel3111.setLink(link311);
 		tunnel3111.setPhysicalLocalInterfaceName("eth0");
+		tunnel3111.setLocalRouterAddress(daRouterAddress);
 		
 		Tunnel tunnel3211 = new Tunnel();
 		tunnel3211.setTunnelID(new EndAddressPairTunnelID("3211", new NetworkAddressIPv4("10.3.2.1", 32), null));
 		tunnel3211.setLink(link321);
 		tunnel3211.setPhysicalLocalInterfaceName("eth1");
-				
+		tunnel3211.setLocalRouterAddress(daRouterAddress);
+
 		link311.setTraversingTunnels(Arrays.asList(tunnel3111));
 		link321.setTraversingTunnels(Arrays.asList(tunnel3211));
 
@@ -217,8 +240,6 @@ public class DBStructuresBuilderForMockedDAO {
 		as2.setLocal(false);
 		as2.setAsNumber(20);
 		as2.setSbox(new SBox(new NetworkAddressIPv4("127.0.0.1", 32)));
-		
-		DARouter daRouter3 = new DARouter(new NetworkAddressIPv4("3.1.1.1", 32), "smit", "00:00:00:00:00:00:00:03");
 
 		CloudDC cloudLocal31 = new CloudDC("cloudLocal31", as3, daRouter3, null, null);
 		as3.setLocalClouds(Arrays.asList(cloudLocal31));

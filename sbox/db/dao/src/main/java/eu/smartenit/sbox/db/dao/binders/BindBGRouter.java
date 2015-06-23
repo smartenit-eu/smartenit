@@ -33,7 +33,7 @@ import eu.smartenit.sbox.db.dto.BGRouter;
  * into BGRouter parameters.
  *
  * @authors George Petropoulos
- * @version 1.0
+ * @version 3.1
  * 
  */
 @BindingAnnotation(BindBGRouter.BGRouterBinderFactory.class)
@@ -48,6 +48,8 @@ public @interface BindBGRouter {
 				public void bind(SQLStatement q, BindBGRouter bind, BGRouter arg) {
 					q.bind(bind.value() + ".address", arg.getManagementAddress().getPrefix());
 					q.bind(bind.value() + ".snmpCommunity", arg.getSnmpCommunity());
+					q.bind(bind.value() + ".netconfUsername", arg.getNetconfUsername());
+					q.bind(bind.value() + ".netconfPassword", arg.getNetconfPassword());
 				}
 			};
 		}

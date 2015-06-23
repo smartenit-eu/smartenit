@@ -100,7 +100,7 @@
 						To Live (hours)</label>
 					<div class="col-xs-6">
 						<h:inputText type="text" class="form-control" id="timeToLive"
-							value="#{cacheBean.cache.timeToLive}">
+							value="#{cacheBean.cache.timeToLive}" >
 							<f:converter
 								converterId="eu.smartenit.unada.web.util.HourConverter" />
 						</h:inputText>
@@ -120,7 +120,7 @@
 					<label for="overlayThreshold" class="col-xs-4 control-label">Overlay
 						Threshold</label>
 					<div class="col-xs-6">
-						<h:inputText type="text" class="form-control"
+						<h:inputText type="text" class="form-control" 
 							id="overlayThreshold" value="#{cacheBean.cache.overlayThreshold}" />
 					</div>
 				</div>

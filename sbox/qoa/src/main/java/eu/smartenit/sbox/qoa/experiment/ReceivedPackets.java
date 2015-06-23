@@ -16,7 +16,7 @@
 package eu.smartenit.sbox.qoa.experiment;
 
 /**
- * Used to store information about the number of three types of packets.
+ * Data container class used used to store information about the number of three types of packets.
  * 
  * @author Lukasz Lopatowski
  * @version 1.2
@@ -27,16 +27,42 @@ public class ReceivedPackets {
 	private long multicast;
 	private long broadcast;
 	
+	
+	/**
+	 * The constructor with arguments.
+	 * 
+	 * @param unicast
+	 * 		unicast packets
+	 * @param multicast
+	 * 		multicast packets
+	 * @param broadcast
+	 * 		broadcast packets
+	 */
 	public ReceivedPackets(long unicast, long multicast, long broadcast) {
 		this.unicast = unicast;
 		this.multicast = multicast;
 		this.broadcast = broadcast;
 	}
 
+	
+	/**
+	 * Method used to calculate packets sum.
+	 * 
+	 * @return
+	 * 		packets sum
+	 */
 	public long aggregate() {
 		return unicast + multicast + broadcast;
 	}
 
+	/**
+	 *  Method used to calculate difference between stored and provided values.
+	 * 
+	 * @param toBeSubtracted
+	 * 		{@link ReceivedPackets} object
+	 * @return
+	 * 		difference between stored and provided values
+	 */
 	public ReceivedPackets calculateDifference(ReceivedPackets toBeSubtracted) {
 		ReceivedPackets result = new ReceivedPackets(
 				unicast - toBeSubtracted.getUnicast(), 
@@ -45,14 +71,32 @@ public class ReceivedPackets {
 		return result;
 	}
 	
+	/**
+	 *  Returns amount of unicast packets. 
+	 * 
+	 * @return
+	 * 		amount of unicast packets
+	 */
 	public long getUnicast() {
 		return unicast;
 	}
 
+	/**
+	 *  Returns amount of multicast packets. 
+	 * 
+	 * @return
+	 * 		amount of multicast packets
+	 */
 	public long getMulticast() {
 		return multicast;
 	}
 
+	/**
+	 *  Returns amount of broadcast packets. 
+	 * 
+	 * @return
+	 * 		amount of broadcast packets
+	 */
 	public long getBroadcast() {
 		return broadcast;
 	}

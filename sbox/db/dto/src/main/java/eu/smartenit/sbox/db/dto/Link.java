@@ -50,6 +50,7 @@ public final class Link implements Serializable {
 		this.costFunction = new CostFunction();
 		this.bgRouter = new BGRouter();
 		this.tunnelEndPrefix = new NetworkAddressIPv4();
+		this.policerBandwidthLimitFactor = 1.0;
 	}
 
 
@@ -82,6 +83,7 @@ public final class Link implements Serializable {
 		this.bgRouter = bgRouter;
 		this.traversingTunnels = traversingTunnels;
 		this.tunnelEndPrefix = tunnelEndPrefix;
+		this.policerBandwidthLimitFactor = 1.0;
 	}
 
 
@@ -106,6 +108,8 @@ public final class Link implements Serializable {
 	private List<Tunnel> traversingTunnels;
 	
 	private NetworkAddressIPv4 tunnelEndPrefix;
+	
+	private double policerBandwidthLimitFactor;
 	
 	/* Extended to support packet counters*/
 	private String inboundInterfaceCounterOID_UcastPkts;
@@ -196,6 +200,14 @@ public final class Link implements Serializable {
 		this.tunnelEndPrefix = tunnelEndPrefix;
 	}
 	
+	public double getPolicerBandwidthLimitFactor() {
+		return policerBandwidthLimitFactor;
+	}
+
+	public void setPolicerBandwidthLimitFactor(double policerBandwidthLimitFactor) {
+		this.policerBandwidthLimitFactor = policerBandwidthLimitFactor;
+	}
+
 	public String getInboundInterfaceCounterOID_UcastPkts() {
 		return inboundInterfaceCounterOID_UcastPkts;
 	}
@@ -250,6 +262,7 @@ public final class Link implements Serializable {
 		this.outboundInterfaceCounterOID_BroadcastPkts = outboundInterfaceCounterOID_BroadcastPkts;
 	}
 
+	
 	@Override
 	public String toString() {
 		return "Link [linkID=" + linkID + ", address=" + address
@@ -257,8 +270,23 @@ public final class Link implements Serializable {
 				+ ", vlan=" + vlan + ", inboundInterfaceCounterOID="
 				+ inboundInterfaceCounterOID + ", outboundInterfaceCounterOID="
 				+ outboundInterfaceCounterOID + ", costFunction="
-				+ costFunction + ", traversingTunnels=" + traversingTunnels
-				+ ", tunnelEndPrefix=" + tunnelEndPrefix + "]";
+				+ costFunction + ", bgRouter=" + bgRouter
+				+ ", traversingTunnels=" + traversingTunnels
+				+ ", tunnelEndPrefix=" + tunnelEndPrefix
+				+ ", policerBandwidthLimitFactor="
+				+ policerBandwidthLimitFactor
+				+ ", inboundInterfaceCounterOID_UcastPkts="
+				+ inboundInterfaceCounterOID_UcastPkts
+				+ ", outboundInterfaceCounterOID_UcastPkts="
+				+ outboundInterfaceCounterOID_UcastPkts
+				+ ", inboundInterfaceCounterOID_MulticastPkts="
+				+ inboundInterfaceCounterOID_MulticastPkts
+				+ ", outboundInterfaceCounterOID_MulticastPkts="
+				+ outboundInterfaceCounterOID_MulticastPkts
+				+ ", inboundInterfaceCounterOID_BroadcastPkts="
+				+ inboundInterfaceCounterOID_BroadcastPkts
+				+ ", outboundInterfaceCounterOID_BroadcastPkts="
+				+ outboundInterfaceCounterOID_BroadcastPkts + "]";
 	}
 
 }

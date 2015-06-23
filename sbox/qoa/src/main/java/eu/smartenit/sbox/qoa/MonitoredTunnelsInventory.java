@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import eu.smartenit.sbox.db.dto.AS;
+import eu.smartenit.sbox.db.dto.BGRouter;
 import eu.smartenit.sbox.db.dto.DARouter;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
 import eu.smartenit.sbox.db.dto.DC2DCCommunicationID;
@@ -37,13 +38,13 @@ import eu.smartenit.sbox.db.dto.TunnelID;
  * 
  * @author Jakub Gutkowski
  * @author Lukasz Lopatowski
- * @version 1.0
+ * @version 3.1
  * 
  */
 public class MonitoredTunnelsInventory {
 	
 	private Map<Integer, Set<DARouter>> asDARouters = new HashMap<Integer, Set<DARouter>>();
-	
+
 	private List<DC2DCCommunication> communications = new ArrayList<DC2DCCommunication>();
 	
 	/**
@@ -74,9 +75,10 @@ public class MonitoredTunnelsInventory {
 	 * @return list of {@link Tunnel} instances
 	 */
 	public List<Tunnel> getTunnels(int asNumber) {
-		List<Tunnel> tunnels = new ArrayList<Tunnel>();
-		for (DARouter router : getDARoutersByAsNumber(asNumber)) {
-			tunnels.addAll(getTunnels(router));
+		final List<Tunnel> tunnels = new ArrayList<Tunnel>();
+		for(DC2DCCommunication communication : communications) {
+			if (communication.getLocalCloud().getAs().getAsNumber() == asNumber)
+				tunnels.addAll(communication.getConnectingTunnels());
 		}
 		return tunnels;
 	}
@@ -106,10 +108,12 @@ public class MonitoredTunnelsInventory {
 	 * @return list of {@link Tunnel} instances
 	 */
 	public List<Tunnel> getTunnels(DARouter daRouter) {
-		List<Tunnel> tunnels = new ArrayList<Tunnel>();		
-		for(DC2DCCommunication communication : communications) {
-			if (sameDARouters(communication.getLocalCloud().getDaRouter(), daRouter))
-				tunnels.addAll(communication.getConnectingTunnels());
+		List<Tunnel> tunnels = new ArrayList<Tunnel>();
+		for (Tunnel tunnel : getAllTunnels()) {
+			if(daRouter.getManagementAddress() != null 
+					&& daRouter.getManagementAddress().getPrefix().equals(tunnel.getLocalRouterAddress().getPrefix())) {
+				tunnels.add(tunnel);
+			}
 		}
 		return tunnels;
 	}
@@ -191,8 +195,29 @@ public class MonitoredTunnelsInventory {
 		}
 	}
 	
-	private boolean sameDARouters(DARouter router1, DARouter router2) {
-		return router1.getManagementAddress().getPrefix().equals(router2.getManagementAddress().getPrefix());
+	/**
+	 * Retrieves all monitored tunnels from given BG router.
+	 * 
+	 * @param bgRouter
+	 *            {@link BGRouter} instance
+	 * @return list of {@link Tunnel} instances
+	 */
+	public List<Tunnel> getTunnels(BGRouter bgRouter) {
+		List<Tunnel> tunnels = new ArrayList<Tunnel>();
+		for (Tunnel tunnel : getAllTunnels()) {
+			if(bgRouter.getManagementAddress() != null 
+					&& bgRouter.getManagementAddress().getPrefix().equals(tunnel.getLocalRouterAddress().getPrefix())) {
+				tunnels.add(tunnel);
+			}
+		}
+		return tunnels;
 	}
-
+	
+	protected List<Tunnel> getAllTunnels() {
+		final List<Tunnel> allTunnels = new ArrayList<Tunnel>();
+		for(DC2DCCommunication communication : this.communications) { 
+				allTunnels.addAll(communication.getConnectingTunnels());
+		}
+		return allTunnels;
+	}
 }

@@ -56,6 +56,13 @@ import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.eca.EconomicAnalyzer;
 import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
+/**
+ * Test class checking QOA component logic.
+ * 
+ *  @author <a href="mailto:jgutkow@man.poznan.pl">Jakub Gutkowski</a> (<a
+ *         href="http://psnc.pl">PSNC</a>)
+ *
+ */
 public class QoaLogicTest {
 	private DTMQosAnalyzer dtmQosAnalyzer;
 	private DTMTrafficManager trafficManager;
@@ -94,7 +101,7 @@ public class QoaLogicTest {
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
-	public void shouldSendPoroperXAndZVectors() throws InterruptedException {
+	public void shouldSendProperXAndZVectors() throws InterruptedException {
 		when(snmpWrapper.snmpWalk(any(OID.class), any(Target.class))).thenReturn(prepareSnmpwalkResponse());
 		Mockito.doCallRealMethod().when(snmpWrapper).prepareOID(any(String.class));
 		Mockito.doCallRealMethod().when(snmpWrapper).prepareTarget(any(String.class), any(String.class));

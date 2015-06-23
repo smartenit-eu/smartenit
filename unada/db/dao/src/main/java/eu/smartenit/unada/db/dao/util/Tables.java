@@ -38,6 +38,8 @@ public class Tables {
 		DAOFactory.getuNaDaConfigurationDAO().createTable();
 		
 		DAOFactory.getVideoInfoDAO().createTable();
+
+        DAOFactory.getSocialScoresDAO().createTable();
 	}
 
     public void deleteTables() {
@@ -61,6 +63,8 @@ public class Tables {
         DAOFactory.getuNaDaConfigurationDAO().deleteTable();
 
         DAOFactory.getVideoInfoDAO().deleteTable();
+
+        DAOFactory.getSocialScoresDAO().deleteTable();
     }
 
 }

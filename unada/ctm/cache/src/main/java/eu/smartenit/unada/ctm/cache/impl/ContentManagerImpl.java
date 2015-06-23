@@ -16,9 +16,12 @@
 package eu.smartenit.unada.ctm.cache.impl;
 
 import eu.smartenit.unada.ctm.cache.util.CacheConstants;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.smartenit.unada.commons.constants.UnadaConstants;
+import eu.smartenit.unada.commons.logging.UnadaLogger;
 import eu.smartenit.unada.commons.threads.UnadaThreadService;
 import eu.smartenit.unada.ctm.cache.ContentManager;
 import eu.smartenit.unada.ctm.cache.util.FileUtils;
@@ -108,6 +111,10 @@ public class ContentManagerImpl implements ContentManager {
                 String p = remotePath.split("unada")[1];
                 c.setPath(CacheConstants.cachePath + p);
 				FileUtils.deleteFile(c.getPath());
+				
+				UnadaLogger.overall.info("{}: Cache delete ({}, {})", 
+						new Object[]{UnadaConstants.UNADA_OWNER_MD5, c.getContentID(), 
+						System.currentTimeMillis() - c.getCacheDate().getTime()});
 			}
 			DAOFactory.getContentDAO().deleteBatch(contents.listIterator());
 		}
@@ -135,6 +142,10 @@ public class ContentManagerImpl implements ContentManager {
                     String p = remotePath.split("unada")[1];
                     c.setPath(CacheConstants.cachePath + p);
                     FileUtils.deleteFile(c.getPath());
+                    
+                    UnadaLogger.overall.info("{}: Cache delete ({}, {})", 
+                    		new Object[]{UnadaConstants.UNADA_OWNER_MD5, c.getContentID(), 
+    						System.currentTimeMillis() - c.getCacheDate().getTime()});
                 }
             }
         }

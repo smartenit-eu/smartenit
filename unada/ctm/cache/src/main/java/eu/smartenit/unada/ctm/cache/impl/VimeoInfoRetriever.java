@@ -16,9 +16,7 @@
 package eu.smartenit.unada.ctm.cache.impl;
 
 import com.github.axet.vget.VGet;
-import com.github.axet.vget.info.VGetParser;
 import com.github.axet.vget.info.VideoInfo;
-import com.github.axet.vget.vhs.VimeoInfo;
 import com.github.axet.vget.vhs.VimeoParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**

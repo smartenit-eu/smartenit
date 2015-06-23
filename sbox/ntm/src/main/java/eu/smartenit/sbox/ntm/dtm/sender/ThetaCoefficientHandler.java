@@ -54,8 +54,8 @@ public class ThetaCoefficientHandler {
 	public CVector normalizeCVector(CVector cVector, RVector rVector) {
 		
 		if (rVector.getThetaCollection() == null) {
-			logger.info("Theta collection in received reference vector is not set.");
-			logger.info("Compensation vector normalization will not be performed.");
+			logger.debug("Theta collection in received reference vector is not set.");
+			logger.debug("Compensation vector normalization will not be performed.");
 			return cVector;
 		}
 		

@@ -53,7 +53,7 @@ public class CounterValues {
 	}
 
 	/**
-	 * Adds value to existing entry in the structure or creates new a entry.
+	 * Adds counter value to existing entry in the structure or creates a new entry.
 	 * 
 	 * @param linkID
 	 *            identifier of the monitored link

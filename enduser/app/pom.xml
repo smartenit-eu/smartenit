@@ -6,7 +6,7 @@
 	<artifactId>sit</artifactId>
 	<version>1.0</version>
 	<packaging>pom</packaging>
-	<name>SmartenIT</name>	  
+	<name>End-user Application</name>	  
 	
 	<profiles>
 		<profile>

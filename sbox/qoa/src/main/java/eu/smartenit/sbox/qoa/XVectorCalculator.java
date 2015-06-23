@@ -28,7 +28,7 @@ import eu.smartenit.sbox.db.dto.XVector;
  * counters.
  * 
  * @author Lukasz Lopatowski
- * @version 1.0
+ * @version 3.0
  * 
  */
 public class XVectorCalculator extends VectorCalculator {

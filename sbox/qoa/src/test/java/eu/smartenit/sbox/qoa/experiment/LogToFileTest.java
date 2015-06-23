@@ -28,6 +28,7 @@ import java.util.Date;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -47,6 +48,12 @@ import eu.smartenit.sbox.qoa.MonitoredLinksInventory;
 import eu.smartenit.sbox.qoa.MonitoredTunnelsInventory;
 import eu.smartenit.sbox.qoa.MonitoringDataProcessor;
 
+/**
+ * Unit test checking traffic details log generation and store.
+ * 
+ *  @author <a href="mailto:jgutkow@man.poznan.pl">Jakub Gutkowski</a> (<a href="http://psnc.pl">PSNC</a>)
+ *
+ */
 public class LogToFileTest {
 	private static final String FILE_NAME = "packets.txt";
 	private static final String PATH = "." + File.separator;
@@ -79,7 +86,7 @@ public class LogToFileTest {
 		log.append(extendedSNMPTrafficCollector2.logToFile(AS_NUMBER, prepareValues(400, 4000)));
 	}
 	
-	@Test
+	@Test @Ignore
 	public void shouldLogToFile() throws IOException {
 		extendedSNMPTrafficCollector.notifyNewCounterValues(AS_NUMBER, prepareValues(100, 1000));
 		extendedSNMPTrafficCollector.notifyNewCounterValues(AS_NUMBER, prepareValues(200, 2000));

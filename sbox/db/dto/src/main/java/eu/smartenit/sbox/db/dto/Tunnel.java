@@ -25,7 +25,7 @@ import eu.smartenit.sbox.db.dto.util.ClassNameAndIntSequenceGenerator;
  *
  * @author George Petropoulos
  * @author Jakub Gutkowski
- * @version 1.2
+ * @version 3.1
  * 
  */
 @JsonIdentityInfo(generator=ClassNameAndIntSequenceGenerator.class, scope=Tunnel.class, property="@id")
@@ -42,6 +42,7 @@ public final class Tunnel implements Serializable{
 	public Tunnel() {
 		this.tunnelID = new EndAddressPairTunnelID();
 		this.link = new Link();
+		this.localRouterAddress = new NetworkAddressIPv4();
 	}
 
 	/**
@@ -79,6 +80,8 @@ public final class Tunnel implements Serializable{
 	private String outboundInterfaceCounterOID;
 	
 	private int ofSwitchPortNumber;
+	
+	private NetworkAddressIPv4 localRouterAddress;
 	
 	/* Extended to support packet counters*/
 	private String inboundInterfaceCounterOID_UcastPkts;
@@ -134,6 +137,14 @@ public final class Tunnel implements Serializable{
 
 	public void setOfSwitchPortNumber(int ofSwitchPortNumber) {
 		this.ofSwitchPortNumber = ofSwitchPortNumber;
+	}
+
+	public NetworkAddressIPv4 getLocalRouterAddress() {
+		return localRouterAddress;
+	}
+
+	public void setLocalRouterAddress(NetworkAddressIPv4 localRouterAddress) {
+		this.localRouterAddress = localRouterAddress;
 	}
 
 	public String getInboundInterfaceCounterOID_UcastPkts() {
@@ -192,12 +203,25 @@ public final class Tunnel implements Serializable{
 
 	@Override
 	public String toString() {
-		return "Tunnel [tunnelID=" + tunnelID 
+		return "Tunnel [tunnelID=" + tunnelID + ", link=" + link
 				+ ", physicalLocalInterfaceName=" + physicalLocalInterfaceName
 				+ ", inboundInterfaceCounterOID=" + inboundInterfaceCounterOID
 				+ ", outboundInterfaceCounterOID="
 				+ outboundInterfaceCounterOID + ", ofSwitchPortNumber="
-				+ ofSwitchPortNumber + "]";
+				+ ofSwitchPortNumber + ", localRouterAddress="
+				+ localRouterAddress
+				+ ", inboundInterfaceCounterOID_UcastPkts="
+				+ inboundInterfaceCounterOID_UcastPkts
+				+ ", outboundInterfaceCounterOID_UcastPkts="
+				+ outboundInterfaceCounterOID_UcastPkts
+				+ ", inboundInterfaceCounterOID_MulticastPkts="
+				+ inboundInterfaceCounterOID_MulticastPkts
+				+ ", outboundInterfaceCounterOID_MulticastPkts="
+				+ outboundInterfaceCounterOID_MulticastPkts
+				+ ", inboundInterfaceCounterOID_BroadcastPkts="
+				+ inboundInterfaceCounterOID_BroadcastPkts
+				+ ", outboundInterfaceCounterOID_BroadcastPkts="
+				+ outboundInterfaceCounterOID_BroadcastPkts + "]";
 	}
 	
 }

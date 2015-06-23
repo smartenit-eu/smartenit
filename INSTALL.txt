@@ -7,6 +7,7 @@ Prerequisites
 * Sqlite 3 (SBox)
 * h2 (uNaDa)
 * lighttpd (Modify "server.document-root" of /etc/lighttpd/lighttpd.conf file to be equal to $HOME directory, e.g. server.document-root = "/home/pi")
+* mitmproxy (sudo apt-get install python-pip libxml2-dev libxslt1-dev libffi-dev python-dev; sudo pip install mitmproxy)
 
 
 SBox Instructions
@@ -48,31 +49,40 @@ uNaDa Instructions
 
 From the previously extracted folder, do the following (unada/ directory):
 
-1. Copy the jar files of lib/ folder to $JETTY_HOME/lib/ext/ directory: cp lib/* $JETTY_HOME/lib/ext
-2. Copy the jetty-unadaproxy.xml of jetty-conf/ folder to $JETTY_HOME/etc/ directory: cp conf/jetty-unadaproxy.xml $JETTY_HOME/etc/jetty-unadaproxy.xml
-3. Create a new directory unada-proxy/ at $JETTY_HOME/: mkdir $JETTY_HOME/unada-proxy
-4. Copy the unada.war to $JETTY_HOME/webapps/: cp unada.war $JETTY_HOME/webapps/unada.war
-6. Copy the root.war to $JETTY_HOME/unada-proxy/: cp root.war $JETTY_HOME/unada-proxy/root.war
-7. Add a relevant iptables rule to proxy all HTTP requests to the uNaDa web application: sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp --dport 80 -j DNAT --to-destination 192.168.40.1:8888
-8a. Initialize Jetty ($JETTY_HOME/ directory): java -jar start.jar etc/jetty.xml etc/jetty-unadaproxy.xml
-8b. Or use the unada.sh script (unada/ directory):
+1. Copy vimeo_proxy.py to $HOME directory: cp vimeo_proxy.py ~/vimeo_proxy.py
+
+2. Start the mitmproxy software ($HOME/ directory): mitmdump -T --host -s vimeo_proxy.py
+
+3. Copy the unada.war to $JETTY_HOME/webapps/: cp unada.war $JETTY_HOME/webapps/unada.war
+
+4. Add a relevant iptables rule to proxy all HTTPs requests to the mitmproxy: sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp --dport 443 -j REDIRECT --to-port 8080
+
+5a. Initialize Jetty ($JETTY_HOME/ directory): java -jar start.jar etc/jetty.xml -Djetty.port=8181
+
+5b. Or use the unada.sh script (unada/ directory):
+
 -sudo chmod +x unada.sh (do this step only once)
 -./unada.sh
-9. uNaDa web interface is available at: http://192.168.40.1:8080/unada. If you are the owner of the uNaDa you must login with your Facebook credentials.
+
+6. uNaDa web interface is available at: http://192.168.40.1:8181/unada. If you are the owner of the uNaDa you must login with your Facebook credentials.
 
 Note #1: If you want to run uNaDa as a background process and hide all printing, then you could use the provided unada.sh script (given that you have configured $JETTY_HOME environment variable). 
-(a) sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp --dport 80 -j DNAT --to-destination 192.168.40.1:8888 (it is required after every reboot)
+(a) sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp --dport 443 -j REDIRECT --to-port 8080 (it is required after every reboot)
 (b) sudo chmod +x unada.sh
 (c) nohup ./unada.sh > unada.log &
-
+(d) nohup mitmdump -T --host -s vimeo_proxy.py > mitmdump.log &
+ 
 In another terminal you may check the unada process status:
 -sudo ps aux | grep unada
+
+In another terminal you may check the mimpdump process status:
+-sudo ps aux | grep mitmdump
 
 You may check the printed output:
 -nano unada.log
 
-Or you may end the process (<unada-process-id> can be retrieved from “ps aux | grep unada” command):
--sudo kill -9 <unada-process-id> 
+Or you may end any of the processes (<X-process-id> can be retrieved from “ps aux | grep X command):
+-sudo kill -9 <X-process-id> 
 
 
 End-user Instructions

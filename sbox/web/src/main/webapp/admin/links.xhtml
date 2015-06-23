@@ -161,6 +161,15 @@
 							value="#{linksBean.link.tunnelEndPrefix.prefixLength}" />
 					</div>
 				</div>
+				
+				<div class="form-group">
+					<label for="policerBandwidthLimitFactor" class="col-xs-4 control-label">Limit 
+						Factor</label>
+					<div class="col-xs-4">
+						<h:inputText type="text" class="form-control" id="policerBandwidthLimitFactor"
+							value="#{linksBean.link.policerBandwidthLimitFactor}" />
+					</div>
+				</div>
 
 				<div class="form-group row">
 					<label class="col-xs-4 control-label">Segment (left, right,
@@ -277,6 +286,10 @@
 						<h:column>
 							<f:facet name="header">Tunnel End Prefix</f:facet>
 								#{l.tunnelEndPrefix.prefix}/#{l.tunnelEndPrefix.prefixLength}
+							</h:column>
+						<h:column>
+							<f:facet name="header">Limit Factor</f:facet>
+								#{l.policerBandwidthLimitFactor}
 							</h:column>
 						<h:column>
 							<f:facet name="header">Actions</f:facet>
@@ -397,10 +410,19 @@
 															between : {
 																min : 0,
 																max : 32,
-																message : 'The Tunnel End Prefix Length must be between 0 and 32'
+																message : 'The Tunnel End Prefix Length must be between 0 and 32.'
 															},
 															integer : {
-																message : 'The Tunnel End Prefix Length must be an integer'
+																message : 'The Tunnel End Prefix Length must be an integer.'
+															}
+														}
+													},
+													'links:policerBandwidthLimitFactor' : {
+														validators : {
+															between : {
+																min : 0,
+																max : 1,
+																message : 'The Bandwidth Limit Factor must be between 0 and 1.'
 															}
 														}
 													}

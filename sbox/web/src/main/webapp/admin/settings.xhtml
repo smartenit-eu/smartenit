@@ -90,6 +90,7 @@
         					<f:selectItem id="the95thPercentile" 
         						itemLabel="the95thPercentile" itemValue="the95thPercentile" />
         					<f:selectItem id="volume" itemLabel="volume" itemValue="volume" />
+        					<f:ajax render="delayTolerantTrafficManagement" execute="@all"/>
     					</h:selectOneMenu>
 					</div>
 				</div>
@@ -121,6 +122,21 @@
 					<div class="col-xs-6">
 						<h:inputText type="text" class="form-control" id="compensationThreshold"
 							value="#{settingsBean.systemParams.compensationThreshold}" />
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="delayTolerantTrafficManagement" 
+					class="col-xs-4 control-label">Delay Tolerant Traffic Management</label>
+					<div class="col-xs-4">
+						<h:selectOneMenu id="delayTolerantTrafficManagement" class="form-control"
+							value="#{settingsBean.systemParams.delayTolerantTrafficManagement}" >
+        					<f:selectItem itemLabel="true" 
+        						itemValue="true" 
+        						itemDisabled="#{settingsBean.systemParams.chargingRule == 'volume'}"/>
+        					<f:selectItem itemLabel="false" 
+        						itemValue="false" />
+    					</h:selectOneMenu>
 					</div>
 				</div>
 

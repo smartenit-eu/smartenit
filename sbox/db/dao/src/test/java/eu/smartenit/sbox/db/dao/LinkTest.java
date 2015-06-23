@@ -81,6 +81,13 @@ public class LinkTest {
 		List<Link> list = ldao.findAll();
 		assertEquals(list.size(), 0);
 		
+		BGRouter bg = new BGRouter();
+		bg.setManagementAddress(new NetworkAddressIPv4("5.5.5.5", 0));
+		bg.setSnmpCommunity("snmp");
+		bg.setNetconfPassword("12133");
+		bg.setNetconfUsername("admin");
+		bgdao.insert(bg);
+		
 		Link l = new Link();
 		l.setLinkID(new SimpleLinkID("link", "ote"));
 		l.setPhysicalInterfaceName("name");
@@ -96,6 +103,7 @@ public class LinkTest {
 		segments.add(new Segment(2422, 42425, (float)0.9, (float)4.3));
 		c.setSegments(segments);
 		l.setCostFunction(c);
+		l.setBgRouter(bg);
 		ldao.insert(l);
 
 		list = ldao.findAll();
@@ -111,6 +119,8 @@ public class LinkTest {
 		assertEquals(stored.getCostFunction().getSegments().size(), 2);
 		assertEquals(stored.getCostFunction().getSegments().get(0).getA(), 0.5, 0.01);
 		assertEquals(stored.getCostFunction().getSegments().get(1).getB(), 4.3, 0.01);
+		assertEquals(stored.getPolicerBandwidthLimitFactor(), 1, 0.001);
+		assertEquals(stored.getBgRouter().getManagementAddress().getPrefix(), "5.5.5.5");
 		
 		l = new Link();
 		l.setLinkID(new SimpleLinkID("link2", "ote"));
@@ -121,11 +131,13 @@ public class LinkTest {
 		l.setAddress(address);
 		l.setVlan(4);
 		l.setTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.0", 16));
+		l.setPolicerBandwidthLimitFactor(0.5);
 		c = new CostFunction("cost", "subtype", "bw", "cost", null);
 		segments = new ArrayList<Segment>();
 		segments.add(new Segment(343, 5555, (float)5.5, (float)8.4));
 		c.setSegments(segments);
 		l.setCostFunction(c);
+		l.setBgRouter(bg);
 		ldao.insert(l);
 
 		list = ldao.findAll();
@@ -142,15 +154,20 @@ public class LinkTest {
 		assertEquals(l.getCostFunction().getInputUnit(), "bw");
 		assertEquals(l.getCostFunction().getSegments().size(), 1);
 		assertEquals(l.getCostFunction().getSegments().get(0).getA(), 5.5, 0.01);
+		assertEquals(l.getPolicerBandwidthLimitFactor(), 0.5, 0.001);
+		assertEquals(l.getBgRouter().getManagementAddress().getPrefix(), "5.5.5.5");
+		assertEquals(l.getBgRouter().getNetconfUsername(), "admin");
 		
 		l.setVlan(4242);
 		l.setTunnelEndPrefix(new NetworkAddressIPv4("2.2.0.0", 16));
+		l.setPolicerBandwidthLimitFactor(0.7);
 		ldao.update(l);
 		l = ldao.findById(new SimpleLinkID("link2", "ote"));
 		assertNotNull(l);
 		assertEquals(l.getVlan(), 4242);
 		assertEquals(l.getTunnelEndPrefix().getPrefix(), "2.2.0.0");
 		assertEquals(l.getTunnelEndPrefix().getPrefixLength(), 16);
+		assertEquals(l.getPolicerBandwidthLimitFactor(), 0.7, 0.001);
 		
 		ldao.deleteById(new SimpleLinkID("link2", "ote"));
 		list = ldao.findAll();
@@ -186,16 +203,10 @@ public class LinkTest {
 		List<Link> list = ldao.findAll();
 		assertEquals(list.size(), 1);
 		
-		BGRouter b = new BGRouter();
-		b.setManagementAddress(new NetworkAddressIPv4("5.5.5.5", 0));
-		b.setSnmpCommunity("snmp");
-		
-		bgdao.insert(b);
-		
 		List<BGRouter> bglist = bgdao.findAll();
 		assertEquals(bglist.size(), 1);
 		
-		b = bgdao.findById("5.5.5.5");
+		BGRouter b = bgdao.findById("5.5.5.5");
 		assertNotNull(b);
 		assertEquals(b.getManagementAddress().getPrefix(), "5.5.5.5");
 		
@@ -216,6 +227,7 @@ public class LinkTest {
 		assertEquals(list.size(), 1);
 		assertEquals(list.get(0).getBgRouter().getManagementAddress().getPrefix(), "5.5.5.5");
 		assertEquals(list.get(0).getCostFunction().getSegments().size(), 4);
+		assertEquals(list.get(0).getPolicerBandwidthLimitFactor(), 1, 0.001);
 		
 		l.getCostFunction().setSegments(new ArrayList<Segment>());
 		ldao.update(l);

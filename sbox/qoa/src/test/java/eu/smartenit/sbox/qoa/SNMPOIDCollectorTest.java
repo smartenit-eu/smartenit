@@ -101,7 +101,7 @@ public class SNMPOIDCollectorTest {
 		
 		snmpOidCollector = new SNMPOIDCollector(monitoredLinks, monitoredTunnels);
 		snmpOidCollector.collectOIDsForTunnels();
-		verify(snmpWrapper, times(3)).snmpWalk(any(OID.class), any(Target.class));
+		verify(snmpWrapper, times(6)).snmpWalk(any(OID.class), any(Target.class));
 	}
 	
 	@Test(expected=IllegalArgumentException.class)

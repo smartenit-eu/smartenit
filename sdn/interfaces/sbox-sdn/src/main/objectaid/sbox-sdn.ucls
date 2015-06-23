@@ -1,47 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<class-diagram version="1.1.6" icons="true" automaticImage="PNG" always-add-relationships="true" generalizations="true" 
-  realizations="true" associations="true" dependencies="true" nesting-relationships="true">  
+<class-diagram version="1.1.6" icons="true" automaticImage="PNG" always-add-relationships="false" generalizations="true" 
+  realizations="true" associations="true" dependencies="false" nesting-relationships="true">  
   <class id="1" language="java" name="eu.smartenit.sdn.interfaces.sboxsdn.RCVectors" project="interfaces-sboxsdn" 
     file="/interfaces-sboxsdn/src/main/java/eu/smartenit/sdn/interfaces/sboxsdn/RCVectors.java" binary="false" 
     corner="BOTTOM_RIGHT">    
-    <position height="243" width="211" x="721" y="37"/>    
+    <position height="243" width="211" x="244" y="37"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="2" language="java" name="eu.smartenit.sdn.interfaces.sboxsdn.URLs" project="interfaces-sboxsdn" 
-    file="/interfaces-sboxsdn/src/main/java/eu/smartenit/sdn/interfaces/sboxsdn/URLs.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="135" width="193" x="41" y="37"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
-      visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <class id="3" language="java" name="eu.smartenit.sdn.interfaces.sboxsdn.Serialization" project="interfaces-sboxsdn" 
-    file="/interfaces-sboxsdn/src/main/java/eu/smartenit/sdn/interfaces/sboxsdn/Serialization.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="153" width="163" x="518" y="37"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
-      visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <class id="4" language="java" name="eu.smartenit.sdn.interfaces.sboxsdn.SimpleTunnelIDToPortConverter" 
+  <class id="2" language="java" name="eu.smartenit.sdn.interfaces.sboxsdn.SimpleTunnelIDToPortConverter" 
     project="interfaces-sboxsdn" 
     file="/interfaces-sboxsdn/src/main/java/eu/smartenit/sdn/interfaces/sboxsdn/SimpleTunnelIDToPortConverter.java" 
     binary="false" corner="BOTTOM_RIGHT">    
-    <position height="117" width="204" x="274" y="37"/>    
+    <position height="117" width="204" x="728" y="37"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
+  <class id="3" language="java" name="eu.smartenit.sdn.interfaces.sboxsdn.URLs" project="interfaces-sboxsdn" 
+    file="/interfaces-sboxsdn/src/main/java/eu/smartenit/sdn/interfaces/sboxsdn/URLs.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="135" width="193" x="495" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="4" language="java" name="eu.smartenit.sdn.interfaces.sboxsdn.Serialization" project="interfaces-sboxsdn" 
+    file="/interfaces-sboxsdn/src/main/java/eu/smartenit/sdn/interfaces/sboxsdn/Serialization.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="153" width="163" x="41" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="5" language="java" name="java.io.Serializable" project="interfaces-sboxsdn" 
+    file="C:/Program Files (x86)/Java/jre7/lib/rt.jar" binary="true" corner="BOTTOM_RIGHT">    
+    <position height="53" width="103" x="244" y="320"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="false" package="false" protected="false" private="false" static="true"/>      
+      <operations public="false" package="false" protected="false" private="false" static="true"/>    
+    </display>  
+  </interface>  
+  <realization id="6">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="5"/>  
+  </realization>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
     accessors="true" visibility="true">    
     <attributes public="true" package="true" protected="true" private="true" static="true"/>    

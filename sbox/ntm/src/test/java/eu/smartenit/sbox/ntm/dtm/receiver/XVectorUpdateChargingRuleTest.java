@@ -40,6 +40,7 @@ import eu.smartenit.sbox.db.dao.TimeScheduleParametersDAO;
 import eu.smartenit.sbox.db.dto.CVector;
 import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.Link;
+import eu.smartenit.sbox.db.dto.LinkID;
 import eu.smartenit.sbox.db.dto.LocalRVector;
 import eu.smartenit.sbox.db.dto.LocalVectorValue;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
@@ -57,7 +58,7 @@ import eu.smartenit.sbox.ntm.dtm.DAOFactory;
  * for both values of {@link ChargingRule})
  * 
  * @author Lukasz Lopatowski
- * @version 3.0
+ * @version 3.1
  * 
  */
 public class XVectorUpdateChargingRuleTest {
@@ -72,6 +73,9 @@ public class XVectorUpdateChargingRuleTest {
 	private SystemControlParametersDAO scpDAO = mock(SystemControlParametersDAO.class);
 	private TimeScheduleParametersDAO tspDAO = mock(TimeScheduleParametersDAO.class);
 	
+	SimpleLinkID linkID1 = new SimpleLinkID("id1", "isp1");
+	SimpleLinkID linkID2 = new SimpleLinkID("id2", "isp1");
+
 	@Before
 	public void setup() {
     	SBox sbox1 = new SBox(new NetworkAddressIPv4("1.1.1.1", 32));
@@ -83,38 +87,36 @@ public class XVectorUpdateChargingRuleTest {
     	SBoxThreadHandler.threadService = 
     			Executors.newScheduledThreadPool(SBoxProperties.CORE_POOL_SIZE, new ThreadFactory());
     	
-		LocalVectorValue xValue1 = new LocalVectorValue(100, new SimpleLinkID("id1", "isp1"));
-		LocalVectorValue xValue2 = new LocalVectorValue(100, new SimpleLinkID("id2", "isp1"));
-		xVector1 = new XVector(Arrays.asList(xValue1, xValue2) , asNumber1);
+		LocalVectorValue xValue1 = new LocalVectorValue(100, linkID1);
+		LocalVectorValue xValue2 = new LocalVectorValue(100, linkID2);
+		xVector1 = new XVector(Arrays.asList(xValue1, xValue2), asNumber1);
 
-		LocalVectorValue xValue3 = new LocalVectorValue(200, new SimpleLinkID("id1", "isp1"));
-		LocalVectorValue xValue4 = new LocalVectorValue(50, new SimpleLinkID("id2", "isp1"));
-		xVector2 = new XVector(Arrays.asList(xValue3, xValue4) , asNumber1);
+		LocalVectorValue xValue3 = new LocalVectorValue(200, linkID1);
+		LocalVectorValue xValue4 = new LocalVectorValue(50, linkID2);
+		xVector2 = new XVector(Arrays.asList(xValue3, xValue4), asNumber1);
 
-		LocalVectorValue xValue5 = new LocalVectorValue(60, new SimpleLinkID("id1", "isp1"));
-		LocalVectorValue xValue6 = new LocalVectorValue(120, new SimpleLinkID("id2", "isp1"));
-		xVector3 = new XVector(Arrays.asList(xValue5, xValue6) , asNumber1);
+		LocalVectorValue xValue5 = new LocalVectorValue(60, linkID1);
+		LocalVectorValue xValue6 = new LocalVectorValue(120, linkID2);
+		xVector3 = new XVector(Arrays.asList(xValue5, xValue6), asNumber1);
 		
-		LocalVectorValue xValue7 = new LocalVectorValue(180, new SimpleLinkID("id1", "isp1"));
-		LocalVectorValue xValue8 = new LocalVectorValue(120, new SimpleLinkID("id2", "isp1"));
-		xVector4 = new XVector(Arrays.asList(xValue7, xValue8) , asNumber1);
+		LocalVectorValue xValue7 = new LocalVectorValue(180, linkID1);
+		LocalVectorValue xValue8 = new LocalVectorValue(120, linkID2);
+		xVector4 = new XVector(Arrays.asList(xValue7, xValue8), asNumber1);
 		
-		LocalVectorValue rValue1 = new LocalVectorValue(500, new SimpleLinkID("id1", "isp1"));
-		LocalVectorValue rValue2 = new LocalVectorValue(800, new SimpleLinkID("id2", "isp1"));
+		LocalVectorValue rValue1 = new LocalVectorValue(500, linkID1);
+		LocalVectorValue rValue2 = new LocalVectorValue(800, linkID2);
 		rVector = new LocalRVector(Arrays.asList(rValue1, rValue2), asNumber1);
 		
-		SimpleLinkID linkID1 = new SimpleLinkID("id1", "isp1");
-		SimpleLinkID linkID2 = new SimpleLinkID("id2", "isp1");
 		when(dao.findById(linkID1)).thenReturn(
-				new Link(null, null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("1.1.1.1", 24)));
+				new Link(linkID1, null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("1.1.1.1", 24)));
 		when(dao.findById(linkID2)).thenReturn(
-				new Link(null, null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("2.2.2.2", 24)));
+				new Link(linkID2, null, null, 0, null, null, null, null, null, new NetworkAddressIPv4("2.2.2.2", 24)));
 		
 		DAOFactory.setLinkDAOInstance(dao);
 	}
 	
 	@Test
-	public void shouldDistributeCVectorChargingRule95th () throws Exception {
+	public void shouldDistributeCVectorChargingRule95thNoController() throws Exception {
     	SystemControlParameters scp = new SystemControlParameters(ChargingRule.the95thPercentile, null, 0);
     	when(scpDAO.findLast()).thenReturn(scp);
     	TimeScheduleParameters tsp = new TimeScheduleParameters();
@@ -154,7 +156,69 @@ public class XVectorUpdateChargingRuleTest {
 	}
 	
 	@Test
-	public void shouldDistributeCVectorChargingRuleVolume () throws Exception {
+	public void shouldDistributeCVectorChargingRule95thWithController() throws Exception {
+		xVector1 = new XVector(Arrays.asList(new LocalVectorValue(1000, linkID1), new LocalVectorValue(1000, linkID2)), asNumber1);
+		xVector2 = new XVector(Arrays.asList(new LocalVectorValue(500, linkID1), new LocalVectorValue(1000, linkID2)), asNumber1);
+		xVector3 = new XVector(Arrays.asList(new LocalVectorValue(500, linkID1), new LocalVectorValue(1000, linkID2)), asNumber1);
+		xVector4 = new XVector(Arrays.asList(new LocalVectorValue(100, linkID1), new LocalVectorValue(5000, linkID2)), asNumber1);
+		
+		rVector = new LocalRVector(Arrays.asList(new LocalVectorValue(3000, linkID1), new LocalVectorValue(5000, linkID2)), asNumber1);
+		
+		SystemControlParameters scp = new SystemControlParameters(ChargingRule.the95thPercentile, null, 0.2);
+    	when(scpDAO.findLast()).thenReturn(scp);
+    	TimeScheduleParameters tsp = new TimeScheduleParameters();
+    	tsp.setSamplingPeriod(18);
+    	tsp.setReportPeriodDTM(3);
+    	tsp.setCompensationPeriod(90);
+    	when(tspDAO.findLast()).thenReturn(tsp);
+    	
+    	DAOFactory.setSCPDAOInstance(scpDAO);
+    	DAOFactory.setTSPDAOInstance(tspDAO);
+		
+		DTMTrafficManager manager = new DTMTrafficManager();
+		manager.setSBoxContainer(container);
+		manager.initialize();
+		manager.updateRVector(rVector);
+		manager.updateXVector(xVector1);
+		Thread.sleep(100);
+		manager.updateXVector(xVector2);
+		Thread.sleep(100);
+		manager.updateXVector(xVector3);
+		Thread.sleep(100);
+		manager.updateXVector(xVector4);
+		
+		CVectorUpdateController controller = CVectorUpdateController.getInstance();
+		controller.updateLinksWithRVectorAchieved(asNumber1, Arrays.asList((LinkID)linkID2));
+		Thread.sleep(100);
+		manager.updateXVector(xVector1);
+		Thread.sleep(100);
+		manager.updateXVector(xVector1);
+		Thread.sleep(100);
+		manager.updateXVector(xVector1);
+		controller.updateLinksWithRVectorAchieved(asNumber1, Arrays.asList((LinkID)linkID1));
+		Thread.sleep(100);
+		manager.updateXVector(xVector1);
+		Thread.sleep(100);
+		manager.updateXVector(xVector1);
+		
+		Thread.sleep(1000);
+		ArgumentCaptor<CVector> cVectorArgument = ArgumentCaptor.forClass(CVector.class);
+		verify(client, times(5)).send(any(String.class), anyInt(), cVectorArgument.capture());
+		reset(client);
+		assertEquals(-250, cVectorArgument.getAllValues().get(0).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
+		assertEquals(250, cVectorArgument.getAllValues().get(0).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
+		assertEquals(1687, cVectorArgument.getAllValues().get(1).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
+		assertEquals(-1687, cVectorArgument.getAllValues().get(1).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
+		assertEquals(-800000, cVectorArgument.getAllValues().get(2).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
+		assertEquals(800000, cVectorArgument.getAllValues().get(2).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
+		assertEquals(800000, cVectorArgument.getAllValues().get(3).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
+		assertEquals(-800000, cVectorArgument.getAllValues().get(3).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
+		assertEquals(-800000, cVectorArgument.getAllValues().get(4).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.1", 24)));
+		assertEquals(800000, cVectorArgument.getAllValues().get(4).getVectorValueForTunnelEndPrefix(new NetworkAddressIPv4("2.2.2.2", 24)));
+	}
+	
+	@Test
+	public void shouldDistributeCVectorChargingRuleVolume() throws Exception {
     	SystemControlParameters scp = new SystemControlParameters(ChargingRule.volume, null, 0);
     	when(scpDAO.findLast()).thenReturn(scp);
     	TimeScheduleParameters tsp = new TimeScheduleParameters();

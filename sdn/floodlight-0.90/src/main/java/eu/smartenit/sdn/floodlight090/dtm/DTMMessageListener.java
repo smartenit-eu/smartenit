@@ -69,6 +69,12 @@ public class DTMMessageListener implements IOFMessageListener {
     @Override
     public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
         logger.debug("receive(IOFSwitch,OFMessage,FloodlightContext) begin");
+        
+        if (DTM.getInstance().getCompensationVector()==null){
+            logger.debug("Compensation vector is not set yet");
+            return Command.STOP;
+        }
+        
         DTM.getInstance().setOFPacketIn((OFPacketIn) msg);
         
         if (DTM.getInstance().getConfigData() == null) {

@@ -15,7 +15,10 @@
  */
 package eu.smartenit.unada.tpm;
 
+import eu.smartenit.unada.commons.constants.UnadaConstants;
+import eu.smartenit.unada.commons.logging.UnadaLogger;
 import eu.smartenit.unada.db.dto.UnadaInfo;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,6 +36,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -189,6 +193,11 @@ public class TopologyProximityMonitorImpl implements TopologyProximityMonitor {
         for (int i = 0; i < nulls; i++) {
             asvector.add(null);
         }
+        
+        String ases = asvector == null ? "[]" : asvector.toString();
+        UnadaLogger.overall.debug("{}: Traceroute ({}, {})", 
+        		new Object[]{UnadaConstants.UNADA_OWNER_MD5, 
+        		info.getInetAddress().getHostAddress(), ases});
         return asvector;
     }
 

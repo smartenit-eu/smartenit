@@ -137,6 +137,15 @@
 							value="#{tunnelsBean.tunnel.ofSwitchPortNumber}" />
 					</div>
 				</div>
+				
+				<div class="form-group">
+					<label for="localRouterAddress" class="col-xs-4 control-label">Local 
+						Router Address</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control" id="localRouterAddress"
+							value="#{tunnelsBean.tunnel.localRouterAddress.prefix}"/>
+					</div>
+				</div>
 
 				<div class="form-group">
 					<label for="bgRouters" class="col-xs-4 control-label">Link</label>
@@ -165,7 +174,7 @@
 					<h:dataTable value="#{tunnelsBean.tunnelsList}" var="t"
 						class="table table-striped">
 						<h:column>
-							<f:facet name="header">Tunnel Name</f:facet>
+							<f:facet name="header">Name</f:facet>
 								#{t.tunnelID.tunnelName}
 							</h:column>
 						<h:column>
@@ -183,6 +192,10 @@
 						<h:column>
 							<f:facet name="header">Link ID</f:facet>
 								#{t.link.linkID.localLinkID}, #{t.link.linkID.localIspName}
+							</h:column>
+						<h:column>
+							<f:facet name="header">Router Address</f:facet>
+								#{t.localRouterAddress.prefix}
 							</h:column>
 						<h:column>
 							<f:facet name="header">Actions</f:facet>
@@ -278,6 +291,16 @@
 														validators : {
 															notEmpty : {
 																message : 'The Link must not be empty.'
+															}
+														}
+													},
+													'tunnels:localRouterAddress' : {
+														validators : {
+															ip : {
+																message : 'The local router address is not an IPv4 address.'
+															},
+															notEmpty : {
+																message : 'The local router address must not be empty.'
 															}
 														}
 													}												

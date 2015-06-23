@@ -22,7 +22,7 @@
   <parent>
     <groupId>eu.smartenit.sbox.interfaces.intersbox</groupId>
     <artifactId>inter-sbox</artifactId>
-    <version>3.0</version>
+    <version>3.1</version>
   </parent>
 
   <groupId>eu.smartenit.sbox.interfaces.intersbox.client</groupId>

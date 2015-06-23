@@ -98,6 +98,8 @@ public class SBox {
 			SBoxProperties.INTER_SBOX_PORT = config.getInt("inter.sbox.port");
 			SBoxProperties.MAX_FETCHING_TIME = config.getLong("max.fetching.time");
 			
+			SBoxProperties.RESET_COMP_VECTOR_AFTER_SAMPLE = config.getBoolean("reset.comp.vector.after.sample");
+			
 			SBoxProperties.LOG_TRAFFIC_DETAILS = config.getBoolean("log.traffic.details");
 			SBoxProperties.TRAFFIC_DETAILS_FILE_PATH = config.getString("traffic.details.file.path");
 			SBoxProperties.TRAFFIC_DETAILS_FILE_NAME = config.getString("traffic.details.file.name");
@@ -120,6 +122,7 @@ public class SBox {
 				+ "db.file: " + SBoxProperties.DB_FILE + "\n"
 				+ "inter.sbox.port: " + SBoxProperties.INTER_SBOX_PORT + "\n"
 				+ "max.fetching.time: " + SBoxProperties.MAX_FETCHING_TIME + "\n"
+				+ "reset.comp.vector.after.sample: " + SBoxProperties.RESET_COMP_VECTOR_AFTER_SAMPLE + "\n"
 				+ "log.traffic.details: " + SBoxProperties.LOG_TRAFFIC_DETAILS + "\n"
 				+ "traffic.details.file.path: " + SBoxProperties.TRAFFIC_DETAILS_FILE_PATH + "\n"
 				+ "traffic.details.file.name: " + SBoxProperties.TRAFFIC_DETAILS_FILE_NAME + "\n"

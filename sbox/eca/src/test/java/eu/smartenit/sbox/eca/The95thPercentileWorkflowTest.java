@@ -16,6 +16,7 @@
 package eu.smartenit.sbox.eca;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -44,6 +45,11 @@ import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
+/**
+ * Includes test method for workflow triggered by the {@link EconomicAnalyzer}
+ * after receiving updated link and tunnel traffic vectors in the case the
+ * {@link ChargingRule}<code>.the95thPercentile</code> is enabled.
+ */
 public class The95thPercentileWorkflowTest {
 
 	private DTMTrafficManager dtm = mock(DTMTrafficManager.class);
@@ -94,6 +100,7 @@ public class The95thPercentileWorkflowTest {
 		zVector4 = new ZVector(Arrays.asList(new LocalVectorValue(900, id1), new LocalVectorValue(8, id2)), 1);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCalculateRefVectorAfterAccountingPeriod() {
 		EconomicAnalyzer eca = new EconomicAnalyzer(dtm);
@@ -105,6 +112,7 @@ public class The95thPercentileWorkflowTest {
 		eca.updateXZVectors(xVector4, Arrays.asList(zVector4));
 		
 		verify(dtm, times(3)).updateRVector(any(LocalRVector.class));
+		verify(dtm, times(0)).updateLinksWithRVectorAchieved(anyInt(), any(List.class));
 	}
 	
 }

@@ -20,12 +20,16 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.types.Post;
 import com.restfb.types.User;
+
+import eu.smartenit.unada.commons.constants.UnadaConstants;
+import eu.smartenit.unada.commons.logging.UnadaLogger;
 import eu.smartenit.unada.db.dao.impl.FeedItemDAO;
 import eu.smartenit.unada.db.dao.impl.FriendDAO;
 import eu.smartenit.unada.db.dao.impl.TrustedUserDAO;
 import eu.smartenit.unada.db.dao.impl.VideoInfoDAO;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.*;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;

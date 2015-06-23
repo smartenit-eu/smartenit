@@ -108,6 +108,25 @@
 							value="#{routersBean.bgRouter.snmpCommunity}" />
 					</div>
 				</div>
+								
+				<div class="form-group">
+					<label for="netconfUsername" class="col-xs-4 control-label">NetConf Username</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control"
+							id="netconfUsername" 
+							value="#{routersBean.bgRouter.netconfUsername}" />
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="netconfPassword" class="col-xs-4 control-label">NetConf Password</label>
+					<div class="col-xs-6">
+						<h:inputText type="text" class="form-control"
+							id="netconfPassword" 
+							value="#{routersBean.bgRouter.netconfPassword}" />
+					</div>
+				</div>
+				
 
 				<div class="form-group">
 					<div class="btn-group col-xs-6 col-xs-offset-4">
@@ -129,6 +148,14 @@
 						<h:column>
 							<f:facet name="header">SNMP Community</f:facet>
 								#{bg.snmpCommunity}
+							</h:column>
+						<h:column>
+							<f:facet name="header">Username</f:facet>
+								#{bg.netconfUsername}
+							</h:column>
+						<h:column>
+							<f:facet name="header">Password</f:facet>
+								#{bg.netconfPassword}
 							</h:column>
 						<h:column>
 							<f:facet name="header">Actions</f:facet>
@@ -286,6 +313,20 @@
 														validators : {
 															notEmpty : {
 																message : 'The SNMP community must not be empty.'
+															}
+														}
+													},
+													'bgrouters:netconfUsername' : {
+														validators : {
+															notEmpty : {
+																message : 'The NetConf username must not be empty.'
+															}
+														}
+													},
+													'bgrouters:netconfPassword' : {
+														validators : {
+															notEmpty : {
+																message : 'The NetConf password must not be empty.'
 															}
 														}
 													}

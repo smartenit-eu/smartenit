@@ -59,7 +59,7 @@ public final class SocialAnalyzer {
      */
     public List<Content> predicting() {
 
-        SortedSet<ContentItem> contentItems = new TreeSet<ContentItem>();
+        List<Content> sortedContent = new ArrayList<Content>();
 
         List<FeedItem> feedItemList = getFeedItems();
         Set<Long> contentIDSet = createContentIDSet(feedItemList);
@@ -118,20 +118,30 @@ public final class SocialAnalyzer {
 
             logger.debug("Calculating final score for content ID " + contentID);
             double score = calculateScore(alpha, delta, eta, phi, gamma);
-            logger.debug("Score for conent ID " + contentID + ": " + score);
 
-            contentItems.add(new ContentItem(contentID, score));
+            SocialScores s = new SocialScores(contentID, calcFAge(alpha), calcFDistance(delta),
+                    calcFHistory(eta), calcFPouplarity(phi), calcFSocial(gamma));
+            try {
+                DAOFactory.getSocialScoresDAO().insert(s);
+                logger.debug("Inserted score {}", s);
+            } catch (Exception e) {
+                logger.error("Error inserting social score {}", s);
+            }
+
+            Content content = new Content();
+            content.setContentID(contentID);
+            content.setCacheScore(score);
+            sortedContent.add(content);
             logger.info("Done.");
         }
 
         logger.info("Sorting content by prediction score...");
-        List<Content> sortedContent = new ArrayList<Content>();
-        for(ContentItem item: contentItems){
-            Content content = new Content();
-            content.setContentID(item.getContentID());
-            content.setCacheScore(item.getScore());
-            sortedContent.add(content);
-        }
+        Collections.sort(sortedContent, new Comparator<Content>() {
+            @Override
+            public int compare(Content o1, Content o2) {
+                return o1.getCacheScore() < o2.getCacheScore() ? 1 : -1;
+            }
+        });
         logger.info("Done.");
         return sortedContent;
     }
@@ -334,9 +344,12 @@ public final class SocialAnalyzer {
         double fPopularity = calcFPouplarity(phi);
         double fSocial = calcFSocial(gamma);
 
-        return calculateFinalScore(fAge, fDistance, fHistory, fPopularity, fSocial);
-        //double pRetweet = transformToProbability(score);
+        double score = calculateFinalScore(fAge, fDistance, fHistory, fPopularity, fSocial);
+        double p = transformToProbability(score);
+        logger.debug("score, probability = {}, {}", score, p);
         //boolean predicting = pRetweet >= 0.5;
+
+        return p;
     }
 
     /**
@@ -372,7 +385,7 @@ public final class SocialAnalyzer {
      * @return Returns the history component.
      */
     private double calcFHistory(double eta) {
-        if(eta >= 500) {
+        if(eta < 500) {
             return 0.1377 * Math.log(0.2952 + 0.5 * eta) + 0.1683;
         } else {
             return 0.99;

@@ -31,7 +31,7 @@ import eu.smartenit.sbox.db.dto.SystemControlParameters;
  * The abstract SystemControlParametersDAO class, including all SQL queries.
  *
  * @author George Petropoulos
- * @version 3.0
+ * @version 3.1
  * 
  */
 public abstract class AbstractSystemControlParametersDAO {
@@ -40,7 +40,8 @@ public abstract class AbstractSystemControlParametersDAO {
 			+ "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
 			+ "chargingRule TEXT, "
 			+ "operationModeSDN TEXT, "
-			+ "compensationThreshold REAL)")
+			+ "compensationThreshold REAL, "
+			+ "delayTolerantTrafficManagement BOOLEAN)")
 	public abstract void createTable();
 
 	
@@ -49,27 +50,29 @@ public abstract class AbstractSystemControlParametersDAO {
 	
 	
 	@SqlUpdate("INSERT INTO SystemControlParameters "
-			+ "(chargingRule, operationModeSDN, compensationThreshold) "
-			+ "VALUES (:chargingRule, :operationModeSDN , :compensationThreshold)")
+			+ "(chargingRule, operationModeSDN, compensationThreshold, delayTolerantTrafficManagement) "
+			+ "VALUES (:chargingRule, :operationModeSDN, :compensationThreshold, "
+			+ ":delayTolerantTrafficManagement)")
 	@GetGeneratedKeys
 	public abstract long insert(@BindBean SystemControlParameters s);
 
 	
-	@SqlQuery("SELECT chargingRule, operationModeSDN, compensationThreshold  "
-			+ "from SystemControlParameters")
+	@SqlQuery("SELECT chargingRule, operationModeSDN, compensationThreshold, delayTolerantTrafficManagement "
+			+ "FROM SystemControlParameters")
 	@Mapper(SystemControlParametersMapper.class)
 	public abstract List<SystemControlParameters> findAll();
 
 	
-	@SqlQuery("SELECT chargingRule, operationModeSDN, compensationThreshold "
-			+ "from SystemControlParameters where ID =:id")
+	@SqlQuery("SELECT chargingRule, operationModeSDN, compensationThreshold, delayTolerantTrafficManagement "
+			+ "FROM SystemControlParameters where ID =:id")
 	@Mapper(SystemControlParametersMapper.class)
 	public abstract SystemControlParameters findById(@Bind("id") long id);
 
 	
 	@SqlUpdate("UPDATE SystemControlParameters SET chargingRule = :chargingRule, "
 			+ "operationModeSDN = :operationModeSDN, "
-			+ "compensationThreshold = :compensationThreshold "
+			+ "compensationThreshold = :compensationThreshold,"
+			+ "delayTolerantTrafficManagement = :delayTolerantTrafficManagement "
 			+ "WHERE ID = :id")
 	public abstract void update(@Bind("id") long id, @BindBean SystemControlParameters s);
 

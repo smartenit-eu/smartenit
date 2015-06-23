@@ -22,8 +22,6 @@ package eu.smartenit.sbox.eca;
  *
  */
 class DInterval {
-	
-	
 
 	/**
 	 * The lower bound of the interval
@@ -36,11 +34,13 @@ class DInterval {
 	private final long upperBound;
 	
 	/**
-	 * Default constructor for DInterval
+	 * The constructor with arguments.
 	 * 
-	 * @param lowerBound The lower bound of the interval
-	 * @param upperBound The upper bound of the interval
-	 */	
+	 * @param lowerBound
+	 *            The lower bound of the interval
+	 * @param upperBound
+	 *            The upper bound of the interval
+	 */
 	public DInterval(long lowerBound, long upperBound) {
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;		
@@ -63,10 +63,13 @@ class DInterval {
 	}
 	
 	/**
-	 * Returns true if the parameter value passed as an argument is contained in the two bounds (including boundaries)
+	 * Returns true if the parameter value passed as an argument is contained in
+	 * the two bounds (including boundaries)
 	 * 
-	 * @param x The parameter to be checked for
-	 * @return true if the parameter value passed as an argument is contained in the two bounds (including boundaries)
+	 * @param x
+	 *            The parameter to be checked for
+	 * @return true if the parameter value passed as an argument is contained in
+	 *         the two bounds (including boundaries)
 	 */
 	public boolean contains(long x) {
 		if(x >= lowerBound && x <= upperBound) {
@@ -75,12 +78,10 @@ class DInterval {
 		return false;
 	}
 
-
 	@Override
 	public String toString() {
 		return "DInterval [lowerBound=" + lowerBound + ", upperBound=" + upperBound + "]";
 	}
-
 
 	@Override
 	public int hashCode() {
@@ -90,7 +91,6 @@ class DInterval {
 		result = prime * result + (int) (upperBound ^ (upperBound >>> 32));
 		return result;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -107,7 +107,5 @@ class DInterval {
 			return false;
 		return true;
 	}
-	
-	
 	
 }

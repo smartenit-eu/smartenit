@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>eu.smartenit.sbox</groupId>
 		<artifactId>sbox</artifactId>
-		<version>3.0</version>
+		<version>3.1</version>
 	</parent>
 
 	<groupId>eu.smartenit.sbox.ntm</groupId>
@@ -76,6 +76,14 @@
       		<groupId>org.mockito</groupId>
       		<artifactId>mockito-core</artifactId>
     	</dependency>
+    	
+    	<dependency>
+        	<groupId>juniper</groupId>
+        	<artifactId>netconf-java</artifactId>
+        	<scope>system</scope>
+        	<version>1.0.1</version>
+        	<systemPath>${basedir}/src/lib/Netconf.jar</systemPath>
+      	</dependency>
 	</dependencies>
  		
 </project>

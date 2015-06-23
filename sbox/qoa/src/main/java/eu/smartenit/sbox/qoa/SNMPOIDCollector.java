@@ -70,7 +70,7 @@ public class SNMPOIDCollector {
 
 	/**
 	 * Triggers OID information collection for all tunnel counters from all DA
-	 * routers.
+	 * and BG routers.
 	 * 
 	 * @throws IOException
 	 */
@@ -78,6 +78,12 @@ public class SNMPOIDCollector {
 		for (DARouter daRouter : tunnels.getDARouters()) {
 			logger.debug("Collecting tunnel OIDs from DA router {} ...", daRouter.getManagementAddress().getPrefix());
 			setOIDsForTunnels(daRouter);
+			logger.debug("... done.");
+		}
+		
+		for (BGRouter bgRouter : links.getBGRouters()) {
+			logger.debug("Collecting tunnel OIDs from BG router {} ...", bgRouter.getManagementAddress().getPrefix());
+			setOIDsForTunnels(bgRouter);
 			logger.debug("... done.");
 		}
 	}
@@ -96,6 +102,14 @@ public class SNMPOIDCollector {
 			link.setInboundInterfaceCounterOID(getInterfaceCounterOID(OIDValues.IF_HC_IN_OCTETS_OID.getValue(), link.getPhysicalInterfaceName(), interfaces));
 			link.setOutboundInterfaceCounterOID(getInterfaceCounterOID(OIDValues.IF_HC_OUT_OCTETS_OID.getValue(), link.getPhysicalInterfaceName(), interfaces));
 		}		
+	}
+	
+	protected void setOIDsForTunnels(BGRouter bgRouter) throws IOException {
+		final List<String> interfaces = getIntrefacesForBGRouter(bgRouter);
+		for (Tunnel tunnel : tunnels.getTunnels(bgRouter)) {
+			tunnel.setInboundInterfaceCounterOID(getInterfaceCounterOID(OIDValues.IF_HC_IN_OCTETS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
+			tunnel.setOutboundInterfaceCounterOID(getInterfaceCounterOID(OIDValues.IF_HC_OUT_OCTETS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
+		}
 	}
 	
 	protected List<String> getIntrefacesForBGRouter(BGRouter bgRouter) throws IOException {

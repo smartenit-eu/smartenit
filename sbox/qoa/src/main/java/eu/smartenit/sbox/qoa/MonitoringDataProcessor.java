@@ -29,7 +29,7 @@ import eu.smartenit.sbox.db.dto.ZVector;
  * 
  * @author Jakub Gutkowski
  * @author Lukasz Lopatowski
- * @version 1.0
+ * @version 3.0
  * 
  */
 public class MonitoringDataProcessor {

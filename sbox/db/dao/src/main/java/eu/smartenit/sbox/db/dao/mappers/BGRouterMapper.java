@@ -28,7 +28,7 @@ import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
  * The BGRouterMapper class.
  * 
  * @authors George Petropoulos
- * @version 1.0
+ * @version 3.1
  * 
  */
 public class BGRouterMapper implements ResultSetMapper<BGRouter> {
@@ -49,7 +49,10 @@ public class BGRouterMapper implements ResultSetMapper<BGRouter> {
 			throws SQLException {
 		NetworkAddressIPv4 managementAddress = new NetworkAddressIPv4(
 				r.getString("managementAddressPrefix"), 0);
-		return new BGRouter(managementAddress, r.getString("snmpCommunity"),
+		BGRouter bg = new BGRouter(managementAddress, r.getString("snmpCommunity"),
 				null);
+		bg.setNetconfUsername(r.getString("netconfUsername"));
+		bg.setNetconfPassword(r.getString("netconfPassword"));
+		return bg;
 	}
 }

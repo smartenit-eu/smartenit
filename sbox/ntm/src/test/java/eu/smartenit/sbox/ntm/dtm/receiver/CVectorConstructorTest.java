@@ -34,8 +34,8 @@ import eu.smartenit.sbox.ntm.dtm.receiver.CVectorConstructor;
 import eu.smartenit.sbox.ntm.dtm.receiver.CVectorValuesCalculator;
 
 /**
- * Includes test methods for compensation vector calculation logic implemented
- * in {@link CVectorValuesCalculator} class.
+ * Includes test methods for compensation vector construction from values
+ * calculated by {@link CVectorValuesCalculator}.
  * 
  * @author Lukasz Lopatowski
  * @version 3.0

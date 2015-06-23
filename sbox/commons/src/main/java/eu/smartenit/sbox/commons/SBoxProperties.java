@@ -16,38 +16,44 @@
 package eu.smartenit.sbox.commons;
 
 /**
- * The global SBox properties. 
- *
+ * The global SBox properties.
+ * 
  * @author George Petropoulos
  * @version 1.2
  * 
  */
 public class SBoxProperties {
-	
+
 	public static String PROPERTIES_FILE_NAME = "./sbox.properties";
-		
+
 	public static String DB_FILE = "smartenit.db";
-	
+
 	public static int CORE_POOL_SIZE = 10;
 
 	public static long CONNECTION_TIMEOUT = 1500;
-	
-	public static int CONNECTION_RETRIES = 2; 
-	
+
+	public static int CONNECTION_RETRIES = 2;
+
 	public static long MAX_FETCHING_TIME = 2000;
-	
+
 	public static int INTER_SBOX_PORT = 9999;
-	
+
 	// Configuration of QoS Analyzer feature of periodical logging of incoming
 	// traffic details (no. of bytes and packets) to file.
 	public static boolean LOG_TRAFFIC_DETAILS = false;
-	
+
 	public static String TRAFFIC_DETAILS_FILE_PATH = "./";
-	
+
 	public static String TRAFFIC_DETAILS_FILE_NAME = "traffic.log";
-	
+
 	// Configuration of Network Traffic Manager
-	
-	// Points to file with default reference vector (serialized to JSON) to be read by NTM during initialization (optional) 
+
+	// In the case the 95th percentile billing rule is enabled, indicates
+	// whether the compensation vector should be set to zero after each 5
+	// minutes (300 seconds) interval
+	public static Boolean RESET_COMP_VECTOR_AFTER_SAMPLE = true;
+
+	// Points to file with default reference vector (serialized to JSON) to be
+	// read by NTM during initialization (optional)
 	public static String DEFAULT_REF_VECTOR_FILE = "./rvector.json";
 }

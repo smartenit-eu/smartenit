@@ -29,7 +29,7 @@ import eu.smartenit.sbox.db.dto.SystemControlParameters;
  * The SystemControlParametersMapper class.
  * 
  * @authors George Petropoulos
- * @version 3.0
+ * @version 3.1
  * 
  */
 public class SystemControlParametersMapper implements
@@ -53,6 +53,7 @@ public class SystemControlParametersMapper implements
 		s.setChargingRule(ChargingRule.valueOf(r.getString("chargingRule")));
 		s.setCompensationThreshold(r.getDouble("compensationThreshold"));
 		s.setOperationModeSDN(OperationModeSDN.valueOf(r.getString("operationModeSDN")));
+		s.setDelayTolerantTrafficManagement(r.getBoolean("delayTolerantTrafficManagement"));
 		return s;
 	}
 }

@@ -28,6 +28,17 @@ import java.io.IOException;
  * 
  */
 public class FileManager {
+	
+	/**
+	 * Method used to update file with new record.
+	 * 
+	 * @param path
+	 * 		path to file
+	 * @param fileName
+	 * 		file name
+	 * @param newRecord
+	 * 		new record
+	 */
 	public void updateFile(String path, String fileName, String newRecord) {
 		File file = new File(path + fileName);
 		try {

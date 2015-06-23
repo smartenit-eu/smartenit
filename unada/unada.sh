@@ -8,6 +8,6 @@ if [ -z "$JETTY_HOME" ]; then
 fi  
 
 cd $JETTY_HOME
-java -jar start.jar etc/jetty.xml etc/jetty-unadaproxy.xml
+java -jar start.jar etc/jetty.xml -Djetty.port=8181
 
 echo "Finalizing uNaDa.."

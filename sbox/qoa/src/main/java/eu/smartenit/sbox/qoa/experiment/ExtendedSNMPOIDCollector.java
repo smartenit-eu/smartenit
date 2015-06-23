@@ -85,6 +85,23 @@ public class ExtendedSNMPOIDCollector extends SNMPOIDCollector {
 			link.setOutboundInterfaceCounterOID_MulticastPkts(getInterfaceCounterOID(OIDValues.IF_HC_OUT_MULTICAST_PKTS_OID.getValue(), link.getPhysicalInterfaceName(), interfaces));
 			link.setInboundInterfaceCounterOID_BroadcastPkts(getInterfaceCounterOID(OIDValues.IF_HC_IN_BROADCAST_PKTS_OID.getValue(), link.getPhysicalInterfaceName(), interfaces));
 			link.setOutboundInterfaceCounterOID_BroadcastPkts(getInterfaceCounterOID(OIDValues.IF_HC_OUT_BROADCAST_PKTS_OID.getValue(), link.getPhysicalInterfaceName(), interfaces));
-		}		
+		}	
+	}
+	
+	@Override
+	protected void setOIDsForTunnels(BGRouter bgRouter) throws IOException {
+		logger.info("Setting OIDs for tunnels ...");
+		final List<String> interfaces = getIntrefacesForBGRouter(bgRouter);
+		for (Tunnel tunnel : tunnels.getTunnels(bgRouter)) {
+			tunnel.setInboundInterfaceCounterOID(getInterfaceCounterOID(OIDValues.IF_HC_IN_OCTETS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
+			tunnel.setOutboundInterfaceCounterOID(getInterfaceCounterOID(OIDValues.IF_HC_OUT_OCTETS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
+			/* Extended to support packet counters*/
+			tunnel.setInboundInterfaceCounterOID_UcastPkts(getInterfaceCounterOID(OIDValues.IF_HC_IN_UCAST_PKTS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
+			tunnel.setOutboundInterfaceCounterOID_UcastPkts(getInterfaceCounterOID(OIDValues.IF_HC_OUT_UCAST_PKTS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
+			tunnel.setInboundInterfaceCounterOID_MulticastPkts(getInterfaceCounterOID(OIDValues.IF_HC_IN_MULTICAST_PKTS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
+			tunnel.setOutboundInterfaceCounterOID_MulticastPkts(getInterfaceCounterOID(OIDValues.IF_HC_OUT_MULTICAST_PKTS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
+			tunnel.setInboundInterfaceCounterOID_BroadcastPkts(getInterfaceCounterOID(OIDValues.IF_HC_IN_BROADCAST_PKTS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
+			tunnel.setOutboundInterfaceCounterOID_BroadcastPkts(getInterfaceCounterOID(OIDValues.IF_HC_OUT_BROADCAST_PKTS_OID.getValue(), tunnel.getPhysicalLocalInterfaceName(), interfaces));
+		}
 	}
 }

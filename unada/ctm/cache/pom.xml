@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>eu.smartenit.unada.ctm</groupId>
 		<artifactId>ctm</artifactId>
-		<version>3.0</version>
+		<version>3.1</version>
 	</parent>
 
 	<groupId>eu.smartenit.unada.ctm.cache</groupId>
@@ -42,6 +42,14 @@
     </repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>eu.smartenit.unada.db.dto</groupId>
 			<artifactId>dto</artifactId>
@@ -63,11 +71,24 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>eu.smartenit.unada.sm</groupId>
+            <artifactId>sm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.smartenit.unada.sa</groupId>
+            <artifactId>sa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.axet</groupId>
             <artifactId>vget</artifactId>
             <version>1.1.23</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

@@ -36,7 +36,7 @@ import eu.smartenit.sbox.db.dto.ZVector;
  * of those counters.
  * 
  * @author Lukasz Lopatowski
- * @version 1.0
+ * @version 3.0
  * 
  */
 public class ZVectorCalculator extends VectorCalculator {

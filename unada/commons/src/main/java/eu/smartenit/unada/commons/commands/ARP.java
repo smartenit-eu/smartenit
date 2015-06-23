@@ -35,7 +35,7 @@ public class ARP {
 	
 	private static ARP arpInstance = new ARP();
 	private static final Logger logger = LoggerFactory.getLogger(ARP.class);
-	private static String arpCommand = "arp ";
+	private static String arpCommand = "/usr/sbin/arp ";
 	
 	/**
 	 * The method that returns the arp instance.
@@ -93,6 +93,7 @@ public class ARP {
 		} catch (Exception e) {
 			logger.error("Error while executing arp command: " + e.getMessage());
 		}
+		
 		
 		return macAddress;
 	}

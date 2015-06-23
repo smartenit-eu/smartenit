@@ -44,6 +44,11 @@ import eu.smartenit.sbox.db.dto.XVector;
 import eu.smartenit.sbox.db.dto.ZVector;
 import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
 
+/**
+ * Includes test method for workflow triggered by the {@link EconomicAnalyzer}
+ * after receiving updated link and tunnel traffic vectors in the case the
+ * {@link ChargingRule}<code>.volume</code> is enabled.
+ */
 public class TotalVolumeWorkflowTest {
 	private DTMTrafficManager dtm = mock(DTMTrafficManager.class);
 	

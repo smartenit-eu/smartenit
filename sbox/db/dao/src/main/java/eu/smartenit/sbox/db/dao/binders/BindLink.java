@@ -60,6 +60,7 @@ public @interface BindLink {
 					q.bind("bgRouterAddress", arg.getBgRouter().getManagementAddress().getPrefix());
 					q.bind("tunnelEndPrefix", arg.getTunnelEndPrefix().getPrefix());
 					q.bind("tunnelEndPrefixLength", arg.getTunnelEndPrefix().getPrefixLength());
+					q.bind("policerBandwidthLimitFactor", arg.getPolicerBandwidthLimitFactor());
 				}
 			};
 		}

@@ -48,7 +48,16 @@ public class Flows {
     private Flows() {
         logger.debug("Flows() begin/end");
     }
-
+    
+    /**
+     * Adds flow for given switch, outgoing port, and DC switch port. Constructs {@link OFMatch} and instructs switch 
+     * to send all packets from the given interface to dcPort interface
+     * @param sw
+     * @param floodlightProvider
+     * @param cntx
+     * @param dcPort
+     * @param inetPort 
+     */
     public static void init(IOFSwitch sw, IFloodlightProviderService floodlightProvider, FloodlightContext cntx, short dcPort, short inetPort) {
         logger.debug("init(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) begin");
 
@@ -60,7 +69,7 @@ public class Flows {
         match.setInputPort(inetPort);
         match.setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_IN_PORT);
         flowMod.setMatch(match);
-        
+
         flowMod.setCommand(OFFlowMod.OFPFC_ADD);
         flowMod.setIdleTimeout((short) 0);
         flowMod.setHardTimeout((short) 0);
@@ -110,7 +119,7 @@ public class Flows {
         flowMod.setMatch(match);
 
         flowMod.setCommand(OFFlowMod.OFPFC_ADD);
-        flowMod.setIdleTimeout((short) 5);
+        flowMod.setIdleTimeout((short) 11);
         flowMod.setHardTimeout((short) 0);
         flowMod.setPriority((short) 50);
         flowMod.setBufferId(OFPacketOut.BUFFER_ID_NONE);
@@ -149,7 +158,16 @@ public class Flows {
         }
         logger.debug("add(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) end");
     }
-
+    
+    /**
+     * Deletes flow for given switch and destination DC IP. 
+     * Constructs {@link OFMatch} and instructs switch to delete particular flow from its flow table.
+     * @param sw
+     * @param floodlightProvider
+     * @param cntx
+     * @param dcIP
+     * @param dcMask 
+     */
     public static void del(IOFSwitch sw, IFloodlightProviderService floodlightProvider, FloodlightContext cntx, String dcIP, int dcMask) {
         logger.debug("del(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) end");
         OFMatch match = new OFMatch();
@@ -174,24 +192,24 @@ public class Flows {
         }
         logger.debug("del(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) end");
     }
-
+    
+    /**
+     * Modifies particular flow rule in the switch {@link IOFSwitch}
+     * @param sw
+     * @param floodlightProvider
+     * @param cntx
+     * @param dcIP
+     * @param dcMask
+     * @param outPort 
+     */
     public static void mod(IOFSwitch sw, IFloodlightProviderService floodlightProvider, FloodlightContext cntx, String dcIP, int dcMask, short outPort) {
-        logger.debug("mod(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) begin");
+        logger.debug("mod(IOFSwitch,IFloodlightProviderService,FloodlightContext,String,int,short) begin");
 
-        //floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
         OFFlowMod flowMod = (OFFlowMod) floodlightProvider.getOFMessageFactory().getMessage(OFType.FLOW_MOD);
-
-        // Create new match
-        OFMatch match = new OFMatch();
-        //match.setNetworkDestination(IPv4.toIPv4Address(networkDestination));
-        match.setDataLayerType(Ethernet.TYPE_IPv4);
-        match.setNetworkDestination(IPv4.toIPv4Address(dcIP));
-        int nw_dst_mask = ((1 << OFMatch.OFPFW_NW_DST_BITS) - 1) << dcMask;
-        match.setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_DL_TYPE & ~nw_dst_mask);
-        flowMod.setMatch(match);
-        //altenratywnie
-        //OFMatch mTo = new OFMatch();
-        //mTo.fromString("dl_type=0x800,nw_dst=224.128.0.0/9");
+        OFMatch mTo = new OFMatch();
+        String match = "dl_type=0x800,nw_dst=" + dcIP + "/" + Integer.toString(dcMask);
+        mTo.fromString(match);
+        flowMod.setMatch(mTo);
 
         flowMod.setCommand(OFFlowMod.OFPFC_MODIFY_STRICT); //OFPFC_MODIFY
         flowMod.setIdleTimeout((short) 0);
@@ -214,6 +232,6 @@ public class Flows {
         } catch (IOException ex) {
             logger.error(String.format("Error while modyfing flow rule (out port %d) to switch %s", outPort, sw.getStringId()), ex);
         }
-        logger.debug("mod(IOFSwitch,IFloodlightProviderService,FloodlightContext,short OFPacketIn) end");
+        logger.debug("mod(IOFSwitch,IFloodlightProviderService,FloodlightContext,String,int,short) end");
     }
 }

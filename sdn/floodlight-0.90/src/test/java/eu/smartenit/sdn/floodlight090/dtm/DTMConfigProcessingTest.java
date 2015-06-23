@@ -66,7 +66,10 @@ public class DTMConfigProcessingTest {
     public void testGetInstance() {
         Assert.assertSame(dtm, DTM.getInstance());
     }
-
+    
+    /**
+     * Tests the {@link ConfigData} setter
+     */
     @Test
     public void testSetConfigData() {
         ConfigData configData = new ConfigData();

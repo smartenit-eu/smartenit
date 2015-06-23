@@ -59,6 +59,7 @@ public @interface BindTunnel {
                     q.bind(bind.value() + ".ofSwitchPortNumber", arg.getOfSwitchPortNumber());
 					q.bind(bind.value() + ".localLinkID", ((SimpleLinkID)arg.getLink().getLinkID()).getLocalLinkID());
 					q.bind(bind.value() + ".localIspName", ((SimpleLinkID)arg.getLink().getLinkID()).getLocalIspName());
+					q.bind(bind.value() + ".localRouterAddress", arg.getLocalRouterAddress().getPrefix());
 				}
 			};
 		}

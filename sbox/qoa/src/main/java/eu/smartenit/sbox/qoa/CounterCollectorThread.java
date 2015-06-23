@@ -44,16 +44,19 @@ public class CounterCollectorThread implements Callable<CounterValues> {
 	}
 	
 	/**
-	 * The constructor with arguments to be used when monitoring BG router.
+	 * The constructor with arguments to be used when monitoring a BG router.
 	 * 
 	 * @param links
 	 *            list of links of a given BG router that will be monitored
+	 * @param tunnels
+	 *            list of tunnels of a given BG router that will be monitored
 	 * @param bgRouter
 	 *            target {@link BGRouter}
 	 */
-	public CounterCollectorThread(List<Link> links, BGRouter bgRouter) {
+	public CounterCollectorThread(List<Link> links, List<Tunnel> tunnels, BGRouter bgRouter) {
 		this();
 		this.links = links;
+		this.tunnels = tunnels;
 		this.bgRouter = bgRouter;
 	}
 	
@@ -101,8 +104,15 @@ public class CounterCollectorThread implements Callable<CounterValues> {
 	
 	protected CounterValues collectCounterValuesForBGRouter() throws Exception {
 		final CounterValues counterValues = new CounterValues();
-		for (Link link : links) {
-			counterValues.storeCounterValue(link.getLinkID(), getInboundLinkCounterValueFromBGRouter(link));
+		if(links != null) {
+			for (Link link : links) {
+				counterValues.storeCounterValue(link.getLinkID(), getInboundLinkCounterValueFromBGRouter(link));
+			}
+		}
+		if(tunnels != null) {
+			for (Tunnel tunnel : tunnels) {
+				counterValues.storeCounterValue(tunnel.getTunnelID(), getInboundTunnelCounterValueFromBGRouter(tunnel));
+			}
 		}
 		return counterValues;
 	}
@@ -116,7 +126,7 @@ public class CounterCollectorThread implements Callable<CounterValues> {
 	}
 
 	protected boolean validateBgRouter() {
-		if (bgRouter == null || links == null) {
+		if (bgRouter == null || (links == null && tunnels == null)) {
 			return false;
 		}
 		return true;
@@ -148,6 +158,14 @@ public class CounterCollectorThread implements Callable<CounterValues> {
 		value = parseCounterValue(
 				snmpWrapper.snmpGet(snmpWrapper.prepareOID(tunnel.getInboundInterfaceCounterOID()), 
 				snmpWrapper.prepareTarget(daRouter.getManagementAddress().getPrefix(), daRouter.getSnmpCommunity())));
+		return value;
+	}
+	
+	protected long getInboundTunnelCounterValueFromBGRouter(Tunnel tunnel) {
+		long value = -1;
+		value = parseCounterValue(
+				snmpWrapper.snmpGet(snmpWrapper.prepareOID(tunnel.getInboundInterfaceCounterOID()), 
+				snmpWrapper.prepareTarget(bgRouter.getManagementAddress().getPrefix(), bgRouter.getSnmpCommunity())));
 		return value;
 	}
 

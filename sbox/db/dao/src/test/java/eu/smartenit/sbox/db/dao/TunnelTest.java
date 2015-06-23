@@ -130,6 +130,7 @@ public class TunnelTest {
 		t.setOutboundInterfaceCounterOID("1.3.6.7");
         t.setOfSwitchPortNumber(5678);
 		t.setLink(l);
+		t.setLocalRouterAddress(new NetworkAddressIPv4("5.5.5.5", 32));
 		
 		tdao.insert(t);
 		list = tdao.findAll();
@@ -142,10 +143,12 @@ public class TunnelTest {
         assertEquals(t.getOfSwitchPortNumber(), 5678);
         assertEquals(t.getPhysicalLocalInterfaceName(), "p");
 		assertEquals(((SimpleLinkID)t.getLink().getLinkID()).getLocalIspName(), "ote");
+		assertEquals(t.getLocalRouterAddress().getPrefix(), "5.5.5.5");
 		
 		t.setPhysicalLocalInterfaceName("physical-interface");
 		t.setOutboundInterfaceCounterOID("1.2.3.4.5.6.7");
         t.setOfSwitchPortNumber(56789);
+        t.setLocalRouterAddress(new NetworkAddressIPv4("5.5.6.6", 32));
 		
 		tdao.update(t);
 		t = tdao.findById(tunnelID);
@@ -156,6 +159,7 @@ public class TunnelTest {
         assertEquals(t.getPhysicalLocalInterfaceName(), "physical-interface");
         assertEquals(t.getOutboundInterfaceCounterOID(), "1.2.3.4.5.6.7");
         assertEquals(((SimpleLinkID)t.getLink().getLinkID()).getLocalIspName(), "ote");
+        assertEquals(t.getLocalRouterAddress().getPrefix(), "5.5.6.6");
 		
 		List<DC2DCCommunication> dcList = ddao.findAll();
 		assertEquals(dcList.size(), 0);
@@ -222,6 +226,7 @@ public class TunnelTest {
 		t.setPhysicalLocalInterfaceName("p");
 		t.setInboundInterfaceCounterOID("1.2.3.4.4.5.6");
 		t.setOutboundInterfaceCounterOID("1.3.6.7");
+		t.setLocalRouterAddress(new NetworkAddressIPv4("4.5.6.7", 32));
 		t.setLink(l);
 		
 		tdao.insert(t);

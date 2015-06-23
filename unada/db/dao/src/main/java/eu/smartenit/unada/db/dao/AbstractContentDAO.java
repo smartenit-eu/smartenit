@@ -148,4 +148,8 @@ public abstract class AbstractContentDAO {
 	@Mapper(ContentMapper.class)
 	public abstract List<Content> findAllOutDated(@Bind("cachethreshold") long cacheThreshold);
 
+    @SqlQuery("SELECT * FROM content WHERE downloaded = 1")
+    @Mapper(ContentMapper.class)
+    public abstract List<Content> findAllDownloaded();
+
 }

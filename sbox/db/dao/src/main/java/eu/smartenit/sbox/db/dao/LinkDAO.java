@@ -42,6 +42,8 @@ public class LinkDAO {
 	private SegmentDAO sdao;
 	
 	private TunnelDAO tdao;
+	
+	private BGRouterDAO bgdao;
 		
 	/**
 	 * The constructor.
@@ -109,9 +111,12 @@ public class LinkDAO {
 		List<Link> linksList = dao.findAll();
 		cdao = new CostFunctionDAO();
 		tdao = new TunnelDAO();
+		bgdao = new BGRouterDAO();
+		
 		for (Link l : linksList) {
 			l.setCostFunction(cdao.findByLinkId((SimpleLinkID)l.getLinkID()));
 			l.setTraversingTunnels(tdao.findAllByLinkID((SimpleLinkID)l.getLinkID()));
+			l.setBgRouter(bgdao.findById(l.getBgRouter().getManagementAddress().getPrefix()));
 		}
 		return linksList;
 	}
@@ -126,8 +131,11 @@ public class LinkDAO {
 		if (link != null) {
 			cdao = new CostFunctionDAO();
 			tdao = new TunnelDAO();
+			bgdao = new BGRouterDAO();
+			
 			link.setCostFunction(cdao.findByLinkId((SimpleLinkID)link.getLinkID()));
 			link.setTraversingTunnels(tdao.findAllByLinkID((SimpleLinkID)link.getLinkID()));
+			link.setBgRouter(bgdao.findById(link.getBgRouter().getManagementAddress().getPrefix()));
 		}
 		return link;
 	}
@@ -160,9 +168,12 @@ public class LinkDAO {
 		List<Link> linksList = dao.findByBGRouterAddress(bgAddress);
 		cdao = new CostFunctionDAO();
 		tdao = new TunnelDAO();
+		bgdao = new BGRouterDAO();
+		
 		for (Link l : linksList) {
 			l.setCostFunction(cdao.findByLinkId((SimpleLinkID)l.getLinkID()));
 			l.setTraversingTunnels(tdao.findAllByLinkID((SimpleLinkID)l.getLinkID()));
+			l.setBgRouter(bgdao.findById(bgAddress));
 		}
 		return linksList;
 	}

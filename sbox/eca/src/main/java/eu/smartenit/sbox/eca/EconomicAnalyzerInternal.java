@@ -38,7 +38,7 @@ import eu.smartenit.sbox.ntm.dtm.receiver.DTMTrafficManager;
  * 
  * @author D. D&ouml;nni, K. Bhargav, T. Bocek
  * @author Lukasz Lopatowski
- * @version 3.0
+ * @version 3.1
  * 
  */
 public class EconomicAnalyzerInternal {
@@ -61,12 +61,12 @@ public class EconomicAnalyzerInternal {
 	final static int x2 = 1;
 
 	/**
-	 * Contains the link IDs for links 1
+	 * Link ID for link 1
 	 */
 	final SimpleLinkID link1;
 	
 	/**
-	 * Contains the link IDs for links 2
+	 * Link ID for link 2
 	 */
 	final SimpleLinkID link2;
 	
@@ -75,8 +75,6 @@ public class EconomicAnalyzerInternal {
 	 */
 	private final DTMTrafficManager dtmTrafficManager;
 
-	final ChargingRule chargingRule;
-	
 	final ReferenceVectorCalculator calculator;
 
 	final TrafficSamplesContainer trafficContainer;
@@ -84,22 +82,24 @@ public class EconomicAnalyzerInternal {
 	private int reportsInAccountingPeriod;
 	
 	/**
-	 * Constructor for EconomicAnalyzerInternal
+	 * The constructor with arguments.
 	 * 
 	 * @param dtmTrafficManager
+	 *            instance of {@link DTMTrafficManager} that should be updated
+	 *            once new reference vector is calculated or on some new link
+	 *            the reference vector is achieved
 	 * @param link1
-	 *            The {@link SimpleLinkID} of link 1
+	 *            identifier of the first link
 	 * @param link2
-	 *            The {@link SimpleLinkID} of link 2
+	 *            identifier of the second link
 	 */
 	EconomicAnalyzerInternal(DTMTrafficManager dtmTrafficManager, SimpleLinkID link1, SimpleLinkID link2) {
 		this.dtmTrafficManager = dtmTrafficManager;
 		this.link1 = link1;
 		this.link2 = link2;
-		chargingRule = DAOFactory.getSCPDAOInstance().findLast().getChargingRule();
 		TimeScheduleParameters tsp = getTimeScheduleParametersFromDB();
 		
-		if (chargingRule.equals(ChargingRule.volume)) {
+		if (isChargingRule(ChargingRule.volume)) {
 			long xzReportPeriod = (tsp.getReportPeriodEA() == 0) ? tsp.getReportingPeriod() : tsp.getReportPeriodEA();
 			reportsInAccountingPeriod = (int) (tsp.getAccountingPeriod() / xzReportPeriod);
 			trafficContainer = new TotalVolumeSamplesContainer(link1, link2);
@@ -111,7 +111,7 @@ public class EconomicAnalyzerInternal {
 			}
 			
 			reportsInAccountingPeriod = (int) (tsp.getAccountingPeriod() / tsp.getSamplingPeriod());
-			trafficContainer = new The95PercentileSamplesContainer(link1, link2);
+			trafficContainer = new The95PercentileSamplesContainer(link1, link2, reportsInAccountingPeriod);
 		}
 		
 		calculator = new ReferenceVectorCalculator(link1, link2, getCostFunctionsFromDB(), tsp);
@@ -120,6 +120,8 @@ public class EconomicAnalyzerInternal {
 	/**
 	 * Updates link and tunnel traffic data. If accounting period elapsed,
 	 * calculates new reference vector and sends is to configured NTM instance.
+	 * Updates NTM with a list of links on which the R vector has been already
+	 * achieved in the current accounting period.
 	 * 
 	 * @param xVector
 	 *            The link traffic vector
@@ -130,25 +132,39 @@ public class EconomicAnalyzerInternal {
 		logger.debug("New update received.");
 		updateCounter++;
 		trafficContainer.storeTrafficValues(xVector, zVectors);
+		
+		if (!isEndOfAccountingPeriod() && isChargingRule(ChargingRule.the95thPercentile))
+			if (((The95PercentileSamplesContainer)trafficContainer).isChangeInLinksWithRVectorAchieved()) {
+				logger.debug("Updating NTM with new list of links with R vector achieved.");
+				dtmTrafficManager.updateLinksWithRVectorAchieved(
+						xVector.getSourceAsNumber()
+						, ((The95PercentileSamplesContainer)trafficContainer).getLinksWithRVectorAchieved());
+			}
 
-		if (updateCounter == reportsInAccountingPeriod) {
+		if (isEndOfAccountingPeriod()) {
 			logger.debug("Accounting period elapsed. Will calculate new reference vector.");
 			LocalRVector rVector = calculator.calculate(
 					trafficContainer.getTrafficValuesForLinks(), trafficContainer.getTrafficValuesForTunnels(), xVector.getSourceAsNumber());
 			
-			if(dtmTrafficManager != null) {
+			if(dtmTrafficManager != null)
 				dtmTrafficManager.updateRVector(rVector);
-			}
+			
+			if (isChargingRule(ChargingRule.the95thPercentile))
+				((The95PercentileSamplesContainer)trafficContainer).setCurrentRVector(rVector);
 			
 			trafficContainer.resetTrafficValues();
 			updateCounter = 0;
 		}
 	}
 
+	private boolean isEndOfAccountingPeriod() {
+		return updateCounter == reportsInAccountingPeriod;
+	}
+
 	/**
-	 * Retrieves the time schedule parameters from the database
+	 * Retrieves the time schedule parameters from the database.
 	 * 
-	 * @return Returns a {@link TimeScheduleParameters} object holding the time schedule parameters
+	 * @return {@link TimeScheduleParameters} object holding the time schedule parameters
 	 */
 	private TimeScheduleParameters getTimeScheduleParametersFromDB() {
 		TimeScheduleParametersDAO dao = DAOFactory.getTSPDAOInstance();
@@ -157,9 +173,9 @@ public class EconomicAnalyzerInternal {
 	}
 	
 	/**
-	 * Retrieves the cost functions from the database
+	 * Retrieves cost functions for configured links from the database.
 	 * 
-	 * @return A {@link List} 
+	 * @return list of {@link CostFunction} objects
 	 */
 	private List<CostFunction> getCostFunctionsFromDB() {
 		CostFunctionDAO cfdao = DAOFactory.getCostFunctionDAOInstance();
@@ -172,6 +188,10 @@ public class EconomicAnalyzerInternal {
 		costFunctions.add(cf2);
 		
 		return costFunctions;
+	}
+	
+	private boolean isChargingRule(ChargingRule rule) {
+		return DAOFactory.getSCPDAOInstance().findLast().getChargingRule().equals(rule);
 	}
 	
 }

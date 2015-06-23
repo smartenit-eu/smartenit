@@ -105,54 +105,13 @@
           <include>unada.sh</include>
       </includes>
   </fileSet>
-
   <fileSet>
-      <directory>../unada/ctm/main/target</directory>
+      <directory>../unada</directory>
       <outputDirectory>/unada</outputDirectory>
       <includes>
-        <include>root.war</include>
+          <include>vimeo_proxy.py</include>
       </includes>
-    </fileSet>
-
-  <fileSet>
-      <directory>../unada/ctm/main/src/main/resources</directory>
-      <outputDirectory>/unada/conf</outputDirectory>
-      <includes>
-        <include>jetty-unadaproxy.xml</include>
-      </includes>
-    </fileSet>
-
-  <fileSet>
-      <directory>../unada/db/dao/target</directory>
-      <outputDirectory>/unada/lib</outputDirectory>
-      <includes>
-        <include>unada-db.jar</include>
-      </includes>
-    </fileSet>
-  <fileSet>
-      <directory>../unada/web/target/web-${project.version}/WEB-INF/lib</directory>
-      <outputDirectory>/unada/lib</outputDirectory>
-      <includes>
-        <include>jsf-*.jar</include>
-	    <include>jersey-*.jar</include>
-	    <include>jackson-*.jar</include>
-	    <include>javax.*.jar</include>
-	    <include>validation-*.jar</include>
-	    <include>httpclient-*.jar</include>
-	    <include>httpcore-*.jar</include>
-	    <include>hk2-*.jar</include>
-	    <include>restfb-*.jar</include>
-            <include>commons-codec-*.jar</include>
-            <include>commons-logging-*.jar</include>
-      </includes>
-    </fileSet>
-    <fileSet>
-      <directory>../unada/ctm/main/target/main-${project.version}/WEB-INF/lib</directory>
-      <outputDirectory>/unada/lib</outputDirectory>
-      <includes>
-        <include>netty-*.jar</include>
-      </includes>
-    </fileSet>
+  </fileSet>
 
   <fileSet>
       <directory>../enduser/app/SIT/target</directory>

@@ -26,7 +26,7 @@ import eu.smartenit.sbox.db.dto.util.ClassNameAndIntSequenceGenerator;
  * The BGRouter class.
  *
  * @author George Petropoulos
- * @version 1.0
+ * @version 3.1
  * 
  */
 @JsonIdentityInfo(generator=ClassNameAndIntSequenceGenerator.class, scope=BGRouter.class, property="@id")
@@ -61,6 +61,10 @@ public final class BGRouter implements Serializable {
 
 	private NetworkAddressIPv4 managementAddress;
 	
+	private String netconfUsername;
+	
+	private String netconfPassword;
+	
 	private String snmpCommunity;
 	
 	private List<Link> interDomainLinks;
@@ -89,12 +93,56 @@ public final class BGRouter implements Serializable {
 		this.snmpCommunity = snmpCommunity;
 	}
 
+	public String getNetconfUsername() {
+		return netconfUsername;
+	}
+
+	public void setNetconfUsername(String netconfUsername) {
+		this.netconfUsername = netconfUsername;
+	}
+
+	public String getNetconfPassword() {
+		return netconfPassword;
+	}
+
+	public void setNetconfPassword(String netconfPassword) {
+		this.netconfPassword = netconfPassword;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime
+				* result
+				+ ((managementAddress == null) ? 0 : managementAddress
+						.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BGRouter other = (BGRouter) obj;
+		if (managementAddress == null) {
+			if (other.managementAddress != null)
+				return false;
+		} else if (!managementAddress.equals(other.managementAddress))
+			return false;
+		return true;
+	}
+
 	@Override
 	public String toString() {
 		return "BGRouter [managementAddress=" + managementAddress
-				+ ", snmpCommunity=" + snmpCommunity + ", interDomainLinks="
-				+ interDomainLinks + "]";
+				+ ", netconfUsername=" + netconfUsername + ", netconfPassword="
+				+ netconfPassword + ", snmpCommunity=" + snmpCommunity
+				+ ", interDomainLinks=" + interDomainLinks + "]";
 	}
-	
 	
 }

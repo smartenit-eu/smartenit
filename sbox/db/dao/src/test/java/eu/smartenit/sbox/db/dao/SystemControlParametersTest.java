@@ -66,6 +66,7 @@ public class SystemControlParametersTest {
 		s.setChargingRule(ChargingRule.the95thPercentile);
 		s.setCompensationThreshold(22.34);
 		s.setOperationModeSDN(OperationModeSDN.reactiveWithReferenceVector);
+		s.setDelayTolerantTrafficManagement(true);
 		sdao.insert(s);
 		
 		//Checking non empty SystemControlParameters table
@@ -77,6 +78,7 @@ public class SystemControlParametersTest {
 		assertEquals(sList.get(0).getCompensationThreshold(), 22.34, 0.001);
 		assertEquals(sList.get(0).getOperationModeSDN(), 
 				OperationModeSDN.reactiveWithReferenceVector);
+		assertTrue(sList.get(0).isDelayTolerantTrafficManagement());
 		
 		s = new SystemControlParameters();
 		s.setChargingRule(ChargingRule.volume);
@@ -95,6 +97,7 @@ public class SystemControlParametersTest {
 		assertEquals(s2.getCompensationThreshold(), 55.88, 0.001);
 		assertEquals(s2.getOperationModeSDN(), 
 				OperationModeSDN.proactiveWithoutReferenceVector);
+		assertFalse(s2.isDelayTolerantTrafficManagement());
 		
 		sdao.deleteAll();
 		sList = sdao.findAll();

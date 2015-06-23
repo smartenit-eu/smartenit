@@ -18,6 +18,9 @@ package eu.smartenit.unada.ctm.cache.impl;
 import com.github.axet.vget.VGet;
 import com.github.axet.vget.info.VideoInfo;
 import com.github.axet.vget.vhs.VimeoInfo;
+
+import eu.smartenit.unada.commons.constants.UnadaConstants;
+import eu.smartenit.unada.commons.logging.UnadaLogger;
 import eu.smartenit.unada.commons.threads.UnadaThreadService;
 import eu.smartenit.unada.ctm.cache.VideoDownloader;
 import eu.smartenit.unada.ctm.cache.util.CacheConstants;
@@ -25,6 +28,7 @@ import eu.smartenit.unada.ctm.cache.util.OverlayFactory;
 import eu.smartenit.unada.ctm.cache.util.VimeoPatterns;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.Content;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +37,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,7 +49,7 @@ import java.util.regex.Pattern;
  * and download the content, if not present in the cache.
  * 
  * @author George Petropoulos
- * @version 2.1
+ * @version 3.1
  * 
  */
 public class VimeoDownloader implements VideoDownloader, Runnable {
@@ -102,7 +109,16 @@ public class VimeoDownloader implements VideoDownloader, Runnable {
         }
 		else {
 			logger.info("Content " + contentID + " is not cached.");
-            VideoInfo info = new VimeoInfoRetriever().retrieveVideoInfo(contentURL);
+            VideoInfo info;
+            Future<VideoInfo> future = UnadaThreadService.getThreadService().submit(
+					new Callable<VideoInfo>() {
+
+						public VideoInfo call() throws Exception {
+							return new VimeoInfoRetriever()
+									.retrieveVideoInfo(contentURL);
+						}
+					});
+            info = future.get(10, TimeUnit.SECONDS);
 
             VGet v = new VGet(info, new File(""));
             Path target = getVideoStorage(v);
@@ -131,7 +147,9 @@ public class VimeoDownloader implements VideoDownloader, Runnable {
                 // download content
                 logger.info("Prefetching video from Vimeo with id " + content.getContentID()
                         + " and size " + (float) content.getSize()/1000000+  "MB to " + content.getPath());
-				v.download();
+                long timeBefore = System.currentTimeMillis();
+                v.download();
+                long timeAfter = System.currentTimeMillis();
 
                 //check if size is zero, then update with real size
                 File f = new File(content.getPath());
@@ -144,8 +162,10 @@ public class VimeoDownloader implements VideoDownloader, Runnable {
 				logger.info("Content " + content.getContentID() + " prefetching from Vimeo "
                 		+ "completed successfully.");
 				DAOFactory.getContentDAO().update(content);
-
-                //OverlayFactory.getOverlayManager().advertiseContent(content.getContentID());
+				
+				UnadaLogger.overall.info("{}: Video prefetching ({}, {}, {}, social, {})", 
+						new Object[]{UnadaConstants.UNADA_OWNER_MD5, timeAfter, 
+						content.getContentID(), content.getSize(), timeAfter - timeBefore});
 
 			} catch (Exception e) {
 				logger.error("Exception while downloading video " + contentURL 
