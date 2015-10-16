@@ -30,6 +30,7 @@ import net.tomp2p.nat.PeerBuilderNAT;
 import net.tomp2p.nat.PeerNAT;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.replication.IndirectReplication;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,14 @@ public class Main {
 		
 		Main start = new Main();
 		log.info("Starting the bootstrap node");
+		
+		if(args.length < 1){
 		start.start();
+		} else {
+			if(args[0].equalsIgnoreCase("-c")){
+				start.create();
+			}
+		}
 
 	}
 	
@@ -59,28 +67,27 @@ public class Main {
 		bindings.listenAny();
 				
 		peer = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(rnd.nextLong())).bindings(bindings).ports(4001).start()).start();
-		
-		while(!bootstrap()){
-			log.warn("No bootstrap node could be reached.");
-			Thread.sleep(1000*60*5);
-		};
+//		while(!bootstrap()){
+//			log.warn("No bootstrap node could be reached.");
+//			Thread.sleep(1000*60*5);
+//		};
 	}
 	
 	private void setNodes(){
 		ArrayList<InetSocketAddress> addresses = new ArrayList<>();
 		
 		
-		addresses.add( new InetSocketAddress("emanicslab2.man.poznan.pl", 4001));
-		addresses.add( new InetSocketAddress("emanicslab2.ps.tu-darmstadt.de", 4001));
-		addresses.add( new InetSocketAddress("emanicslab2.ewi.utwente.nl", 4001));
-		addresses.add(  new InetSocketAddress("emanicslab2.eecs.jacobs-university.de", 4001));
-		addresses.add(  new InetSocketAddress("moscu.upc.es", 4001));
-		addresses.add(  new InetSocketAddress("emanicslab1.ps.tu-darmstadt.de", 4001));
-		addresses.add(  new InetSocketAddress("emanicslab1.man.poznan.pl", 4001));
-		addresses.add(  new InetSocketAddress("emanicslab1.informatik.unibw-muenchen.de", 4001));
-		addresses.add(  new InetSocketAddress("emanicslab1.csg.uzh.ch", 4001));
-		addresses.add(  new InetSocketAddress("planck232ple.test.iminds.be", 4001));
-		addresses.add(  new InetSocketAddress("emanicslab1.ewi.utwente.nl",4001));
+//		addresses.add( new InetSocketAddress("emanicslab2.csg.uzh.ch", 4001));
+//		addresses.add( new InetSocketAddress("emanicslab2.ps.tu-darmstadt.de", 4001));
+//		addresses.add( new InetSocketAddress("emanicslab2.ewi.utwente.nl", 4001));
+//		addresses.add(  new InetSocketAddress("emanicslab1.unige.ch", 4001));
+//		addresses.add(  new InetSocketAddress("moscu.upc.es", 4001));
+//		addresses.add(  new InetSocketAddress("emanicslab1.ps.tu-darmstadt.de", 4001));
+//		addresses.add(  new InetSocketAddress("emanicslab1.man.poznan.pl", 4001));
+//		addresses.add(  new InetSocketAddress("emanicslab1.informatik.unibw-muenchen.de", 4001));
+//		addresses.add(  new InetSocketAddress("emanicslab1.csg.uzh.ch", 4001));
+//		addresses.add(  new InetSocketAddress("muro.upc.es", 4001));
+//		addresses.add(  new InetSocketAddress("emanicslab1.ewi.utwente.nl",4001));
 		
 		nodes = addresses;
 	}
@@ -126,6 +133,22 @@ public class Main {
 		}
 
 		log.info("Finished bootsrapping, local address: {}", peer.peerAddress());
+		return true;
+	}
+	
+	private boolean create(){
+		if ( peer != null ) {
+			peer.shutdown().awaitUninterruptibly();
+			peer=null;
+		}
+		Random rnd = new Random();
+		try {
+			peer = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(rnd.nextLong())).ports(4001).start()).start();
+			new IndirectReplication(peer).start();
+		} catch (Exception e) {
+			log.error("Failed to create overlay due to a socket error", e);
+			return false;
+		}
 		return true;
 	}
 

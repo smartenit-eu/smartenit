@@ -35,64 +35,67 @@ import eu.smartenit.unada.commons.commands.ARP;
 import java.util.Date;
 
 /**
- * The login REST API of uNaDa towards the end-user device.
- * It listens to URL: http://<unada-ip-address>:<unada-port>/unada/rest/login/<facebookID>
- * for end-user application login requests.
- *
+ * The login REST API of uNaDa towards the end-user device. It listens to URL:
+ * http://<unada-ip-address>:<unada-port>/unada/rest/login/<facebookID> for
+ * end-user application login requests.
+ * 
  * @author George Petropoulos
  * @version 2.0
  */
 @Path("/login")
 public class LoginService {
-	
-	private static final Logger logger = LoggerFactory.getLogger(LoginService.class);
-			 
-	/**
-	 * The login method. It checks whether the user is a trusted one.
-	 * If yes, then it executes an ARP request and updates its entry with 
-	 * his MAC address and finally returns the private SSID parameters
-	 * (SSID name and password).
-	 * Otherwise, it returns a negative reply.
-	 * 
-	 * 
-	 * @param facebookID The user's facebook identifier
-	 * @param request The http servlet request
-	 * 
-	 * @return The RemoteLoginReply object
-	 *
-	 */
-	@GET
-	@Path("/{facebookID}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public RemoteLoginReply login(@PathParam("facebookID") String facebookID, 
-			@Context HttpServletRequest request) {
-		
-		RemoteLoginReply reply = new RemoteLoginReply();
-		reply.setType("remoteLoginReply");
-		
-		TrustedUser trustedUser = DAOFactory.getTrustedUserDAO().findById(facebookID);
-		if (trustedUser != null) {
-			String ipAddress = request.getRemoteAddr();
-			logger.info("Login attempt by trusted user with id " + facebookID
-					+ " and ip address " + ipAddress);
-			reply.setOutcome(1);
-			UNaDaConfiguration unadaConfiguration = 
-					DAOFactory.getuNaDaConfigurationDAO().findLast();
-			if (unadaConfiguration != null) {
-				reply.setWifiConfiguration(unadaConfiguration.getPrivateWifi());
-			}
-			
-			String macAddress = ARP.getArpInstance().execute(ipAddress);
-			trustedUser.setMacAddress(macAddress);
+
+    private static final Logger logger = LoggerFactory
+            .getLogger(LoginService.class);
+
+    /**
+     * The login method. It checks whether the user is a trusted one. If yes,
+     * then it executes an ARP request and updates its entry with his MAC
+     * address and finally returns the private SSID parameters (SSID name and
+     * password). Otherwise, it returns a negative reply.
+     * 
+     * 
+     * @param facebookID
+     *            The user's facebook identifier
+     * @param request
+     *            The http servlet request
+     * 
+     * @return The RemoteLoginReply object
+     * 
+     */
+    @GET
+    @Path("/{facebookID}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RemoteLoginReply login(@PathParam("facebookID") String facebookID,
+            @Context HttpServletRequest request) {
+
+        RemoteLoginReply reply = new RemoteLoginReply();
+        reply.setType("remoteLoginReply");
+
+        TrustedUser trustedUser = DAOFactory.getTrustedUserDAO().findById(
+                facebookID);
+        if (trustedUser != null) {
+            String ipAddress = request.getRemoteAddr();
+            logger.info("Login attempt by trusted user with id " + facebookID
+                    + " and ip address " + ipAddress);
+            reply.setOutcome(1);
+            UNaDaConfiguration unadaConfiguration = DAOFactory
+                    .getuNaDaConfigurationDAO().findLast();
+            if (unadaConfiguration != null) {
+                reply.setWifiConfiguration(unadaConfiguration.getPrivateWifi());
+            }
+
+            String macAddress = ARP.getArpInstance().execute(ipAddress);
+            trustedUser.setMacAddress(macAddress);
             trustedUser.setLastAccess(new Date(System.currentTimeMillis()));
-			DAOFactory.getTrustedUserDAO().update(trustedUser);
-		}
-		else {
-			logger.info("Login attempt by non-trusted user with id " + facebookID);
-			reply.setOutcome(0);
-		}
-		
-		return reply;
-	}
- 
+            DAOFactory.getTrustedUserDAO().update(trustedUser);
+        } else {
+            logger.info("Login attempt by non-trusted user with id "
+                    + facebookID);
+            reply.setOutcome(0);
+        }
+
+        return reply;
+    }
+
 }

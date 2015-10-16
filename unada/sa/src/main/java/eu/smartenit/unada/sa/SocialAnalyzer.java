@@ -83,7 +83,8 @@ public final class SocialAnalyzer {
 
             //distance
             logger.debug("Calculating distance for content ID " + contentID);
-            double delta = getDistance(contentID);
+            //double delta = getDistance(contentID);
+            double delta = -1;
             if(delta == -1) {
                 logger.warn("Distance for content ID " + contentID + " could not be calculated. Setting distance component to 0.");
             }
@@ -231,11 +232,13 @@ public final class SocialAnalyzer {
      */
     private double getDistance(long contentID) {
         UnadaInfo localInfo = overlayManager.getuNaDaInfo();
+        logger.info("Unada info {}", localInfo);
         double localLatitude = localInfo.getLatitude();
         double localLongitude = localInfo.getLongitude();
 
 
         Set<UnadaInfo> closeProviders = overlayManager.getCloseProviders(contentID);
+        logger.info("Close providers {}", closeProviders);
         //If no unada could be found, return -1, i.e. no valid value
         if(closeProviders.isEmpty()) {
             return -1;

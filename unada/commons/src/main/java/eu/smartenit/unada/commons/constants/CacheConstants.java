@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.smartenit.unada.ctm.cache.util;
+package eu.smartenit.unada.commons.constants;
 
 /**
  * The CacheConstants class. It includes cache constant parameters.

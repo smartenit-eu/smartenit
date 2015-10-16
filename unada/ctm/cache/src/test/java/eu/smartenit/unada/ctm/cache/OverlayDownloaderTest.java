@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import eu.smartenit.unada.db.dao.impl.ContentDAO;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.Content;
+import eu.smartenit.unada.om.IOverlayManager;
 import eu.smartenit.unada.om.OverlayManager;
 
 import java.io.File;
@@ -38,7 +39,7 @@ public class OverlayDownloaderTest {
 	
 	public ContentDAO contentDAO = mock(ContentDAO.class);
 	
-	public OverlayManager overlayManager = mock(OverlayManager.class);
+	public IOverlayManager overlayManager = mock(OverlayManager.class);
 		
 	Content c;
 			

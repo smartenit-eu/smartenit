@@ -15,26 +15,26 @@
  */
 package eu.smartenit.unada.ctm.cache.util;
 
-import eu.smartenit.unada.om.OverlayManager;
+import eu.smartenit.unada.om.IOverlayManager;
 
 /**
- * The OverlayFactory class. It includes constructor for the OverlayManager component.
+ * The OverlayFactory class. It includes constructor for the OverlayManager
+ * component.
  * 
  * @author George Petropoulos
  * @version 2.0
  * 
  */
 public class OverlayFactory {
-	
-	private static OverlayManager overlayManager;
-	
-	public static OverlayManager getOverlayManager() {
-		return overlayManager;
-	}
 
-	public static void setOverlayManager(OverlayManager overlayManager) {
-		OverlayFactory.overlayManager = overlayManager;
-	}
-	
+    private static IOverlayManager overlayManager;
+
+    public static IOverlayManager getOverlayManager() {
+        return overlayManager;
+    }
+
+    public static void setOverlayManager(IOverlayManager overlayManager) {
+        OverlayFactory.overlayManager = overlayManager;
+    }
 
 }

@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The UserSessionFilter class. It filters all incoming requests and checks 
+ * The UserSessionFilter class. It filters all incoming requests and checks
  * whether current session is active, otherwise it redirects them to login page.
  * 
  * @author George Petropoulos
@@ -39,46 +39,49 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class UserSessionFilter implements Filter {
-	
-	private static final Logger logger = LoggerFactory.getLogger(UserSessionFilter.class);
 
-	public void init(FilterConfig filterConfig) throws ServletException {
+    private static final Logger logger = LoggerFactory
+            .getLogger(UserSessionFilter.class);
 
-	}
+    public void init(FilterConfig filterConfig) throws ServletException {
 
-	/**
-	 * The method that executes the session filtering.
-	 * If the session is not valid and the request page is not the login one, 
-	 * then the user is redirected back to login page.
-	 * 
-	 * @param servletRequest The servlet request to be filtered.
-	 * @param servletResponse The servlet response to be redirected to.
-	 * @param filterChain The filter chain.
-	 * 
-	 * @throws IOException
-	 * @throws ServletException
-	 */
-	public void doFilter(ServletRequest servletRequest,
-			ServletResponse servletResponse, FilterChain filterChain)
-			throws IOException, ServletException {
-		
-		HttpServletRequest req = (HttpServletRequest) servletRequest;
-		HttpServletResponse resp = (HttpServletResponse) servletResponse;
-		HttpSession session = req.getSession(false);
-		String page = req.getRequestURL().toString();
+    }
+
+    /**
+     * The method that executes the session filtering. If the session is not
+     * valid and the request page is not the login one, then the user is
+     * redirected back to login page.
+     * 
+     * @param servletRequest
+     *            The servlet request to be filtered.
+     * @param servletResponse
+     *            The servlet response to be redirected to.
+     * @param filterChain
+     *            The filter chain.
+     * 
+     * @throws IOException
+     * @throws ServletException
+     */
+    public void doFilter(ServletRequest servletRequest,
+            ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
+
+        HttpServletRequest req = (HttpServletRequest) servletRequest;
+        HttpServletResponse resp = (HttpServletResponse) servletResponse;
+        HttpSession session = req.getSession(false);
+        String page = req.getRequestURL().toString();
         if (page.contains("login.xhtml")) {
             filterChain.doFilter(servletRequest, servletResponse);
+        } else if (session == null && req.getRequestedSessionId() != null
+                && !req.isRequestedSessionIdValid()) {
+            logger.info("Current session has expired, redirecting to login page.");
+            resp.sendRedirect("login.xhtml");
+        } else {
+            filterChain.doFilter(servletRequest, servletResponse);
         }
-		else if (session == null && req.getRequestedSessionId() != null
-				&& !req.isRequestedSessionIdValid()) {
-			logger.info("Current session has expired, redirecting to login page.");
-			resp.sendRedirect("login.xhtml");
-		} else {
-			filterChain.doFilter(servletRequest, servletResponse);
-		}
-	}
+    }
 
-	public void destroy() {
+    public void destroy() {
 
-	}
+    }
 }

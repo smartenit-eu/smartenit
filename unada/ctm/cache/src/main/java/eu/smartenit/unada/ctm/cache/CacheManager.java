@@ -28,8 +28,9 @@ import eu.smartenit.unada.db.dto.Content;
  */
 public interface CacheManager {
 
-	void updateCache(List<Content> socialContentList, List<Content> overlayContentList);
+    void updateCache(List<Content> socialContentList,
+            List<Content> overlayContentList);
 
     void deleteExpired();
-	
+
 }

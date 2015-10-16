@@ -15,6 +15,7 @@
  */
 package eu.smartenit.unada.web.ui;
 
+import eu.smartenit.unada.ctm.cache.timers.PredictionTask;
 import eu.smartenit.unada.web.util.DemoEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +27,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 
 /**
@@ -41,8 +39,9 @@ import java.util.LinkedList;
 @ManagedBean
 @RequestScoped
 public class DemoBean {
-	
-	private static final Logger logger = LoggerFactory.getLogger(DemoBean.class);
+
+    private static final Logger logger = LoggerFactory
+            .getLogger(DemoBean.class);
 
     private static final int MAX_EVENTS = 8;
 
@@ -60,10 +59,10 @@ public class DemoBean {
 
     /**
      * The method that constructs the demo.xhtml page.
-     *
+     * 
      */
     @PostConstruct
-	public void init() {
+    public void init() {
         try {
             readLastLines(new File(System.getenv("HOME") + "/unada.log"));
         } catch (IOException e) {
@@ -73,29 +72,31 @@ public class DemoBean {
 
     /**
      * The method that reads the last X lines of the unada.log file.
-     *
-     * @param file The log file to be read.
-     *
+     * 
+     * @param file
+     *            The log file to be read.
+     * 
      */
-    private void readLastLines(File file) throws FileNotFoundException, IOException {
-    	logger.debug("Reading last lines of unada.log.");
+    private void readLastLines(File file) throws FileNotFoundException,
+            IOException {
+        logger.debug("Reading last lines of unada.log.");
         RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
         int lines = 0;
         StringBuilder builder = new StringBuilder();
         long length = file.length();
         length--;
         randomAccessFile.seek(length);
-        for(long seek = length; seek >= 0; --seek){
+        for (long seek = length; seek >= 0; --seek) {
             randomAccessFile.seek(seek);
-            char c = (char)randomAccessFile.read();
+            char c = (char) randomAccessFile.read();
             builder.append(c);
-            if(c == '\n'){
+            if (c == '\n') {
                 builder = builder.reverse();
                 filterLine(builder.toString());
                 lines++;
                 builder = null;
                 builder = new StringBuilder();
-                if (lines == MAX_LINES){
+                if (lines == MAX_LINES) {
                     break;
                 }
             }
@@ -104,91 +105,118 @@ public class DemoBean {
     }
 
     /**
-     * The method that filters each line and checks whether it contains any major event,
-     * e.g. Proxying, WiFi offloading, Social Prediction, Overlay Prediction, Vimeo prefetching,
-     * overlay prefetching.
-     *
-     * @param s The line text to be checked and filtered.
-     *
+     * The method that filters each line and checks whether it contains any
+     * major event, e.g. Proxying, WiFi offloading, Social Prediction, Overlay
+     * Prediction, Vimeo prefetching, overlay prefetching.
+     * 
+     * @param s
+     *            The line text to be checked and filtered.
+     * 
      */
     private void filterLine(String s) {
         DemoEvent d;
 
-        if (s.contains("CacheManagerImpl - ") 
-        		&& s.contains("Social prediction returned the ranked")) {
+        if (s.contains("CacheManagerImpl - ")
+                && s.contains("Social prediction returned the ranked")) {
             String[] splits = s.split("CacheManagerImpl - ");
             String date = splits[0].trim().split("\\[")[0].trim();
             String text = splits[1];
             d = new DemoEvent();
             d.setTitle("Social Prediction");
-            d.setText("[" + date + "]: " + text);
+            d.setText(text);
             d.setAlertclass("alert alert-info");
-            //if (!eventList.contains(d))
+            // if (!eventList.contains(d))
             eventList.addLast(d);
-        }
-        else if (s.contains("VimeoDownloader - ") && 
-        		(s.contains("Prefetching video from") || s.contains("completed successfully."))) {
+        } else if (s.contains("VimeoDownloader - ")
+                && (s.contains("Prefetching video") || s
+                        .contains("completed successfully"))) {
             String[] splits = s.split("VimeoDownloader - ");
             String date = splits[0].trim().split("\\[")[0].trim();
             String text = splits[1];
             d = new DemoEvent();
             d.setTitle("Social Prefetching");
-            d.setText("[" + date + "]: " + text);
+            d.setText(text);
             d.setAlertclass("alert alert-info");
-            //if (!eventList.contains(d))
+            // if (!eventList.contains(d))
             eventList.addLast(d);
-        }
-        else if (s.contains("CacheManagerImpl - ") 
-        		&& s.contains("Overlay prediction returned the ranked")) {
+        } else if (s.contains("CacheManagerImpl - ")
+                && s.contains("Overlay prediction returned the ranked")) {
             String[] splits = s.split("CacheManagerImpl - ");
             String date = splits[0].trim().split("\\[")[0].trim();
             String text = splits[1];
             d = new DemoEvent();
             d.setTitle("Overlay Prediction");
-            d.setText("[" + date + "]: " + text);
+            d.setText(text);
             d.setAlertclass("alert alert-danger alert-error");
-            //if (!eventList.contains(d))
+            // if (!eventList.contains(d))
             eventList.addLast(d);
-        }
-        else if (s.contains("OverlayDownloader - ") && 
-        		(s.contains("Prefetching video from") || s.contains("completed successfully."))) {
+        } else if (s.contains("OverlayDownloader - ")
+                && (s.contains("Prefetching video") || s
+                        .contains("completed successfully"))) {
             String[] splits = s.split("OverlayDownloader - ");
             String date = splits[0].trim().split("\\[")[0].trim();
             String text = splits[1];
             d = new DemoEvent();
             d.setTitle("Overlay Prefetching");
-            d.setText("[" + date + "]: " + text);
+            d.setText(text);
             d.setAlertclass("alert alert-danger alert-error");
-            //if (!eventList.contains(d))
+            // if (!eventList.contains(d))
             eventList.addLast(d);
-        }
-        else if (s.contains("ContentAccessLoggerImpl - ") && s.contains("is served from local HTTP server")) {
+        } else if (s.contains("ContentAccessLoggerImpl - ")
+                && s.contains("is served from local cache.")) {
             String[] splits = s.split("ContentAccessLoggerImpl - ");
             String date = splits[0].trim().split("\\[")[0].trim();
             String text = splits[1];
             d = new DemoEvent();
-            d.setTitle("Proxy");
-            d.setText("[" + date + "]: " + text);
+            d.setTitle("Video Proxy");
+            d.setText(text);
             d.setAlertclass("alert alert-success");
-            //if (!eventList.contains(d))
+            // if (!eventList.contains(d))
             eventList.addLast(d);
-        }
-        else if (s.contains("LoginService - ") && s.contains("Login attempt by trusted user with id")) {
+        } else if (s.contains("LoginService - ")
+                && s.contains("Login attempt by trusted user")) {
             String[] splits = s.split("LoginService - ");
             String date = splits[0].trim().split("\\[")[0].trim();
             String text = splits[1];
             d = new DemoEvent();
             d.setTitle("WiFi Offloading");
-            d.setText("[" + date + "]: " + text);
-            d.setAlertclass("alert alert-success");
-            //if (!eventList.contains(d))
+            d.setText(text);
+            d.setAlertclass("alert alert-warning");
+            // if (!eventList.contains(d))
+            eventList.addLast(d);
+        } else if (s.contains("MonitorRunner - ") && s.contains("Vimeo video")) {
+            String[] splits = s.split("MonitorRunner - ");
+            String date = splits[0].trim().split("\\[")[0].trim();
+            String text = splits[1];
+            d = new DemoEvent();
+            d.setTitle("Social Monitoring");
+            d.setText(text);
+            d.setAlertclass("alert alert-info");
+            // if (!eventList.contains(d))
+            eventList.addLast(d);
+        } else if (s.contains("DownloadRequestMessage - ")
+                && (s.contains("Serving video") || s
+                        .contains("completed successfully"))) {
+            String[] splits = s.split("DownloadRequestMessage - ");
+            String date = splits[0].trim().split("\\[")[0].trim();
+            String text = splits[1];
+            d = new DemoEvent();
+            d.setTitle("Overlay Serving");
+            d.setText(text);
+            d.setAlertclass("alert alert-danger alert-error");
+            // if (!eventList.contains(d))
             eventList.addLast(d);
         }
 
-        //check if event list exceeded the limit, and delete the last item.
+        // check if event list exceeded the limit, and delete the last item.
         if (eventList.size() > MAX_EVENTS) {
             eventList.removeLast();
         }
+    }
+
+    public void triggerPrediction() {
+        PredictionTask prediction = new PredictionTask();
+        prediction.run();
     }
 
 }

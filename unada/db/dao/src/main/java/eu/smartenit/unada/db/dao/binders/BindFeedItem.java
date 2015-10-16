@@ -54,7 +54,7 @@ public @interface BindFeedItem {
 					q.bind(bind.value() + ".contentid", arg.getContentID());
 					q.bind(bind.value() + ".userid", arg.getUserID());
 					q.bind(bind.value() + ".type", arg.getType());
-					q.bind(bind.value() + ".time", arg.getTime().getTime());
+					q.bind(bind.value() + ".time", arg.getTime()!=null ? arg.getTime().getTime() : System.currentTimeMillis());
 					q.bind(bind.value() + ".feedtype", arg.getFeedType().toString());
 				}
 			};

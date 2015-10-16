@@ -23,79 +23,81 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The ARP class implementing the ARP command execution.
- *
+ * 
  * @author George Petropoulos
  * @version 2.0
  */
 public class ARP {
-	
-	private ARP () {
-		
-	}
-	
-	private static ARP arpInstance = new ARP();
-	private static final Logger logger = LoggerFactory.getLogger(ARP.class);
-	private static String arpCommand = "/usr/sbin/arp ";
-	
-	/**
-	 * The method that returns the arp instance.
-	 * 
-	 * @return The arp instance.
-	 * 
-	 */
-	public static ARP getArpInstance() {
-		return arpInstance;
-	}
 
-	/**
-	 * The method that sets the arp instance.
-	 * 
-	 * @param arpInstance The arp instance.
-	 * 
-	 */
-	public static void setArpInstance(ARP arpInstance) {
-		ARP.arpInstance = arpInstance;
-	}
+    private ARP() {
 
+    }
 
-	/**
-	 * The execution method. It executes the ARP command and reads the output text. 
-	 * If successful, then returns the mapped mac address, otherwise it returns null.
-	 * 
-	 * 
-	 * @param ipAddress The ip address for which ARP will be executed.
-	 * 
-	 * @return The MAC address
-	 *
-	 */
-	public String execute(String ipAddress) {
-		logger.info("Executing ARP for ip address " + ipAddress);
-		String macAddress = null;
-		
-		StringBuffer output = new StringBuffer();
-		Process p;
-		try {
-			p = Runtime.getRuntime().exec(arpCommand + ipAddress);
-			p.waitFor();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
- 
-			String line = "";	
-			int lineNumber = 0;
-			while ((line = reader.readLine()) != null) {
-				output.append(line + "\n");
-				if (lineNumber == 1) {
-					String[] lineSplits = line.split("\\s+");
-					return lineSplits[2];	
-				}
-				lineNumber++;
-			}
- 
-		} catch (Exception e) {
-			logger.error("Error while executing arp command: " + e.getMessage());
-		}
-		
-		
-		return macAddress;
-	}
+    private static ARP arpInstance = new ARP();
+    private static final Logger logger = LoggerFactory.getLogger(ARP.class);
+    private static String arpCommand = "/usr/sbin/arp ";
+
+    /**
+     * The method that returns the arp instance.
+     * 
+     * @return The arp instance.
+     * 
+     */
+    public static ARP getArpInstance() {
+        return arpInstance;
+    }
+
+    /**
+     * The method that sets the arp instance.
+     * 
+     * @param arpInstance
+     *            The arp instance.
+     * 
+     */
+    public static void setArpInstance(ARP arpInstance) {
+        ARP.arpInstance = arpInstance;
+    }
+
+    /**
+     * The execution method. It executes the ARP command and reads the output
+     * text. If successful, then returns the mapped mac address, otherwise it
+     * returns null.
+     * 
+     * 
+     * @param ipAddress
+     *            The ip address for which ARP will be executed.
+     * 
+     * @return The MAC address
+     * 
+     */
+    public String execute(String ipAddress) {
+        logger.info("Executing ARP for ip address " + ipAddress);
+        String macAddress = null;
+
+        StringBuffer output = new StringBuffer();
+        Process p;
+        try {
+            p = Runtime.getRuntime().exec(arpCommand + ipAddress);
+            p.waitFor();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    p.getInputStream()));
+
+            String line = "";
+            int lineNumber = 0;
+            while ((line = reader.readLine()) != null) {
+                output.append(line + "\n");
+                if (lineNumber == 1) {
+                    String[] lineSplits = line.split("\\s+");
+                    return lineSplits[2];
+                }
+                lineNumber++;
+            }
+
+        } catch (Exception e) {
+            logger.error("Error while executing arp command: " + e.getMessage());
+        }
+
+        return macAddress;
+    }
 
 }

@@ -37,22 +37,22 @@ import eu.smartenit.unada.db.dto.VideoInfo;
 @ManagedBean
 @RequestScoped
 public class AdministrationBean {
-			
-	private List<TrustedUser> trustedList;
+
+    private List<TrustedUser> trustedList;
 
     private List<Friend> friendsList;
 
     private List<VideoInfo> videoInfoList;
 
     private List<FeedItem> feedItemList;
-	
-	public List<TrustedUser> getTrustedList() {
-		return trustedList;
-	}
 
-	public void setTrustedList(List<TrustedUser> trustedList) {
-		this.trustedList = trustedList;
-	}
+    public List<TrustedUser> getTrustedList() {
+        return trustedList;
+    }
+
+    public void setTrustedList(List<TrustedUser> trustedList) {
+        this.trustedList = trustedList;
+    }
 
     public List<Friend> getFriendsList() {
         return friendsList;
@@ -79,34 +79,36 @@ public class AdministrationBean {
     }
 
     /**
-	 * The init() method that initializes the AdministrationBean.
-	 * It retrieves the stored trusted users.
-	 * 
-	 */
-	@PostConstruct
-	public void init() {
-		trustedList = DAOFactory.getTrustedUserDAO().findAll();
+     * The init() method that initializes the AdministrationBean. It retrieves
+     * the stored trusted users.
+     * 
+     */
+    @PostConstruct
+    public void init() {
+        trustedList = DAOFactory.getTrustedUserDAO().findAll();
         friendsList = DAOFactory.getFriendDAO().findAll();
         videoInfoList = DAOFactory.getVideoInfoDAO().findAll();
         feedItemList = DAOFactory.getFeedItemDAO().findAll();
-	}
-	
-	/**
-	 * The method that deletes a trusted user from the database.
-	 * 
-	 * @param t The trusted user to be deleted.
-	 * 
-	 */
-	public void deleteTrustedUser(TrustedUser t) {
-		DAOFactory.getTrustedUserDAO().delete(t.getFacebookID());
-		trustedList = DAOFactory.getTrustedUserDAO().findAll();
-	}
+    }
+
+    /**
+     * The method that deletes a trusted user from the database.
+     * 
+     * @param t
+     *            The trusted user to be deleted.
+     * 
+     */
+    public void deleteTrustedUser(TrustedUser t) {
+        DAOFactory.getTrustedUserDAO().delete(t.getFacebookID());
+        trustedList = DAOFactory.getTrustedUserDAO().findAll();
+    }
 
     /**
      * The method that deletes a video info from the database.
-     *
-     * @param v The video info to be deleted.
-     *
+     * 
+     * @param v
+     *            The video info to be deleted.
+     * 
      */
     public void deleteVideoInfo(VideoInfo v) {
         DAOFactory.getVideoInfoDAO().delete(v.getContentID());
@@ -115,7 +117,7 @@ public class AdministrationBean {
 
     /**
      * The method that deletes all video infos from the database.
-     *
+     * 
      */
     public void deleteVideoInfos() {
         DAOFactory.getVideoInfoDAO().deleteAll();
@@ -124,7 +126,7 @@ public class AdministrationBean {
 
     /**
      * The method that deletes all feed items from the database.
-     *
+     * 
      */
     public void deleteFeedItems() {
         DAOFactory.getFeedItemDAO().deleteAll();
@@ -133,11 +135,11 @@ public class AdministrationBean {
 
     /**
      * The method that deletes all friends from the database.
-     *
+     * 
      */
     public void deleteFriends() {
         DAOFactory.getFriendDAO().deleteAll();
         friendsList = DAOFactory.getFriendDAO().findAll();
     }
-	
+
 }

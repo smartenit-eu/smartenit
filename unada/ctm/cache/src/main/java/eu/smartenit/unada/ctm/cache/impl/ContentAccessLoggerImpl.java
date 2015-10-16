@@ -27,7 +27,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 
 /**
- * The ContentAccessLogger class. It updates the content access log for a specific content and user.
+ * The ContentAccessLogger class. It updates the content access log for a
+ * specific content and user.
  * 
  * @author George Petropoulos
  * @version 2.1
@@ -35,60 +36,63 @@ import java.util.Date;
  */
 public class ContentAccessLoggerImpl implements ContentAccessLogger, Runnable {
 
-	private static final Logger logger = LoggerFactory.getLogger(ContentAccessLoggerImpl.class);
-	private final long sameVideoRequestInterval = 60000;
+    private static final Logger logger = LoggerFactory
+            .getLogger(ContentAccessLoggerImpl.class);
+    private final long sameVideoRequestInterval = 60000;
     private long contentID;
     private String ipAddress;
 
-	public ContentAccessLoggerImpl(long contentID, String ipAddress) {
-		this.contentID = contentID;
+    public ContentAccessLoggerImpl(long contentID, String ipAddress) {
+        this.contentID = contentID;
         this.ipAddress = ipAddress;
-	}
+    }
 
-
-	/**
-	 * The method that updates the access log for a specific content and user.
-	 * If the recent accesses are very near to the current time, then the access
-	 * log is not updated.
-	 *
-	 * @return The boolean outcome of the update.
-	 * 
-	 */
-	public boolean updateAccessLog() {
-		logger.debug("Checking last accesses of content " + contentID);
+    /**
+     * The method that updates the access log for a specific content and user.
+     * If the recent accesses are very near to the current time, then the access
+     * log is not updated.
+     * 
+     * @return The boolean outcome of the update.
+     * 
+     */
+    public boolean updateAccessLog() {
+        logger.debug("Checking last accesses of content " + contentID);
         // get last access of content
-        ContentAccess contentAccess = 
-        		DAOFactory.getContentAccessDAO().findLatestByContentID(contentID);
+        ContentAccess contentAccess = DAOFactory.getContentAccessDAO()
+                .findLatestByContentID(contentID);
 
-        // if there are no accesses or last access is more than 1 min ago, then insert new one.
-        // this is done because sometimes Vimeo performs 2-3 consequent requests for one video request.
-        if (contentAccess == null || contentAccess.getTimeStamp().getTime() < System
-                .currentTimeMillis() - sameVideoRequestInterval) {
+        // if there are no accesses or last access is more than 1 min ago, then
+        // insert new one.
+        // this is done because sometimes Vimeo performs 2-3 consequent requests
+        // for one video request.
+        if (contentAccess == null
+                || contentAccess.getTimeStamp().getTime() < System
+                        .currentTimeMillis() - sameVideoRequestInterval) {
 
             contentAccess = new ContentAccess();
             contentAccess.setContentID(contentID);
             contentAccess.setTimeStamp(new Date(System.currentTimeMillis()));
             try {
                 DAOFactory.getContentAccessDAO().insert(contentAccess);
-                logger.info("Request of IP address " + ipAddress
-                        + " for content " + contentAccess.getContentID()
-                        + " is served from local HTTP server.");
-                logger.debug("Inserting content access " + contentAccess + " from IP " + ipAddress);
-                
-                UnadaLogger.overall.info("{}: Video request ({}, {})", 
-                		new Object[]{UnadaConstants.UNADA_OWNER_MD5, 
-                		System.currentTimeMillis(), contentID});
-                
+                logger.info("Request for video " + contentAccess.getContentID()
+                        + " is served from local cache.");
+                logger.debug("Inserting content access " + contentAccess
+                        + " from IP " + ipAddress);
+
+                UnadaLogger.overall.info(
+                        "{}: Video request ({}, {})",
+                        new Object[] { UnadaConstants.UNADA_OWNER_MD5,
+                                System.currentTimeMillis(), contentID });
+
                 return true;
             } catch (Exception e) {
-                logger.error("Error inserting content access for "
-                        + contentID + ": " + e.getMessage());
+                logger.error("Error inserting content access for " + contentID
+                        + ": " + e.getMessage());
                 return false;
             }
         }
         return false;
-	}
-
+    }
 
     @Override
     public void run() {

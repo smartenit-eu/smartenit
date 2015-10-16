@@ -27,35 +27,36 @@ import java.security.NoSuchAlgorithmException;
  */
 public class UnadaConstants {
 
-	public static final String APP_ID = "1498548153749732";
-	public static final String APP_SECRET = "c7a252dc74a210009819e02d833ff87e";
-	public static final String PERMISSIONS = "public_profile,"
-			+ "user_about_me," + "user_friends," + "read_stream";
-	public static final String UNADA_IP_ADDRESS = "192.168.40.1";
-	public static final String REDIRECT_URI = "http://" + UNADA_IP_ADDRESS
-			+ ":8181";
-	public static final int INITIAL_DELAY = 0;
-	public static String UNADA_OWNER;
-	public static String UNADA_OWNER_MD5;
+    public static final String APP_ID = "1498548153749732";
+    public static final String APP_SECRET = "c7a252dc74a210009819e02d833ff87e";
+    public static final String PERMISSIONS = "public_profile,"
+            + "user_about_me," + "user_friends," + "read_stream";
+    public static final String UNADA_IP_ADDRESS = "192.168.40.1";
+    public static final String REDIRECT_URI = "http://" + UNADA_IP_ADDRESS
+            + ":8181";
+    public static final int INITIAL_DELAY = 0;
+    public static String UNADA_OWNER;
+    public static String UNADA_OWNER_MD5;
+    public static int OVERLAY_STATUS = 3;
 
-	public static String md5Hash(String originalString) {
-		MessageDigest md;
-		try {
-			md = MessageDigest.getInstance("MD5");
-			md.update(originalString.getBytes());
+    public static String md5Hash(String originalString) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+            md.update(originalString.getBytes());
 
-			byte byteData[] = md.digest();
+            byte byteData[] = md.digest();
 
-			// convert the byte to hex format method 1
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < byteData.length; i++) {
-				sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16)
-						.substring(1));
-			}
-			return sb.toString();
-		} catch (NoSuchAlgorithmException e) {
-			return "";
-		}
+            // convert the byte to hex format method 1
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < byteData.length; i++) {
+                sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16)
+                        .substring(1));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            return "";
+        }
 
-	}
+    }
 }

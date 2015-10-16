@@ -35,6 +35,7 @@ public class DownloadReplyMessage extends BaseMessage{
 			om.getDownloadHandlers().get(getContent().getContentID()).receiveContentInfo(getContent());
 		} catch (DownloadException e) {
 			log.error("Failed to download a file because no providers are available.", e);
+			om.getDownloadHandlers().get(getContent().getContentID()).cancelDownload();
 		}
 	}
 

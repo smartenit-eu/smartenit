@@ -15,7 +15,6 @@
  */
 package eu.smartenit.unada.interfaces.enduser;
 
-import eu.smartenit.unada.ctm.cache.impl.ContentAccessLoggerImpl;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.Content;
 
@@ -27,47 +26,45 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 
 /**
- * The access REST API of uNaDa.
- * It listens to URL: http://<unada-ip-address>:<unada-port>/unada/rest/access/
- * to log an access of a specific video request to local cache path.
- *
+ * The access REST API of uNaDa. It listens to URL:
+ * http://<unada-ip-address>:<unada-port>/unada/rest/access/ to log an access of
+ * a specific video request to local cache path.
+ * 
  * @author George Petropoulos
  * @version 3.1
  */
 @Path("/access")
 public class AccessContentService {
-	
-	private static final Logger logger = LoggerFactory.getLogger(AccessContentService.class);
-			 
 
-	/**
-	 * The access POST method. It inserts an access entry for the specified content, 
-	 * if it exists in local cache path.
-	 * 
-	 * @param path The path of the video in the local cache.
-	 * @param request The http servlet request
-	 * 
-	 * @return True if content exists locally, otherwise false.
-	 *
-	 */
-	@POST
+    private static final Logger logger = LoggerFactory
+            .getLogger(AccessContentService.class);
+
+    /**
+     * The access POST method. It inserts an access entry for the specified
+     * content, if it exists in local cache path.
+     * 
+     * @param path
+     *            The path of the video in the local cache.
+     * @param request
+     *            The http servlet request
+     * 
+     * @return True if content exists locally, otherwise false.
+     * 
+     */
+    @POST
     @Consumes("text/plain")
     public boolean access(String path, @Context HttpServletRequest request) {
         logger.debug("Checking if content exists in path " + path);
         Content content = DAOFactory.getContentDAO().findByPath(path);
 
-        //check if content exists in cache and is downloaded.
+        // check if content exists in cache and is downloaded.
         if (content != null && content.isDownloaded()) {
-            logger.info("Content " + content.getContentID() + " is cached, " +
-                    "and will be served from local HTTP server.");
-            String ipAddress = request.getRemoteAddr();
-            ContentAccessLoggerImpl contentAccessLogger =
-                    new ContentAccessLoggerImpl(content.getContentID(), ipAddress);
-            contentAccessLogger.updateAccessLog();
+            logger.info("Content " + content.getContentID() + " is cached, "
+                    + "and will be served from local HTTP server.");
             return true;
 
         }
         return false;
-	}
- 
+    }
+
 }

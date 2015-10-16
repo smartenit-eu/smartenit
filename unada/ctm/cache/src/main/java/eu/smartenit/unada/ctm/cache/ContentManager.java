@@ -28,14 +28,14 @@ import java.util.List;
  */
 public interface ContentManager {
 
-	void deleteContent(Content content);
+    void deleteContent(Content content);
 
     void deleteContents(List<Content> contents);
-	
-	void prefetchContent(Content content);
-	
-	void prefetchContents(List<Content> contents);
+
+    void prefetchContent(Content content);
+
+    void prefetchContents(List<Content> contents);
 
     void deleteContents(List<Content> contents, long threshold);
-		
+
 }

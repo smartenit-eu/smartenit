@@ -22,29 +22,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class UnadaThreadService {
-	
-	private static final Logger logger = LoggerFactory
-			.getLogger(UnadaThreadService.class);
-		
-	private static ScheduledExecutorService threadService = Executors
-			.newScheduledThreadPool(30);
-	
-	/**
-	 * The method that shutdowns all threads. 
-	 * 
-	 */
-	public static void shutdownNowThreads() {
-		if(threadService != null) {
-			logger.info("Shutting down all threads.");
-			threadService.shutdownNow();
-		}
-	}
-	
-	/**
-	 * The method that returns the thread service 
-	 * 
-	 */
-	public static ScheduledExecutorService getThreadService() {
-		return threadService;
-	}
+
+    private static final Logger logger = LoggerFactory
+            .getLogger(UnadaThreadService.class);
+
+    private static ScheduledExecutorService threadService = Executors
+            .newScheduledThreadPool(30);
+
+    /**
+     * The method that shutdowns all threads.
+     * 
+     */
+    public static void shutdownNowThreads() {
+        if (threadService != null) {
+            logger.info("Shutting down all threads.");
+            threadService.shutdownNow();
+        }
+    }
+
+    /**
+     * The method that returns the thread service
+     * 
+     */
+    public static ScheduledExecutorService getThreadService() {
+        return threadService;
+    }
 }

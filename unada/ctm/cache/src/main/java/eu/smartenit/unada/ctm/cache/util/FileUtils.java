@@ -34,73 +34,73 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class FileUtils {
-	
-	private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
-	
-	/**
-	 * The method that returns the root directory for given file.
-	 * 
-	 * @param file The given file.
-	 * 
-	 * @return The root directory.
-	 */
-	public static String getRootDir(String file) {
+
+    private static final Logger logger = LoggerFactory
+            .getLogger(FileUtils.class);
+
+    /**
+     * The method that returns the root directory for given file.
+     * 
+     * @param file
+     *            The given file.
+     * 
+     * @return The root directory.
+     */
+    public static String getRootDir(String file) {
         if (file == null || file.isEmpty()) {
             return null;
-        }
-		else if (file.contains("/")) {
+        } else if (file.contains("/")) {
             return file.split("/")[0];
-        }
-        else {
+        } else {
             return file;
         }
-	}
-	
-	
-	/**
-	 * The method that deletes a file recursively.
-	 * 
-	 * @param file The file to be deleted.
-	 * 
-	 * @return The outcome of the deletion.
-	 */
-	public static boolean deleteFile(String file) {
+    }
+
+    /**
+     * The method that deletes a file recursively.
+     * 
+     * @param file
+     *            The file to be deleted.
+     * 
+     * @return The outcome of the deletion.
+     */
+    public static boolean deleteFile(String file) {
         if (file == null || file.isEmpty()) {
             return false;
         }
-		Path dir = Paths.get(file);
-		try {
-			Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
+        Path dir = Paths.get(file);
+        try {
+            Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
 
-				@Override
-				public FileVisitResult visitFile(Path file,
-						BasicFileAttributes attrs) throws IOException {
+                @Override
+                public FileVisitResult visitFile(Path file,
+                        BasicFileAttributes attrs) throws IOException {
 
-					logger.debug("Deleting file: " + file);
-					Files.delete(file);
-					return FileVisitResult.CONTINUE;
-				}
+                    logger.debug("Deleting file: " + file);
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
 
-				@Override
-				public FileVisitResult postVisitDirectory(Path dir,
-						IOException exc) throws IOException {
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir,
+                        IOException exc) throws IOException {
 
-					logger.debug("Deleting dir: " + dir);
-					if (exc == null) {
-						Files.delete(dir);
-						return FileVisitResult.CONTINUE;
-					} else {
-						throw exc;
-					}
-				}
+                    logger.debug("Deleting dir: " + dir);
+                    if (exc == null) {
+                        Files.delete(dir);
+                        return FileVisitResult.CONTINUE;
+                    } else {
+                        throw exc;
+                    }
+                }
 
-			});
-		} catch (IOException e) {
-			logger.error("Exception while deleting file " + file 
-					+ ": " + e.getMessage());
-			return false;
-		}
-		return true;
-	}
+            });
+        } catch (IOException e) {
+            logger.error("Exception while deleting file " + file + ": "
+                    + e.getMessage());
+            return false;
+        }
+        return true;
+    }
 
 }

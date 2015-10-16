@@ -24,10 +24,10 @@ package eu.smartenit.unada.ctm.cache.util;
  */
 public class VimeoPatterns {
 
-	public static final String vimeoURL = "^(http|https)://(www.)?vimeo.com/(.+/)*\\p{Digit}{5,15}$";
+    public static final String vimeoURL = "^(http|https)://(www.)?vimeo.com/(.+/)*\\p{Digit}{5,15}$";
 
-	public static final String vimeoRequest = "^(http|https)://[a-z0-9_-]+\\.[a-z]+\\.[a-z]+/([^?]+)/\\p{Digit}{4,12}\\.mp4$";
+    public static final String vimeoRequest = "^(http|https)://[a-z0-9_-]+\\.[a-z]+\\.[a-z]+/([^?]+)/\\p{Digit}{4,12}\\.mp4$";
 
-	public static final String vimeoFolders = "(http|https)://[a-z0-9_-]+\\.[a-z]+\\.[a-z]+/([^?]+)/(.*\\.mp4).*";
+    public static final String vimeoFolders = "(http|https)://[a-z0-9_-]+\\.[a-z]+\\.[a-z]+/([^?]+)/(.*\\.mp4).*";
 
 }

@@ -15,15 +15,13 @@
  */
 package eu.smartenit.unada.ctm.cache.impl;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import eu.smartenit.unada.commons.logging.UnadaLogger;
 import eu.smartenit.unada.ctm.cache.timers.Periodic24hTask;
+import eu.smartenit.unada.om.IOverlayManager;
 import eu.smartenit.unada.om.OverlayManager;
 import eu.smartenit.unada.om.exceptions.OverlayException;
 import eu.smartenit.unada.sa.SocialAnalyzer;
@@ -31,10 +29,6 @@ import eu.smartenit.unada.sm.SocialMonitor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
-import com.restfb.types.User;
 
 import eu.smartenit.unada.commons.constants.UnadaConstants;
 import eu.smartenit.unada.commons.threads.UnadaThreadService;
@@ -55,117 +49,124 @@ import eu.smartenit.unada.db.dto.UNaDaConfiguration;
  * @version 3.1
  * 
  */
-public class UnadaOrchestrator implements Runnable{
+public class UnadaOrchestrator implements Runnable {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(UnadaOrchestrator.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(UnadaOrchestrator.class);
 
-	public UnadaOrchestrator() {
+    public UnadaOrchestrator() {
 
-	}
+    }
 
-	/**
-	 * The method running the bootstrap method. If its outcome is successful, 
-	 * then thread is over, otherwise runs the bootstrap again after 2 minutes.
-	 * 
-	 */
+    /**
+     * The method running the bootstrap method. If its outcome is successful,
+     * then thread is over, otherwise runs the bootstrap again after 2 minutes.
+     * 
+     */
     @Override
     public void run() {
         boolean bootstrap = bootstrap();
         if (!bootstrap) {
             logger.error("uNaDa configuration is missing! Login to the web application "
-            		+ "with your Facebook credentials!");
-            UnadaThreadService.getThreadService().schedule(new UnadaOrchestrator(), 120, TimeUnit.SECONDS);
+                    + "with your Facebook credentials!");
+            UnadaThreadService.getThreadService().schedule(
+                    new UnadaOrchestrator(), 120, TimeUnit.SECONDS);
         }
     }
 
-	/**
-	 * The method bootstrapping all the uNaDa functionalities: (a) starting or
-	 * joining the overlay, (b) advertising content to the overlay, (c) start
-	 * social monitoring and, (d) start social and overlay prediction.
-	 * 
-	 * @return True if everything is initialized successfully, otherwise False.
-	 * 
-	 */
-	public boolean bootstrap() {
-		logger.info("Bootstrapping the uNaDa Application.");
+    /**
+     * The method bootstrapping all the uNaDa functionalities: (a) starting or
+     * joining the overlay, (b) advertising content to the overlay, (c) start
+     * social monitoring and, (d) start social and overlay prediction.
+     * 
+     * @return True if everything is initialized successfully, otherwise False.
+     * 
+     */
+    public boolean bootstrap() {
+        logger.info("Bootstrapping the uNaDa Application.");
+        // Retrieve unada configuration from database. If not there, or empty
+        // then abort.
+        UNaDaConfiguration unadaConfiguration = DAOFactory
+                .getuNaDaConfigurationDAO().findLast();
+        if (unadaConfiguration == null
+                || unadaConfiguration.getMacAddress() == null
+                || unadaConfiguration.getMacAddress().isEmpty()) {
+            logger.warn("There is no overlay configuration stored, "
+                    + "hence overlay functions cannot start.");
+            return false;
+        }
 
-		// Retrieve unada configuration from database. If not there, or empty then abort.
-		UNaDaConfiguration unadaConfiguration = DAOFactory
-				.getuNaDaConfigurationDAO().findLast();
-		if (unadaConfiguration == null || unadaConfiguration.getMacAddress() == null ||
-                unadaConfiguration.getMacAddress().isEmpty()) {
-			logger.warn("There is no overlay configuration stored, "
-					+ "hence overlay functions cannot start.");
-			return false;
-		}
+        // Check if there is an owner
+        Owner owner = DAOFactory.getOwnerDAO().findLast();
+        if (owner == null) {
+            logger.warn("There is no owner, hence the social functions cannot start.");
+            return false;
+        }
 
-
-        //Check if there is an owner
-		Owner owner = DAOFactory.getOwnerDAO().findLast();
-		if (owner == null) {
-			logger.warn("There is no owner, hence the social functions cannot start.");
-			return false;
-		}
-		
-		// Set unada owner facebook ID
-		UnadaConstants.UNADA_OWNER = owner.getFacebookID();
-		UnadaConstants.UNADA_OWNER_MD5 = 
-				UnadaConstants.md5Hash(UnadaConstants.UNADA_OWNER);
-		logger.debug("Owner ID " + UnadaConstants.UNADA_OWNER + " and its MD5 hash "
-				+ UnadaConstants.UNADA_OWNER_MD5);
+        // Set unada owner facebook ID
+        UnadaConstants.UNADA_OWNER = owner.getFacebookID();
+        UnadaConstants.UNADA_OWNER_MD5 = UnadaConstants
+                .md5Hash(UnadaConstants.UNADA_OWNER);
+        logger.debug("Owner ID " + UnadaConstants.UNADA_OWNER
+                + " and its MD5 hash " + UnadaConstants.UNADA_OWNER_MD5);
 
         // execute cache cleaning task every 1 hour
         UnadaThreadService.getThreadService().scheduleAtFixedRate(
-                new CacheCleanerTask(), 0, 3600 * 1000,
-                TimeUnit.MILLISECONDS);
+                new CacheCleanerTask(), 0, 3600 * 1000, TimeUnit.MILLISECONDS);
 
-		// start overlay join task
-        OverlayManager overlayManager = OverlayFactory.getOverlayManager();
+        // start overlay join task
+        IOverlayManager overlayManager = OverlayFactory.getOverlayManager();
         if (overlayManager == null) {
             logger.info("Creating new overlay manager.");
-            overlayManager = new OverlayManager(unadaConfiguration.getMacAddress());
+            overlayManager = new OverlayManager(
+                    unadaConfiguration.getMacAddress());
             OverlayFactory.setOverlayManager(overlayManager);
         }
 
-		if (!unadaConfiguration.isBootstrapNode()) {
-			try {
-                overlayManager.joinOverlay(
-								InetAddress.getByName(unadaConfiguration
-										.getIpAddress()),
-								unadaConfiguration.getPort());
-			} catch (OverlayException e) {
-				logger.error("Exception joining the overlay: " + e.getMessage());
+        if (!unadaConfiguration.isBootstrapNode()) {
+            logger.info("Joining existing overlay network ...");
+            try {
+                overlayManager.joinOverlay(InetAddress
+                        .getByName(unadaConfiguration.getIpAddress()),
+                        unadaConfiguration.getPort());
+            } catch (OverlayException e) {
+                logger.error("Exception joining the overlay: " + e.getMessage());
                 overlayManager.shutDown();
-				return false;
-			} catch (UnknownHostException e) {
-				logger.error("Unknown host exception: " + e.getMessage());
+                return false;
+            } catch (UnknownHostException e) {
+                logger.error("Unknown host exception: " + e.getMessage());
                 overlayManager.shutDown();
-				return false;
-			}
-		} else {
-			try {
+                return false;
+            }
+        } else {
+            try {
+                logger.info("Creating new overlay network ...");
                 overlayManager.createOverlay("eth0");
-			} catch (OverlayException e) {
-				logger.error("Exception creating the overlay: "
-						+ e.getMessage());
+            } catch (OverlayException e) {
+                logger.error("Exception creating the overlay: "
+                        + e.getMessage());
                 overlayManager.shutDown();
-				return false;
-			} catch (Exception e){//UnknownHostException e) {
+                return false;
+            } catch (Exception e) {// UnknownHostException e) {
                 logger.error("Unknown host exception: " + e.getMessage());
                 overlayManager.shutDown();
                 return false;
             }
         }
 
-		// advertise content to overlay task
-		List<Long> contentIdsList = DAOFactory.getContentDAO().findAllIDs();
-		OverlayFactory.getOverlayManager().advertiseContent(
-				longListToArray(contentIdsList));
+        // advertise content to overlay task
+        UnadaThreadService.getThreadService().execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Long> contentIdsList = DAOFactory.getContentDAO()
+                        .findAllIDs();
+                OverlayFactory.getOverlayManager().advertiseContent(
+                        longListToArray(contentIdsList));
+            }
+        });
 
-		// retrieve facebook and vimeo data task
-
-		SocialMonitor socialMonitor = SocialFactory.getSocialMonitor();
+        // retrieve facebook and vimeo data task
+        SocialMonitor socialMonitor = SocialFactory.getSocialMonitor();
         if (socialMonitor == null) {
             logger.info("Creating new social monitor.");
             socialMonitor = new SocialMonitor(unadaConfiguration);
@@ -176,58 +177,43 @@ public class UnadaOrchestrator implements Runnable{
         SocialAnalyzer socialAnalyzer = SocialFactory.getSocialAnalyzer();
         if (socialAnalyzer == null) {
             logger.info("Creating new social analyzer.");
-            socialAnalyzer = new SocialAnalyzer(OverlayFactory.getOverlayManager());
+            socialAnalyzer = new SocialAnalyzer(
+                    OverlayFactory.getOverlayManager());
             SocialFactory.setSocialAnalyzer(socialAnalyzer);
         }
 
-		// execute overlay and social prediction algorithms and manage cache
-		UnadaThreadService.getThreadService().scheduleAtFixedRate(
-				new PredictionTask(), 60000,
-				unadaConfiguration.getPredictionInterval(),
-				TimeUnit.MILLISECONDS);
-		
-		//Every 6 hours
-		UnadaThreadService.getThreadService().scheduleAtFixedRate(
-				new Periodic6hTask(), 10, 6*60, TimeUnit.MINUTES);
-
-        //Every 24 hours
+        // execute overlay and social prediction algorithms and manage cache
         UnadaThreadService.getThreadService().scheduleAtFixedRate(
-                new Periodic24hTask(), 20, 24*60, TimeUnit.MINUTES);
+                new PredictionTask(), 60000,
+                unadaConfiguration.getPredictionInterval(),
+                TimeUnit.MILLISECONDS);
 
-        //Check if logs available every 2 minutes
-        UnadaThreadService.getThreadService().scheduleAtFixedRate(new Runnable() {
-            public void run(){
-                File f1 = new File(System.getenv("HOME") + "/log/social.log");
-                File f2 = new File(System.getenv("HOME") + "/log/overall.log");
-                if (!f1.exists()) {
-                    UnadaLogger.social = UnadaLogger.createLogger("social", System.getenv("HOME")
-                            + "/log/social.log");
-                }
-                if (!f2.exists()) {
-                    UnadaLogger.overall = UnadaLogger.createLogger("overall", System.getenv("HOME")
-                            + "/log/overall.log");
-                }
-            }
-        }, 2, 2, TimeUnit.MINUTES);
+        // Every 6 hours
+        UnadaThreadService.getThreadService().scheduleAtFixedRate(
+                new Periodic6hTask(), 10, 6 * 60, TimeUnit.MINUTES);
 
-		return true;
-	}
+        // Every 24 hours
+        UnadaThreadService.getThreadService().scheduleAtFixedRate(
+                new Periodic24hTask(), 20, 24 * 60, TimeUnit.MINUTES);
 
-	/**
-	 * The method that maps a list of Long to an array of long.
-	 * 
-	 * @param longList
-	 *            The list of Long
-	 * 
-	 * @return The array of long.
-	 * 
-	 */
-	private long[] longListToArray(List<Long> longList) {
-		long[] longArray = new long[longList.size()];
-		for (int i = 0; i < longList.size(); i++) {
-			longArray[i] = longList.get(i).longValue();
-		}
-		return longArray;
-	}
+        return true;
+    }
+
+    /**
+     * The method that maps a list of Long to an array of long.
+     * 
+     * @param longList
+     *            The list of Long
+     * 
+     * @return The array of long.
+     * 
+     */
+    private long[] longListToArray(List<Long> longList) {
+        long[] longArray = new long[longList.size()];
+        for (int i = 0; i < longList.size(); i++) {
+            longArray[i] = longList.get(i).longValue();
+        }
+        return longArray;
+    }
 
 }

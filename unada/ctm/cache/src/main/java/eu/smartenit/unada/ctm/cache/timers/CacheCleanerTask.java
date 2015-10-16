@@ -22,7 +22,8 @@ import eu.smartenit.unada.ctm.cache.CacheManager;
 import eu.smartenit.unada.ctm.cache.impl.CacheManagerImpl;
 
 /**
- * The CacheCleanerTask class. It removes expired cached contents from the cache.
+ * The CacheCleanerTask class. It removes expired cached contents from the
+ * cache.
  * 
  * @author George Petropoulos
  * @version 2.0
@@ -30,16 +31,16 @@ import eu.smartenit.unada.ctm.cache.impl.CacheManagerImpl;
  */
 public class CacheCleanerTask implements Runnable {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(CacheCleanerTask.class);
-	
-	private CacheManager cacheManager;
+    private static final Logger logger = LoggerFactory
+            .getLogger(CacheCleanerTask.class);
 
-	public void run() {
-		logger.info("Running cache cleaning task.");
-		
-		cacheManager = new CacheManagerImpl(); 
-		cacheManager.deleteExpired();
-	}
+    private CacheManager cacheManager;
+
+    public void run() {
+        logger.info("Running cache cleaning task.");
+
+        cacheManager = new CacheManagerImpl();
+        cacheManager.deleteExpired();
+    }
 
 }

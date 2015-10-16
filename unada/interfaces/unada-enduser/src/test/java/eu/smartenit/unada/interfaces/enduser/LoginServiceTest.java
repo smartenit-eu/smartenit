@@ -40,65 +40,66 @@ import eu.smartenit.unada.db.dto.WifiConfiguration;
 
 /**
  * The LoginServiceTest class implementing tests for the login REST API.
- *
+ * 
  * @author George Petropoulos
  * @version 2.0
  */
-public class LoginServiceTest extends JerseyTest{
-	
-	@Override
+public class LoginServiceTest extends JerseyTest {
+
+    @Override
     protected Application configure() {
         return new ResourceConfig(LoginService.class);
     }
-	
-	private TrustedUserDAO trustedUserDAO = mock(TrustedUserDAO.class);
-	
-	private HttpServletRequest request = mock(HttpServletRequest.class);
-	
-	private UNaDaConfigurationDAO unadaDAO = mock(UNaDaConfigurationDAO.class);
-	
-	private ARP arp = mock(ARP.class);
-	
-	@Before
-	public void setup() {
-		TrustedUser trusted = new TrustedUser();
-		trusted.setFacebookID("4567890");
-		trusted.setMacAddress("aa:ff::0e");
-		
-		UNaDaConfiguration unadaConfiguration = new UNaDaConfiguration();
-		unadaConfiguration.setIpAddress("192.168.40.1");
-		WifiConfiguration privateWifi = new WifiConfiguration();
-		privateWifi.setSSID("private-rb-horst-ssid");
-		privateWifi.setPassword("1234567890");
-		unadaConfiguration.setPrivateWifi(privateWifi);
-		
-    	when(trustedUserDAO.findById("123456")).thenReturn(null);
-    	when(trustedUserDAO.findById("4567890")).thenReturn(trusted);
-    	when(request.getRemoteAddr()).thenReturn("192.168.40.10");
-    	when(unadaDAO.findLast()).thenReturn(unadaConfiguration);
-    	when(arp.execute("192.168.40.10")).thenReturn("aa:ff::0e");
-    	DAOFactory.setTrustedUserDAO(trustedUserDAO);
-    	DAOFactory.setuNaDaConfigurationDAO(unadaDAO);
-	}
- 
-    @Test 
-    public void testNonExistingTrustedUser() {
-    	RemoteLoginReply negativeReply = target("login/123456").register(request)
-    			.request(MediaType.APPLICATION_JSON_TYPE)
-    			.get(RemoteLoginReply.class);
-    	assertNotNull(negativeReply);
-    	assertEquals(negativeReply.getOutcome(), 0);
-    	assertNull(negativeReply.getWifiConfiguration());
+
+    private TrustedUserDAO trustedUserDAO = mock(TrustedUserDAO.class);
+
+    private HttpServletRequest request = mock(HttpServletRequest.class);
+
+    private UNaDaConfigurationDAO unadaDAO = mock(UNaDaConfigurationDAO.class);
+
+    private ARP arp = mock(ARP.class);
+
+    @Before
+    public void setup() {
+        TrustedUser trusted = new TrustedUser();
+        trusted.setFacebookID("4567890");
+        trusted.setMacAddress("aa:ff::0e");
+
+        UNaDaConfiguration unadaConfiguration = new UNaDaConfiguration();
+        unadaConfiguration.setIpAddress("192.168.40.1");
+        WifiConfiguration privateWifi = new WifiConfiguration();
+        privateWifi.setSSID("private-rb-horst-ssid");
+        privateWifi.setPassword("1234567890");
+        unadaConfiguration.setPrivateWifi(privateWifi);
+
+        when(trustedUserDAO.findById("123456")).thenReturn(null);
+        when(trustedUserDAO.findById("4567890")).thenReturn(trusted);
+        when(request.getRemoteAddr()).thenReturn("192.168.40.10");
+        when(unadaDAO.findLast()).thenReturn(unadaConfiguration);
+        when(arp.execute("192.168.40.10")).thenReturn("aa:ff::0e");
+        DAOFactory.setTrustedUserDAO(trustedUserDAO);
+        DAOFactory.setuNaDaConfigurationDAO(unadaDAO);
     }
-    
-    //ignored due to some HttpServletRequest issue
-    @Test @Ignore
+
+    @Test
+    public void testNonExistingTrustedUser() {
+        RemoteLoginReply negativeReply = target("login/123456")
+                .register(request).request(MediaType.APPLICATION_JSON_TYPE)
+                .get(RemoteLoginReply.class);
+        assertNotNull(negativeReply);
+        assertEquals(negativeReply.getOutcome(), 0);
+        assertNull(negativeReply.getWifiConfiguration());
+    }
+
+    // ignored due to some HttpServletRequest issue
+    @Test
+    @Ignore
     public void testExistingTrustedUser() {
-    	RemoteLoginReply negativeReply = target("login/4567890").request(MediaType.APPLICATION_JSON_TYPE)
-    			.get(RemoteLoginReply.class);
-    	assertNotNull(negativeReply);
-    	assertEquals(negativeReply.getOutcome(), 1);
-    	assertNotNull(negativeReply.getWifiConfiguration());
+        RemoteLoginReply negativeReply = target("login/4567890").request(
+                MediaType.APPLICATION_JSON_TYPE).get(RemoteLoginReply.class);
+        assertNotNull(negativeReply);
+        assertEquals(negativeReply.getOutcome(), 1);
+        assertNotNull(negativeReply.getWifiConfiguration());
     }
 
 }

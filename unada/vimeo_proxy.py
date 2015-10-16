@@ -55,6 +55,7 @@ def request(context, flow):
             flow.request.scheme = 'http'
             flow.request.headers['Host'] = ['192.168.40.1']
             return
+        return
 
 def responseheaders(context, flow):
     flow.response.stream = True

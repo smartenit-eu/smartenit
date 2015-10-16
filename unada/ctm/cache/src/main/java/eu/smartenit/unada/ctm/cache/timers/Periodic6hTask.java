@@ -36,36 +36,44 @@ import eu.smartenit.unada.db.dto.UNaDaConfiguration;
  */
 public class Periodic6hTask implements Runnable {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(Periodic6hTask.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(Periodic6hTask.class);
 
-	/**
-	 * The method that executes the thread.
-	 * 
-	 */
-	public void run() {
-		logger.info("Running the 6h periodic task.");
-		logger.debug("Logging the owner's friends in social log.");		
-		List<Friend> friends = DAOFactory.getFriendDAO().findAll();
-		UNaDaConfiguration unadaConfig = DAOFactory.getuNaDaConfigurationDAO().findLast();
-		
-		UnadaLogger.social.info("{}, {}",
-				new Object[]{UnadaConstants.UNADA_OWNER_MD5, 
-				unadaConfig.getPrivateWifi().getSSID()});
-		
-		for (Friend f : friends) {
-			UnadaLogger.social.info("{}", UnadaConstants.md5Hash(f.getFacebookID()));
-		}
-		
-		logger.debug("Logging the cache hits in overall log.");		
-		List<Content> contents = DAOFactory.getContentDAO().findAllWithAccesses();
-		for (Content c : contents) {
-			UnadaLogger.overall.info("{}: Cache Hits ({}, {}, {})",
-					new Object[]{UnadaConstants.UNADA_OWNER_MD5, c.getContentID(), 
-					System.currentTimeMillis() - c.getCacheDate().getTime(), 
-					c.getAccessList() == null ? 0 : c.getAccessList().size()});
-		}
-		logger.info("Done.");
-	}
+    /**
+     * The method that executes the thread.
+     * 
+     */
+    public void run() {
+        logger.info("Running the 6h periodic task.");
+        logger.debug("Logging the owner's friends in social log.");
+        List<Friend> friends = DAOFactory.getFriendDAO().findAll();
+        UNaDaConfiguration unadaConfig = DAOFactory.getuNaDaConfigurationDAO()
+                .findLast();
+
+        UnadaLogger.social.info("{}, {}", new Object[] {
+                UnadaConstants.UNADA_OWNER_MD5,
+                unadaConfig.getPrivateWifi().getSSID() });
+
+        for (Friend f : friends) {
+            UnadaLogger.social.info("{}",
+                    UnadaConstants.md5Hash(f.getFacebookID()));
+        }
+
+        logger.debug("Logging the cache hits in overall log.");
+        List<Content> contents = DAOFactory.getContentDAO()
+                .findAllWithAccesses();
+        for (Content c : contents) {
+            UnadaLogger.overall.info(
+                    "{}: Cache Hits ({}, {}, {})",
+                    new Object[] {
+                            UnadaConstants.UNADA_OWNER_MD5,
+                            c.getContentID(),
+                            System.currentTimeMillis()
+                                    - c.getCacheDate().getTime(),
+                            c.getAccessList() == null ? 0 : c.getAccessList()
+                                    .size() });
+        }
+        logger.info("Done.");
+    }
 
 }

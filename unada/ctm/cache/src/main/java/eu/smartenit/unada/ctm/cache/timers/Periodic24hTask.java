@@ -33,22 +33,22 @@ import java.util.List;
  */
 public class Periodic24hTask implements Runnable {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(Periodic24hTask.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(Periodic24hTask.class);
 
-
-	/**
-	 * The method that executes the thread.
-	 * 
-	 */
-	public void run() {
-		logger.info("Running the 24h periodic task.");
+    /**
+     * The method that executes the thread.
+     * 
+     */
+    public void run() {
+        logger.info("Running the 24h periodic task.");
         updateSocialPredictionParameters();
-		logger.info("Done.");
-	}
+        logger.info("Done.");
+    }
 
     public void updateSocialPredictionParameters() {
-        List<SocialScores> socialScores = DAOFactory.getSocialScoresDAO().findAll();
+        List<SocialScores> socialScores = DAOFactory.getSocialScoresDAO()
+                .findAll();
 
         if (socialScores != null && socialScores.size() >= 6) {
             logger.debug("Executing linear regression.");
@@ -56,38 +56,40 @@ public class Periodic24hTask implements Runnable {
             double[] y = new double[socialScores.size()];
             double[][] x = new double[socialScores.size()][];
 
-            for (int i=0; i<socialScores.size(); i++) {
-                //calculating x
-                x[i] = new double[] {socialScores.get(i).getAlpha(), socialScores.get(i).getDelta(),
-                        socialScores.get(i).getEta(), socialScores.get(i).getPhi(),
-                        socialScores.get(i).getGamma()};
+            for (int i = 0; i < socialScores.size(); i++) {
+                // calculating x
+                x[i] = new double[] { socialScores.get(i).getAlpha(),
+                        socialScores.get(i).getDelta(),
+                        socialScores.get(i).getEta(),
+                        socialScores.get(i).getPhi(),
+                        socialScores.get(i).getGamma() };
                 logger.debug("x = {}", Arrays.toString(x[i]));
 
-                //calculating y
-                Content content = DAOFactory.getContentDAO().findById(socialScores.get(i).getContentID());
-                List<ContentAccess> accesses =
-                        DAOFactory.getContentAccessDAO().findByContentID(content.getContentID());
+                // calculating y
+                Content content = DAOFactory.getContentDAO().findById(
+                        socialScores.get(i).getContentID());
+                List<ContentAccess> accesses = DAOFactory.getContentAccessDAO()
+                        .findByContentID(content.getContentID());
                 double views = 0;
-                if (accesses != null)  {
+                if (accesses != null) {
                     views = accesses.size();
                 }
 
-                long intervals =
-                        (System.currentTimeMillis() - content.getCacheDate().getTime())/(24 * 60 * 60000);
+                long intervals = (System.currentTimeMillis() - content
+                        .getCacheDate().getTime()) / (24 * 60 * 60000);
                 double p = 0;
                 if (intervals == 0) {
                     p = Math.min(0.99, views);
-                }
-                else {
-                    p = Math.min(0.99, (double) views / (double)intervals);
+                } else {
+                    p = Math.min(0.99, (double) views / (double) intervals);
                 }
 
                 if (p < 0.0000001) {
                     p = 0.0000001;
                 }
-                logger.debug("Views {}, intervals {}, p {}, content {}", views, intervals, p,
-                        content.getContentID());
-                y[i] = Math.log(p/(1-p));
+                logger.debug("Views {}, intervals {}, p {}, content {}", views,
+                        intervals, p, content.getContentID());
+                y[i] = Math.log(p / (1 - p));
             }
             logger.debug("y {}", Arrays.toString(y));
             regression.newSampleData(y, x);

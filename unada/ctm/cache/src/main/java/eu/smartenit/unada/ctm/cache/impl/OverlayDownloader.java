@@ -15,11 +15,12 @@
  */
 package eu.smartenit.unada.ctm.cache.impl;
 
+import eu.smartenit.unada.commons.constants.CacheConstants;
 import eu.smartenit.unada.commons.constants.UnadaConstants;
 import eu.smartenit.unada.commons.logging.UnadaLogger;
 import eu.smartenit.unada.commons.threads.UnadaThreadService;
 import eu.smartenit.unada.ctm.cache.VideoDownloader;
-import eu.smartenit.unada.ctm.cache.util.CacheConstants;
+import eu.smartenit.unada.ctm.cache.util.FileUtils;
 import eu.smartenit.unada.ctm.cache.util.OverlayFactory;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.Content;
@@ -32,54 +33,57 @@ import java.io.File;
 import java.util.Date;
 
 /**
- * The OverlayDownloader runnable class.
- * It includes methods that retrieve content information from the overlay,
- * and download the content, if not present in the cache.
- *
+ * The OverlayDownloader runnable class. It includes methods that retrieve
+ * content information from the overlay, and download the content, if not
+ * present in the cache.
+ * 
  * @author George Petropoulos
  * @version 2.1
- *
+ * 
  */
-public class OverlayDownloader implements VideoDownloader, Runnable{
+public class OverlayDownloader implements VideoDownloader, Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(OverlayDownloader.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(OverlayDownloader.class);
 
     private Content content;
 
     /**
      * The constructor.
-     *
+     * 
      */
     public OverlayDownloader(Content content) {
-       this.content = content;
+        this.content = content;
     }
 
     /**
      * The method that executes the OverlayDownloader thread.
-     *
+     * 
      */
     public void run() {
         try {
             downloadVideo();
         } catch (Exception e) {
-            logger.error("Error while downloading video " + content.getContentID()
-                    + " from the overlay.");
+            logger.error("Error while downloading video "
+                    + content.getContentID() + " from the overlay.");
         }
     }
 
     /**
-     * The method that downloads the video from the overlay.
-     * It checks whether the content is cached,
-     * otherwise it downloads it and stores it in the local cache.
-     *
+     * The method that downloads the video from the overlay. It checks whether
+     * the content is cached, otherwise it downloads it and stores it in the
+     * local cache.
+     * 
      * @throws Exception
      */
     public void downloadVideo() throws Exception {
 
-        logger.info("Attempting to download content " + content.getContentID() + " from the overlay.");
+        logger.info("Attempting to download content " + content.getContentID()
+                + " from the overlay.");
 
         // check if file already exists.
-        logger.info("Checking if content " + content.getContentID() + " exists in cache.");
+        logger.info("Checking if content " + content.getContentID()
+                + " exists in cache.");
         Content c = null;
         try {
             c = DAOFactory.getContentDAO().findById(content.getContentID());
@@ -90,47 +94,55 @@ public class OverlayDownloader implements VideoDownloader, Runnable{
         }
         if (c != null) {
             logger.info("Content " + content.getContentID()
-            		+ " is either downloading or already cached.");
+                    + " is either downloading or already cached.");
             return;
-        }
-        else {
+        } else {
 
             try {
-                logger.debug("Content " + content.getContentID() + " is not cached.");
+                logger.debug("Content " + content.getContentID()
+                        + " is not cached.");
                 String remotePath = content.getPath();
-                String p = remotePath.split("unada")[1];
-                content.setPath(CacheConstants.cachePath + p);
+                logger.debug("Content path " + content.getPath());
+                if (remotePath != null && !remotePath.isEmpty()) {
+                    String p = remotePath.split("unada")[1];
+                    content.setPath(CacheConstants.cachePath + p);
 
-                File f = new File(content.getPath());
-                if (!f.getParentFile().getParentFile().exists()) {
-                    f.getParentFile().mkdirs();
+                    File f = new File(content.getPath());
+                    if (!f.getParentFile().exists()) {
+                        f.getParentFile().mkdirs();
+                    }
+                    f.createNewFile();
+                } else {
+                    logger.debug("Path will be resolved during overlay download.");
                 }
-                f.createNewFile();
 
                 // save content information to database
                 content.setCacheScore(0);
                 content.setDownloaded(false);
                 content.setPrefetched(true);
                 content.setQuality("480p");
-                content.setUrl("http://www.vimeo.com/m/" + content.getContentID());
+                content.setUrl("http://www.vimeo.com/m/"
+                        + content.getContentID());
                 content.setPrefetchedVimeo(false);
                 content.setCacheDate(new Date(System.currentTimeMillis()));
-
 
                 logger.info("Inserting content " + content);
                 DAOFactory.getContentDAO().insert(content);
 
                 // download content
-                logger.info("Prefetching video from the overlay with id " + content.getContentID()
-                        + " and size " + (float) content.getSize()/1000000 +  "MB to " + content.getPath());
+                logger.info("Prefetching video " + content.getContentID()
+                        + " with size " + (float) content.getSize() / 1000000
+                        + "MB from the overlay.");
                 long timeBefore = System.currentTimeMillis();
-                IFutureDownload future = OverlayFactory.getOverlayManager().downloadContent(content);
+                IFutureDownload future = OverlayFactory.getOverlayManager()
+                        .downloadContent(content);
                 future.get();
                 long timeAfter = System.currentTimeMillis();
 
                 if (!future.isSuccess()) {
                     logger.warn("Download from overlay failed! Will prefetch it from Vimeo.");
                     // delete existing record
+                    FileUtils.deleteFile(content.getPath());
                     DAOFactory.getContentDAO().delete(content.getContentID());
 
                     // run vimeo downloader to fetch it from Vimeo
@@ -143,24 +155,37 @@ public class OverlayDownloader implements VideoDownloader, Runnable{
                 content.setDownloaded(true);
                 content.setCacheDate(new Date(System.currentTimeMillis()));
                 logger.debug("Updating content " + content);
-                logger.info("Content " + content.getContentID() + " prefetching from the overlay "
-                		+ "completed successfully.");
+                logger.info("Prefetching of video {} from the overlay was "
+                        + "completed successfully after {} seconds.",
+                        content.getContentID(), (timeAfter - timeBefore) / 1000);
                 DAOFactory.getContentDAO().update(content);
-                
-                UnadaLogger.overall.info("{}: Video prefetching ({}, {}, {}, overlay, {})", 
-                		new Object[]{UnadaConstants.UNADA_OWNER_MD5, timeAfter, 
-                		content.getContentID(), content.getSize(), timeAfter - timeBefore});
+
+                UnadaLogger.overall.info(
+                        "{}: Video prefetching ({}, {}, {}, overlay, {})",
+                        new Object[] { UnadaConstants.UNADA_OWNER_MD5,
+                                timeAfter, content.getContentID(),
+                                content.getSize(), timeAfter - timeBefore });
+                UnadaThreadService.getThreadService().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        OverlayFactory.getOverlayManager().advertiseContent(
+                                content.getContentID());
+                    }
+                });
 
             } catch (Exception e) {
-                logger.error("Exception while downloading video {}", content.getContentID(), e);
-            }
+                logger.error("Exception while downloading video {}",
+                        content.getContentID(), e);
+                logger.warn("Download from overlay failed! Will prefetch it from Vimeo.");
+                // delete existing record
+                FileUtils.deleteFile(content.getPath());
+                DAOFactory.getContentDAO().delete(content.getContentID());
 
-            UnadaThreadService.getThreadService().execute(new Runnable() {
-                @Override
-                public void run() {
-                    OverlayFactory.getOverlayManager().advertiseContent(content.getContentID());
-                }
-            });
+                // run vimeo downloader to fetch it from Vimeo
+                UnadaThreadService.getThreadService().execute(
+                        new VimeoDownloader(content.getUrl(), true));
+                return;
+            }
         }
     }
 }

@@ -31,7 +31,7 @@ public class UnadaInfo implements Serializable, Comparable<UnadaInfo>{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3212752756081453967L;
+	private static final long serialVersionUID = -3212752756081453932L;
 
 	public UnadaInfo() {
 		
@@ -39,7 +39,10 @@ public class UnadaInfo implements Serializable, Comparable<UnadaInfo>{
 	
 	private String type;
     private String unadaAddress;
-    private int unadaPort;
+    
+    private int tcpPort;
+    private int udpPort;
+    
     private double longitude;
     private double latitude;
     private String unadaID;
@@ -71,11 +74,10 @@ public class UnadaInfo implements Serializable, Comparable<UnadaInfo>{
 		this.unadaAddress = unadaAddress.getHostAddress();
 		return this;
 	}
-	public int getUnadaPort() {
-		return unadaPort;
-	}
-	public void setUnadaPort(int unadaPort) {
-		this.unadaPort = unadaPort;
+
+	public void setUnadaPorts(int unadaPort) {
+		this.tcpPort = unadaPort;
+		this.udpPort = unadaPort;
 	}
 	public double getLongitude() {
 		return longitude;
@@ -116,7 +118,8 @@ public class UnadaInfo implements Serializable, Comparable<UnadaInfo>{
 		// use the same fields as in equals()
 		int hash = 7;
 		hash = 73 * hash + (this.unadaAddress != null ? this.unadaAddress.hashCode() : 0);
-		hash = 73 * hash + this.unadaPort;
+//		hash = 73 * hash + this.tcpPort;
+//		hash = 73 * hash + this.udpPort;
 		hash = 73 * hash + (this.unadaID != null ? this.unadaID.hashCode() : 0);
 		return hash;
 	}
@@ -126,8 +129,9 @@ public class UnadaInfo implements Serializable, Comparable<UnadaInfo>{
 		if(obj instanceof UnadaInfo){
 			UnadaInfo info = (UnadaInfo) obj;
 			return unadaID.equals(info.getUnadaID())
-					&& unadaAddress.equals(info.getUnadaAddress())
-					&& unadaPort == info.getUnadaPort();
+					&& unadaAddress.equals(info.getUnadaAddress());
+//					&& tcpPort == info.getTcpPort()
+//					&& udpPort == info.getUdpPort();
 		}
 		return super.equals(obj);
 	}
@@ -135,7 +139,7 @@ public class UnadaInfo implements Serializable, Comparable<UnadaInfo>{
 	@Override
 	public String toString() {
 		return "UnadaInfo [type=" + type + ", unadaAddress=" + unadaAddress
-				+ ", unadaPort=" + unadaPort + ", longitude=" + longitude
+				+ ", tcpPort=" + tcpPort + ", udpPort=" + udpPort + ", longitude=" + longitude
 				+ ", latitude=" + latitude + ", unadaID=" + unadaID + ", hopCount=" + hopCount + "]";
 	}
 	
@@ -151,6 +155,18 @@ public class UnadaInfo implements Serializable, Comparable<UnadaInfo>{
 		}
 		
 		return comp;
+	}
+	public int getTcpPort() {
+		return tcpPort;
+	}
+	public void setTcpPort(int tcpPort) {
+		this.tcpPort = tcpPort;
+	}
+	public int getUdpPort() {
+		return udpPort;
+	}
+	public void setUdpPort(int udpPort) {
+		this.udpPort = udpPort;
 	}
 
 }

@@ -50,7 +50,7 @@ public class DownloadRequestMessage extends BaseMessage {
 		long startTime = System.currentTimeMillis();
 		
 		MessageDigest md;
-		log.debug("{} - Starting to serve content request.", om.getuNaDaInfo().getUnadaID());
+		log.info("Serving video {} to overlay neighbor.", contentID);
 		Content content = DAOFactory.getContentDAO().findById(contentID);
 		DownloadReplyMessage reply = new DownloadReplyMessage();
 		try{
@@ -93,8 +93,9 @@ public class DownloadRequestMessage extends BaseMessage {
 				}
 				chunkNo++;
 			}
-			
-			
+
+			log.info("Serving video {} to overlay neighbor was completed successfully after {} seconds.",
+					contentID, (System.currentTimeMillis() - startTime)/1000);
 			//Study log #3 Video Serving Events (time, videoID, size, source, download time) 
 			UnadaLogger.overall.debug("{}: Video Serving Event ({}, {}, {}, {}, {})", new Object[]{
 					UnadaConstants.UNADA_OWNER_MD5, 

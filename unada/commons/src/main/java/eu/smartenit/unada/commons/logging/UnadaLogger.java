@@ -24,9 +24,6 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 
-import java.io.File;
-import java.io.IOException;
-
 /**
  * The UnadaLogger class. It creates some additional logs for RBH trials.
  * 
@@ -35,44 +32,86 @@ import java.io.IOException;
  * 
  */
 public class UnadaLogger {
-	
-	public static Logger social;
 
-	public static Logger overall;
-	
-	static {
-		social = createLogger("social", System.getenv("HOME") + "/log/social.log");
-		overall = createLogger("overall", System.getenv("HOME") + "/log/overall.log");
-	}
+    public static Logger social;
 
-	/**
-	 * The method that creates a logger with a given name and at a given path.
-	 * 
-	 * @param string The logger name.
-	 * @param file The logger path.
-	 * 
-	 * @return The created logger.
-	 * 
-	 */
-	public static Logger createLogger(String string, String file) {
-		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-		PatternLayoutEncoder ple = new PatternLayoutEncoder();
+    public static Logger overall;
 
-		ple.setPattern("%msg%n");
-		ple.setContext(lc);
-		ple.start();
-		FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
-		fileAppender.setFile(file);
-		fileAppender.setEncoder(ple);
-		fileAppender.setContext(lc);
-		fileAppender.start();
+    static {
+        social = createLogger("social", System.getenv("HOME")
+                + "/social.log.tmp", System.getenv("HOME")
+                + "/log/social.log.%d{yyyy-MM-dd}.%i");
+        overall = createLogger("overall", System.getenv("HOME")
+                + "/overall.log.tmp", System.getenv("HOME")
+                + "/log/overall.log.%d{yyyy-MM-dd}.%i");
+    }
 
-		Logger logger = (Logger) LoggerFactory.getLogger(string);
-		logger.addAppender(fileAppender);
-		logger.setLevel(Level.DEBUG);
-		logger.setAdditive(false);  
+    /**
+     * The method that creates a logger with a given name and at a given path.
+     * 
+     * @param name
+     *            The logger name.
+     * @param tmpfile
+     *            , String logArchive The logger path.
+     * 
+     * @return The created logger.
+     * 
+     *         <rollingPolicy
+     *         class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+     *         <fileNamePattern>${HOME}/unada.%i.log.zip</fileNamePattern>
+     *         <minIndex>1</minIndex> <maxIndex>2</maxIndex> </rollingPolicy>
+     * 
+     *         <triggeringPolicy
+     *         class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+     *         <maxFileSize>10MB</maxFileSize> </triggeringPolicy>
+     * 
+     */
+    public static Logger createLogger(String name, String tmpfile,
+            String logArchive) {
 
-		return logger;
-	}
+        System.out.println("Creating logger with name " + name + "tempfile: "
+                + tmpfile + " and archive: " + logArchive);
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        PatternLayoutEncoder ple = new PatternLayoutEncoder();
+
+        ple.setPattern("%msg%n");
+        ple.setContext(lc);
+        ple.start();
+
+        FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+        // SizeAndTimeBasedFNATP<ILoggingEvent> triggeringPolicy=new
+        // SizeAndTimeBasedFNATP<ILoggingEvent>();
+        // RollingFileAppender<ILoggingEvent> fileAppender = new
+        // RollingFileAppender<ILoggingEvent>();
+        // TimeBasedRollingPolicy<ILoggingEvent> rollingPolicy = new
+        // TimeBasedRollingPolicy<>();
+
+        // triggeringPolicy.setMaxFileSize("1MB");
+        // triggeringPolicy.setContext(lc);
+        // triggeringPolicy.setTimeBasedRollingPolicy(rollingPolicy);
+
+        // rollingPolicy.setFileNamePattern(logArchive);
+        // rollingPolicy.setContext(lc);
+        // rollingPolicy.setParent(fileAppender);
+        // rollingPolicy.setTimeBasedFileNamingAndTriggeringPolicy(triggeringPolicy);
+
+        fileAppender.setFile(tmpfile);
+        fileAppender.setEncoder(ple);
+        fileAppender.setContext(lc);
+        // fileAppender.setTriggeringPolicy(rollingPolicy);
+        fileAppender.setAppend(true);
+
+        // triggeringPolicy.start();
+        // rollingPolicy.start();
+        fileAppender.start();
+
+        Logger logger = (Logger) LoggerFactory.getLogger(name);
+        logger.addAppender(fileAppender);
+        logger.setLevel(Level.INFO);
+
+        logger.info("Logger created");
+
+        return logger;
+    }
 
 }

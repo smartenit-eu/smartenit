@@ -23,6 +23,30 @@
 			</pattern>
 		</encoder>
 	</appender>
+	
+		<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${HOME}/unada.log</file>
+		<append>false</append>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<fileNamePattern>${HOME}/unada.%i.log.zip</fileNamePattern>
+			<minIndex>1</minIndex>
+			<maxIndex>2</maxIndex>
+		</rollingPolicy>
+
+		<triggeringPolicy
+			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>10MB</maxFileSize>
+		</triggeringPolicy>
+		<encoder>
+			<pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	 <logger name="net.tomp2p.p2p.builder.DiscoverBuilder" level="DEBUG"/> 
+		<logger name="net.tomp2p.connection.ChannelServer" level="DEBUG"/> <logger 
+		name="net.tomp2p" level="WARN" />
 
     <logger name="net.tomp2p" level="WARN"/>
 

@@ -36,38 +36,65 @@ import eu.smartenit.unada.commons.constants.UnadaConstants;
 @ManagedBean
 @RequestScoped
 public class LoginBean {
-	
-	private static final Logger logger = LoggerFactory.getLogger(LoginBean.class);
 
-	/**
-	 * The login listener method, that handles the Facebook login. It redirects to the 
-	 * Facebook API for further authentication.
-	 * 
-	 * @param event The action event received from the login page.
-	 */
-	public void login(ActionEvent event) {
+    private static final Logger logger = LoggerFactory
+            .getLogger(LoginBean.class);
 
-		final String furl = "https://www.facebook.com/dialog/oauth?"
-				+ "client_id=" + UnadaConstants.APP_ID + "&"
-				+ "redirect_uri=" 
-				+ UnadaConstants.REDIRECT_URI
-				+ "/unada/index.xhtml&"
-				+ "scope=" + UnadaConstants.PERMISSIONS + "&"
-				+ "response_type=code";
+    private String overlayStatus;
 
-		HttpServletResponse response = (HttpServletResponse) FacesContext
-				.getCurrentInstance().getExternalContext().getResponse();
+    public String getOverlayStatus() {
+        switch (UnadaConstants.OVERLAY_STATUS) {
+        case 0:
+            overlayStatus = "OK";
+            break;
+        case 1:
+            overlayStatus = "CONNECTING";
+            break;
+        case 2:
+            overlayStatus = "ERROR";
+            break;
+        case 3:
+            overlayStatus = "INITIALING";
+            break;
+        }
+        return overlayStatus;
+    }
 
-		try {
-            FacesContext.getCurrentInstance().getExternalContext().getApplicationMap().put("noFacebook", false);
-			response.sendRedirect(furl);
-		} catch (Exception e) {
-			logger.error("Error while loggin into Facebook API: " + e.getMessage());
-		}
-	}
+    public void setOverlayStatus(String overlayStatus) {
+        this.overlayStatus = overlayStatus;
+    }
+
+    /**
+     * The login listener method, that handles the Facebook login. It redirects
+     * to the Facebook API for further authentication.
+     * 
+     * @param event
+     *            The action event received from the login page.
+     */
+    public void login(ActionEvent event) {
+
+        final String furl = "https://www.facebook.com/dialog/oauth?"
+                + "client_id=" + UnadaConstants.APP_ID + "&" + "redirect_uri="
+                + UnadaConstants.REDIRECT_URI + "/unada/index.xhtml&"
+                + "scope=" + UnadaConstants.PERMISSIONS + "&"
+                + "response_type=code";
+
+        HttpServletResponse response = (HttpServletResponse) FacesContext
+                .getCurrentInstance().getExternalContext().getResponse();
+
+        try {
+            FacesContext.getCurrentInstance().getExternalContext()
+                    .getApplicationMap().put("noFacebook", false);
+            response.sendRedirect(furl);
+        } catch (Exception e) {
+            logger.error("Error while loggin into Facebook API: "
+                    + e.getMessage());
+        }
+    }
 
     public String loginNoFacebook() {
-        FacesContext.getCurrentInstance().getExternalContext().getApplicationMap().put("noFacebook", true);
+        FacesContext.getCurrentInstance().getExternalContext()
+                .getApplicationMap().put("noFacebook", true);
         return "index";
     }
 }

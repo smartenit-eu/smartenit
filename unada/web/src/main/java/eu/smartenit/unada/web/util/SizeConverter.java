@@ -25,24 +25,24 @@ import javax.faces.convert.FacesConverter;
 @FacesConverter("eu.smartenit.unada.web.util.SizeConverter")
 public class SizeConverter implements Converter {
 
-	public Object getAsObject(FacesContext arg0, UIComponent arg1, String value) {
-		if (value == null || value.isEmpty()) {
-			return 0;
-		} 
-		return Float.valueOf(value)*1000000;
-	}
+    public Object getAsObject(FacesContext arg0, UIComponent arg1, String value) {
+        if (value == null || value.isEmpty()) {
+            return 0;
+        }
+        return Float.valueOf(value) * 1000000;
+    }
 
-	public String getAsString(FacesContext arg0, UIComponent arg1, Object value) {
-		if (value == null) {
-			return "0";
-		}
-		long val = (Long) value;
-		
-		double x = (double) val/1000000;
-		DecimalFormat df = new DecimalFormat("#.##");
-		String dx = df.format(x);
-		
-		return String.valueOf(Double.valueOf(dx));
-	}
+    public String getAsString(FacesContext arg0, UIComponent arg1, Object value) {
+        if (value == null) {
+            return "0";
+        }
+        long val = (Long) value;
+
+        double x = (double) val / 1000000;
+        DecimalFormat df = new DecimalFormat("#.##");
+        String dx = df.format(x);
+
+        return String.valueOf(Double.valueOf(dx));
+    }
 
 }

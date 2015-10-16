@@ -121,7 +121,7 @@ public class NeighborDatabase {
 		}
 		log.debug("Added {} new providers for content {}, total providers are now {}", counter, contentID, providersForContent.size());
 		
-	}
+	}	
 	
 	public synchronized Set<UnadaInfo> getProviders(long contentID){
 		Set<UnadaInfo> sortedProviders = new TreeSet<>();

@@ -19,12 +19,17 @@ import java.io.Serializable;
 
 /**
  * The DemoEvent class.
- *
+ * 
  * @author George Petropoulos
  * @version 2.1
- *
+ * 
  */
-public class DemoEvent implements Serializable{
+public class DemoEvent implements Serializable {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     public DemoEvent() {
 
@@ -58,14 +63,22 @@ public class DemoEvent implements Serializable{
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         DemoEvent demoEvent = (DemoEvent) o;
 
-        if (alertclass != null ? !alertclass.equals(demoEvent.alertclass) : demoEvent.alertclass != null) return false;
-        if (text != null ? !text.equals(demoEvent.text) : demoEvent.text != null) return false;
-        if (title != null ? !title.equals(demoEvent.title) : demoEvent.title != null) return false;
+        if (alertclass != null ? !alertclass.equals(demoEvent.alertclass)
+                : demoEvent.alertclass != null)
+            return false;
+        if (text != null ? !text.equals(demoEvent.text)
+                : demoEvent.text != null)
+            return false;
+        if (title != null ? !title.equals(demoEvent.title)
+                : demoEvent.title != null)
+            return false;
 
         return true;
     }
@@ -82,14 +95,9 @@ public class DemoEvent implements Serializable{
         this.alertclass = alertclass;
     }
 
-
-
     @Override
     public String toString() {
-        return "DemoEvent{" +
-                "title='" + title + '\'' +
-                ", text='" + text + '\'' +
-                ", alertclass='" + alertclass + '\'' +
-                '}';
+        return "DemoEvent{" + "title='" + title + '\'' + ", text='" + text
+                + '\'' + ", alertclass='" + alertclass + '\'' + '}';
     }
 }

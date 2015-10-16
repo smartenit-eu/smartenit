@@ -45,8 +45,11 @@
 			</div>
 		</div>
 		<div class="footer">
-					<center>&copy; The SmartenIT Consortium 2015</center>
-				</div>
+			<center>&copy; The SmartenIT Consortium 2015 </center>
+			<center>Overlay status: #{loginBean.overlayStatus}</center>
+			<center>Mitmproxy certificate for <a href="http://192.168.40.1/.mitmproxy/mitmproxy-ca-cert.pem">iOS</a>, <a href="http://192.168.40.1/.mitmproxy/mitmproxy-ca-cert.cer">Android</a> and <a href="http://192.168.40.1/.mitmproxy/mitmproxy-ca-cert.pem">WP</a> users</center>
+			<center><h:form><h:commandLink action="#{loginBean.loginNoFacebook}">Skip Facebook</h:commandLink></h:form></center>
+		</div>
 
 	</div>
 	<!-- /container -->

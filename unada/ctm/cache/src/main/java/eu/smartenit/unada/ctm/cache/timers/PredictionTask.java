@@ -17,6 +17,7 @@ package eu.smartenit.unada.ctm.cache.timers;
 
 import java.util.List;
 
+import eu.smartenit.unada.commons.threads.UnadaThreadService;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.UNaDaConfiguration;
 import org.slf4j.Logger;
@@ -29,8 +30,8 @@ import eu.smartenit.unada.ctm.cache.util.SocialFactory;
 import eu.smartenit.unada.db.dto.Content;
 
 /**
- * The PredictionTask class. It initializes the social and overlay 
- * prediction algorithms.
+ * The PredictionTask class. It initializes the social and overlay prediction
+ * algorithms.
  * 
  * @author George Petropoulos
  * @version 2.1
@@ -38,31 +39,36 @@ import eu.smartenit.unada.db.dto.Content;
  */
 public class PredictionTask implements Runnable {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(PredictionTask.class);
-	
-	private CacheManager cacheManager;
+    private static final Logger logger = LoggerFactory
+            .getLogger(PredictionTask.class);
+
+    private CacheManager cacheManager;
+
+    public List<Content> overlayContentList = null;
+
+    public List<Content> socialContentList = null;
 
     public PredictionTask() {
 
     }
 
-	public void run() {
-		predict();
-	}
+    public void run() {
+        predict();
+    }
 
     private void predict() {
         logger.info("Running prediction tasks.");
-        List<Content> overlayContentList = null;
-        List<Content> socialContentList = null;
 
-        //getting unada configuration from db to check whether predictions are enabled
-        UNaDaConfiguration uNaDaConfiguration = DAOFactory.getuNaDaConfigurationDAO().findLast();
+        // getting unada configuration from db to check whether predictions are
+        // enabled
+        UNaDaConfiguration uNaDaConfiguration = DAOFactory
+                .getuNaDaConfigurationDAO().findLast();
 
         // Get sorted overlay prediction list
         if (uNaDaConfiguration.isOverlayPredictionEnabled()) {
             logger.info("Executing overlay prediction.");
-            overlayContentList = OverlayFactory.getOverlayManager().getPrediction();
+            overlayContentList = OverlayFactory.getOverlayManager()
+                    .getPrediction();
         }
 
         // Get sorted social prediction list
@@ -72,7 +78,12 @@ public class PredictionTask implements Runnable {
         }
 
         cacheManager = new CacheManagerImpl();
-        cacheManager.updateCache(socialContentList, overlayContentList);
+        UnadaThreadService.getThreadService().execute(new Runnable() {
+            @Override
+            public void run() {
+                cacheManager.updateCache(socialContentList, overlayContentList);
+            }
+        });
         logger.info("Prediction task ended.");
     }
 

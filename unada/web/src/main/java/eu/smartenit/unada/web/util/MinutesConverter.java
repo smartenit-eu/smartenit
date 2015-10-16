@@ -23,19 +23,19 @@ import javax.faces.convert.FacesConverter;
 @FacesConverter("eu.smartenit.unada.web.util.MinutesConverter")
 public class MinutesConverter implements Converter {
 
-	public Object getAsObject(FacesContext arg0, UIComponent arg1, String value) {
-		if (value == null || value.isEmpty()) {
-			return 0;
-		} 
-		return Long.valueOf(value) * 60 * 1000;
-	}
+    public Object getAsObject(FacesContext arg0, UIComponent arg1, String value) {
+        if (value == null || value.isEmpty()) {
+            return 0;
+        }
+        return Long.valueOf(value) * 60 * 1000;
+    }
 
-	public String getAsString(FacesContext arg0, UIComponent arg1, Object value) {
-		if (value == null) {
-			return "0";
-		}
-		long val = (Long) value;
-		return String.valueOf((long) val / 60 / 1000);
-	}
+    public String getAsString(FacesContext arg0, UIComponent arg1, Object value) {
+        if (value == null) {
+            return "0";
+        }
+        long val = (Long) value;
+        return String.valueOf((long) val / 60 / 1000);
+    }
 
 }

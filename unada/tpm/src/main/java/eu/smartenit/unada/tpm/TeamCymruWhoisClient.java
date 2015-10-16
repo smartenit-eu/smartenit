@@ -155,10 +155,11 @@ public class TeamCymruWhoisClient {
             // Shut down executor threads to exit.
             group.shutdownGracefully();
         }
-        ipAddresses.removeAll(asMap.keySet());
-        if (!ipAddresses.isEmpty()) {
-            logger.error("Could not find ASN for " + ipAddresses.toString());
-        }
+//        ipAddresses.removeAll(asMap.keySet());
+//        if (!ipAddresses.isEmpty()) {
+//            logger.error("Could not find ASN for " + ipAddresses.toString());
+//       }
+        logger.debug("Request completed.");
         return new HashMap<>(asMap);
     }
 }

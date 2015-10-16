@@ -20,9 +20,9 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import eu.smartenit.unada.commons.constants.CacheConstants;
 import eu.smartenit.unada.ctm.cache.impl.VimeoDownloader;
 import eu.smartenit.unada.ctm.cache.impl.VimeoInfoRetriever;
-import eu.smartenit.unada.ctm.cache.util.CacheConstants;
 
 import org.junit.After;
 import org.junit.Before;

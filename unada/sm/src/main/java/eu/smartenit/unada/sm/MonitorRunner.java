@@ -18,6 +18,7 @@ package eu.smartenit.unada.sm;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
+import com.restfb.Version;
 import com.restfb.types.Post;
 import com.restfb.types.User;
 
@@ -130,7 +131,7 @@ class MonitorRunner implements Runnable {
      * @return Returns a List of Friends for a given owner
      */
     List<Friend> getFriends(Owner owner) {
-        FacebookClient facebookClient = new DefaultFacebookClient(owner.getOauthToken());
+        FacebookClient facebookClient = new DefaultFacebookClient(owner.getOauthToken(), Version.VERSION_2_1);
         return getFriends(facebookClient, owner);
     }
 
@@ -144,14 +145,13 @@ class MonitorRunner implements Runnable {
     List<Friend> getFriends(FacebookClient facebookClient, Owner owner) {
         Connection<User> friends = facebookClient.fetchConnection("me/friends", User.class);
         List<Friend> friendList = new ArrayList<Friend>();
+        logger.info("Found {} friends.", friends.getData().size());
 
-        for(int i = 0; i < friends.getData().size(); i++) {
-            for(User facebookFriend: friends.getData()) {
-                Friend friend = new Friend();
-                friend.setFacebookID(facebookFriend.getId());
-                friend.setFacebookName(facebookFriend.getName());
-                friendList.add(friend);
-            }
+        for(User facebookFriend: friends.getData()) {
+            Friend friend = new Friend();
+            friend.setFacebookID(facebookFriend.getId());
+            friend.setFacebookName(facebookFriend.getName());
+            friendList.add(friend);
         }
 
         return friendList;
@@ -163,7 +163,7 @@ class MonitorRunner implements Runnable {
      * @return Returns a list of feed items from facebook for a given owner.
      */
     public List<FeedItem> getFeedItems(Owner owner) {
-        FacebookClient facebookClient = new DefaultFacebookClient(owner.getOauthToken());
+        FacebookClient facebookClient = new DefaultFacebookClient(owner.getOauthToken(), Version.VERSION_2_1);
         return getFeedItems(facebookClient, owner);
     }
 
@@ -178,15 +178,20 @@ class MonitorRunner implements Runnable {
         Connection<Post> feeds = facebookClient.fetchConnection("me/feed", Post.class);
         List<FeedItem> feedItemList = new ArrayList<FeedItem>();
 
+        logger.info("Found {} feeds.", feeds.getData().size());
+
         for(int i = 0; i < feeds.getData().size(); i++) {
             Post facebookFeedItem = feeds.getData().get(i);
+            //logger.info("Found {}", facebookFeedItem);
             FeedItem feedItem = createFeedItem(facebookFeedItem, FeedItem.FeedType.FEED);
             feedItemList.add(feedItem);
         }
 
         List<Friend> friendList = getFriendsFromDB();
+        logger.info("Checking {} friends feeds.", friendList.size());
         for(int i = 0; i < friendList.size(); i++) {
             Connection<Post> feedsOfFriend = facebookClient.fetchConnection(friendList.get(i).getFacebookID() + "/feed", Post.class);
+            logger.info("Found {} feeds of {}.", feeds.getData().size(), friendList.get(i).getFacebookID());
             for (int j = 0; j < feedsOfFriend.getData().size(); j++) {
                 Post feedOfFriend = feedsOfFriend.getData().get(j);
                 //if(String.valueOf(friendList.get(i).getFacebookID()).equals(feedOfFriend.getFrom().getId())) {
@@ -264,6 +269,7 @@ class MonitorRunner implements Runnable {
         if(string.contains("vimeo.com")) {
             String[] splitURL = string.split("/");
             String contentID = splitURL[splitURL.length - 1];
+            contentID = contentID.split("\\?")[0];
             return Long.parseLong(contentID);
         }
         //-1 is for not a vimeo video
@@ -292,6 +298,13 @@ class MonitorRunner implements Runnable {
         } else {
             videoInfo.setViewsNumber(-1);
         }
+
+        String title = null;
+        if(namesList.contains("title")) {
+            title = (String) response.get("title");
+        }
+
+        logger.info("Vimeo video \"{}\" was posted in Facebook News Feed.", title != null ? title : contentID);
 
         return videoInfo;
     }

@@ -17,7 +17,6 @@ package eu.smartenit.unada.om;
 
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import net.tomp2p.dht.FutureGet;
@@ -46,10 +45,7 @@ public class OverlayManagerTest extends OverlayBaseTest{
 	@Test
 	public void testUpdateOverlay() throws ClassNotFoundException, IOException, OverlayException {
 				
-		InetAddress testAddress = InetAddress.getByName("127.0.0.9");
-		int testPort = 6000;
-		
-		om1.updateOverlay(testAddress, testPort);
+		om1.getOverlay().updateOverlay();
 		
 		FutureGet futureGet = network[23].get(Number160.createHash(om1ID)).start();
 		futureGet.awaitUninterruptibly();
@@ -57,8 +53,8 @@ public class OverlayManagerTest extends OverlayBaseTest{
 		
 		UnadaInfo info = (UnadaInfo) futureGet.data().object();
 		Assert.assertNotNull(info.getUnadaAddress());
-		Assert.assertEquals(testAddress.getHostAddress(), info.getUnadaAddress());
-		Assert.assertEquals(testPort, info.getUnadaPort());
+		Assert.assertEquals(om1.getuNaDaInfo().getUnadaAddress(), info.getUnadaAddress());
+		Assert.assertEquals(om1.getuNaDaInfo().getTcpPort(), info.getTcpPort());
 	}
 		
 	@Test@Ignore
@@ -66,7 +62,7 @@ public class OverlayManagerTest extends OverlayBaseTest{
 		OverlayManager om = new OverlayManager("randomid");
 		UnadaInfo info = new UnadaInfo();
 		info.setUnadaAddress("130.60.156.188");
-		info.setUnadaPort(4001);
+		info.setUnadaPorts(4001);
 		om.resolveGeoLocation(info);
 		Assert.assertEquals(47.3667, info.getLatitude(), 0);
 		Assert.assertEquals(8.55, info.getLongitude(), 0);

@@ -82,7 +82,7 @@ public class OverlayBaseTest {
 		int id = rnd.nextInt();
 		info.setUnadaID(id+"");
 		info.setUnadaAddress("127.0.0."+ipAdressCounter);
-		info.setUnadaPort(rnd.nextInt(65000));
+		info.setUnadaPorts(rnd.nextInt(65000));
 		info.setLatitude(rnd.nextLong());
 		info.setLongitude(rnd.nextLong());
 		ipAdressCounter++;

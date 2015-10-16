@@ -18,6 +18,7 @@ package eu.smartenit.unada.sa;
 import eu.smartenit.unada.db.dao.impl.*;
 import eu.smartenit.unada.db.dao.util.DAOFactory;
 import eu.smartenit.unada.db.dto.*;
+import eu.smartenit.unada.om.IOverlayManager;
 import eu.smartenit.unada.om.OverlayManager;
 
 import org.joda.time.LocalDateTime;
@@ -92,7 +93,7 @@ public class SocialAnalyzerTest {
         DAOFactory.setVideoInfoDAO(videoInfoDAO);
 
         //Creating unada mocks
-        OverlayManager om = mock(OverlayManager.class);
+        IOverlayManager om = mock(OverlayManager.class);
 
         UnadaInfo localUnadaInfo = new UnadaInfo();
         localUnadaInfo.setLatitude(47.368227);
@@ -103,14 +104,14 @@ public class SocialAnalyzerTest {
         UnadaInfo firstContent1 = new UnadaInfo();
         firstContent1.setUnadaID("id1");
         firstContent1.setUnadaAddress("127.0.0.1");
-        firstContent1.setUnadaPort(3456);
+        firstContent1.setUnadaPorts(3456);
         firstContent1.setLatitude(47.737188);
         firstContent1.setLongitude(7.353973);
 
         UnadaInfo firstContent2 = new UnadaInfo();
         firstContent2.setUnadaID("id2");
         firstContent2.setUnadaAddress("127.0.0.2");
-        firstContent2.setUnadaPort(3567);
+        firstContent2.setUnadaPorts(3567);
         firstContent2.setLatitude(47.563409);
         firstContent2.setLongitude(7.607346);
 
@@ -122,14 +123,14 @@ public class SocialAnalyzerTest {
         UnadaInfo secondContent1 = new UnadaInfo();
         secondContent1.setUnadaID("id3");
         secondContent1.setUnadaAddress("127.0.0.3");
-        secondContent1.setUnadaPort(5555);
+        secondContent1.setUnadaPorts(5555);
         secondContent1.setLatitude(46.616903);
         secondContent1.setLongitude(2.120361);
 
         UnadaInfo secondContent2 = new UnadaInfo();
         secondContent1.setUnadaID("id4");
         secondContent1.setUnadaAddress("127.0.0.4");
-        secondContent1.setUnadaPort(4444);
+        secondContent1.setUnadaPorts(4444);
         secondContent1.setLatitude(39.498742);
         secondContent2.setLongitude(-3.625488);
 
@@ -225,7 +226,7 @@ public class SocialAnalyzerTest {
         DAOFactory.setSocialPredictionParametersDAO(sppDAO);
 
 
-        OverlayManager om = mock(OverlayManager.class);
+        IOverlayManager om = mock(OverlayManager.class);
 
         UnadaInfo localUnadaInfo = new UnadaInfo();
         localUnadaInfo.setLatitude(47.368227);

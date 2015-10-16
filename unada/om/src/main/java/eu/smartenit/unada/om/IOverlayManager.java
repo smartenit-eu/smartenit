@@ -16,7 +16,6 @@
 package eu.smartenit.unada.om;
 
 import java.net.InetAddress;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -68,16 +67,6 @@ public interface IOverlayManager extends TPMMessageSender {
 	public abstract void createOverlay(String interfaceHint) throws OverlayException;
 
 	/**
-	 * This method updates the uNaDa information stored in the DHT.
-	 * 
-	 * @param newAddress
-	 * @param port
-	 * @throws OverlayException
-	 */
-	public abstract void updateOverlay(InetAddress newAddress, int port)
-			throws OverlayException;
-
-	/**
 	 * Updates the DHt with the information that the specified content can be
 	 * found on this peer.
 	 * 
@@ -123,6 +112,24 @@ public interface IOverlayManager extends TPMMessageSender {
 	 */
 	public Set<UnadaInfo> getCloseProviders(long contentID);
 	
+	
+	/**
+	 * Finds sources in the overlay and returns hop count.
+	 * @param content the content object to be resolved
+	 * @return
+	 */
+	public int getHopCount(Content content);
+	
+	/**
+	 * This method deletes all the contents this node has stored in the DHT.
+	 */
+	public void deleteContents(long... contents);
+	
+	/**
+	 * This method deletes all the contents this node has stored in the DHT.
+	 */
+	public void clearNeighborDB();
+	
 	/**
 	 * Returns the local UnadaInfo
 	 * @return
@@ -133,4 +140,12 @@ public interface IOverlayManager extends TPMMessageSender {
 	 * Shuts down the peer connection to the DHT.
 	 */
 	public abstract void shutDown();
+
+
+	/**
+	 * Returns a status code of the overlay.
+	 * 
+	 * @return  0=OK, 1=Connecting, 2=Error, 3=initial
+	 */
+	public abstract int getOverlayStatus();
 }

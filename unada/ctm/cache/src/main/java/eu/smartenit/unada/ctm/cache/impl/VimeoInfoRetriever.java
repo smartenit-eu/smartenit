@@ -27,7 +27,7 @@ import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * The VimeoInfoRetriever class. It includes a method which retrieves a Vimeo's 
+ * The VimeoInfoRetriever class. It includes a method which retrieves a Vimeo's
  * video information from the Vimeo.
  * 
  * @author George Petropoulos
@@ -36,19 +36,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class VimeoInfoRetriever {
 
-    private static final Logger logger = LoggerFactory.getLogger(VimeoInfoRetriever.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(VimeoInfoRetriever.class);
 
-    public VimeoInfoRetriever(){
+    public VimeoInfoRetriever() {
 
     }
 
     /**
      * The method that retrieves the content information from Vimeo.
-     *
-     * @param url The Vimeo URL.
-     *
+     * 
+     * @param url
+     *            The Vimeo URL.
+     * 
      * @return The video information.
-     *
+     * 
      */
     public VideoInfo retrieveVideoInfo(String url) {
         VideoInfo info = null;
@@ -57,7 +59,8 @@ public class VimeoInfoRetriever {
         try {
             web = new URL(url);
         } catch (MalformedURLException e) {
-            logger.debug("Malformed URL " + url + ", now aborting Vimeo info retrieval.");
+            logger.debug("Malformed URL " + url
+                    + ", now aborting Vimeo info retrieval.");
             return null;
         }
         VimeoParser user = (VimeoParser) VGet.parser(web);

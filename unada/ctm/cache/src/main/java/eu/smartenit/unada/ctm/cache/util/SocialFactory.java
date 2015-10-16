@@ -27,28 +27,25 @@ import eu.smartenit.unada.sm.SocialMonitor;
  * 
  */
 public class SocialFactory {
-		
-	private static SocialAnalyzer socialAnalyzer;
-	
-	private static SocialMonitor socialMonitor;
 
-	public static SocialAnalyzer getSocialAnalyzer() {
-		return socialAnalyzer;
-	}
+    private static SocialAnalyzer socialAnalyzer;
 
-	public static void setSocialAnalyzer(SocialAnalyzer socialAnalyzer) {
-		SocialFactory.socialAnalyzer = socialAnalyzer;
-	}
+    private static SocialMonitor socialMonitor;
 
-	public static SocialMonitor getSocialMonitor() {
-		return socialMonitor;
-	}
+    public static SocialAnalyzer getSocialAnalyzer() {
+        return socialAnalyzer;
+    }
 
-	public static void setSocialMonitor(SocialMonitor socialMonitor) {
-		SocialFactory.socialMonitor = socialMonitor;
-	}
-	
-	
-	
+    public static void setSocialAnalyzer(SocialAnalyzer socialAnalyzer) {
+        SocialFactory.socialAnalyzer = socialAnalyzer;
+    }
+
+    public static SocialMonitor getSocialMonitor() {
+        return socialMonitor;
+    }
+
+    public static void setSocialMonitor(SocialMonitor socialMonitor) {
+        SocialFactory.socialMonitor = socialMonitor;
+    }
 
 }

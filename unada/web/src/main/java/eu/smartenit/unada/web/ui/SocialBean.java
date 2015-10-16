@@ -35,47 +35,50 @@ import eu.smartenit.unada.db.dto.SocialPredictionParameters;
 @ManagedBean
 @RequestScoped
 public class SocialBean {
-	
-	private static final Logger logger = LoggerFactory.getLogger(SocialBean.class);
-		
-	private SocialPredictionParameters socialPredictionParameters;
 
-	public SocialPredictionParameters getSocialPredictionParameters() {
-		return socialPredictionParameters;
-	}
+    private static final Logger logger = LoggerFactory
+            .getLogger(SocialBean.class);
 
-	public void setSocialPredictionParameters(
-			SocialPredictionParameters socialPredictionParameters) {
-		this.socialPredictionParameters = socialPredictionParameters;
-	}
-	
-	/**
-	 * The init() method that initializes the SocialBean.
-	 * It retrieves the stored social prediction algorithms parameters.
-	 * 
-	 */
-	@PostConstruct
-	public void init() {
-		socialPredictionParameters = DAOFactory.getSocialPredictionParametersDAO().findLast();
-		if (socialPredictionParameters == null) {
-			socialPredictionParameters = new SocialPredictionParameters();
-		}
-	}
-	
-	/**
-	 * The method that updates the social prediction algorithms parameters.
-	 * 
-	 * @return It returns to the current page.
-	 * 
-	 */
-	public String updateSocialParameters() {
-		try {
-			DAOFactory.getSocialPredictionParametersDAO().insert(socialPredictionParameters);
-		} catch (Exception e) {
-			logger.error("Error while updating unada's social prediction parameters "
-					+ "to the database.");
-		}
-		return "/social.xhtml?faces-redirect=true";
-	}
-	
+    private SocialPredictionParameters socialPredictionParameters;
+
+    public SocialPredictionParameters getSocialPredictionParameters() {
+        return socialPredictionParameters;
+    }
+
+    public void setSocialPredictionParameters(
+            SocialPredictionParameters socialPredictionParameters) {
+        this.socialPredictionParameters = socialPredictionParameters;
+    }
+
+    /**
+     * The init() method that initializes the SocialBean. It retrieves the
+     * stored social prediction algorithms parameters.
+     * 
+     */
+    @PostConstruct
+    public void init() {
+        socialPredictionParameters = DAOFactory
+                .getSocialPredictionParametersDAO().findLast();
+        if (socialPredictionParameters == null) {
+            socialPredictionParameters = new SocialPredictionParameters();
+        }
+    }
+
+    /**
+     * The method that updates the social prediction algorithms parameters.
+     * 
+     * @return It returns to the current page.
+     * 
+     */
+    public String updateSocialParameters() {
+        try {
+            DAOFactory.getSocialPredictionParametersDAO().insert(
+                    socialPredictionParameters);
+        } catch (Exception e) {
+            logger.error("Error while updating unada's social prediction parameters "
+                    + "to the database.");
+        }
+        return "/social.xhtml?faces-redirect=true";
+    }
+
 }

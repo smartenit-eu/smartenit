@@ -23,20 +23,20 @@ import javax.faces.convert.FacesConverter;
 @FacesConverter("eu.smartenit.unada.web.util.HourConverter")
 public class HourConverter implements Converter {
 
-	public Object getAsObject(FacesContext arg0, UIComponent arg1, String value) {
-		if (value == null || value.isEmpty()) {
-			return 0;
-		} 
-		return Float.valueOf(value) * 3600 * 1000;
-	}
+    public Object getAsObject(FacesContext arg0, UIComponent arg1, String value) {
+        if (value == null || value.isEmpty()) {
+            return 0;
+        }
+        return Float.valueOf(value) * 3600 * 1000;
+    }
 
-	public String getAsString(FacesContext arg0, UIComponent arg1, Object value) {
-		if (value == null) {
-			return "0";
-		}
-		long val = (Long) value;
-		long hours = (long) val / 3600 / 1000;
-		return String.valueOf(hours);
-	}
+    public String getAsString(FacesContext arg0, UIComponent arg1, Object value) {
+        if (value == null) {
+            return "0";
+        }
+        long val = (Long) value;
+        long hours = (long) val / 3600 / 1000;
+        return String.valueOf(hours);
+    }
 
 }

@@ -18,7 +18,9 @@ package eu.smartenit.unada.om;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -33,6 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.smartenit.unada.commons.constants.CacheConstants;
 import eu.smartenit.unada.db.dto.Content;
 import eu.smartenit.unada.db.dto.UnadaInfo;
 import eu.smartenit.unada.om.exceptions.DownloadException;
@@ -42,27 +45,32 @@ public class ContentDownloadHandler implements IFutureDownload{
 
 	private static Logger log = LoggerFactory.getLogger(ContentDownloadHandler.class);
 	private Content content;
-	
+
 	private int lastChunk = -1;
 	private PriorityQueue<Chunk> chunkBacklog = new PriorityQueue<Chunk>();
 	private DigestOutputStream writer = null;
 	private long bytesDownloaded = 0;
 
 	private Set<UnadaInfo> providers;
-	private OverlayManager om = null;
+	private IOverlayManager om = null;
 
 	private AtomicBoolean started = new AtomicBoolean(false);
 	private AtomicBoolean completed = new AtomicBoolean(false);
 	private AtomicBoolean success = new AtomicBoolean(false);
-	
+
 	private CountDownLatch barrier = new CountDownLatch(1);
-	
+
 	private MessageDigest md;
-	
+
 	public ContentDownloadHandler(Content content) throws DownloadException {
 		this.content = content;
-		
+	}
+
+
+	private void createStream() throws DownloadException{
+
 		try {
+			Files.createDirectories(Paths.get(this.content.getPath()).getParent());
 			md = MessageDigest.getInstance("MD5");
 			OutputStream os = Files.newOutputStream(Paths.get(this.content.getPath()));
 			writer = new DigestOutputStream(os, md);
@@ -72,8 +80,8 @@ public class ContentDownloadHandler implements IFutureDownload{
 			throw new DownloadException("Error: Algorithm for MD5 digest not found "+content.getPath(), e);
 		}
 	}
-	
-	public void startDownload(OverlayManager om) throws DownloadException{
+
+	public void startDownload(IOverlayManager om) throws DownloadException{
 		if(started.getAndSet(true)){
 			throw new DownloadException("Download already started.");
 		}
@@ -81,7 +89,7 @@ public class ContentDownloadHandler implements IFutureDownload{
 		this.providers = this.om.getCloseProviders(content.getContentID());
 		sendRequest();
 	}
-	
+
 	public void receiveContentInfo(Content content) throws DownloadException{
 		if(content == null){
 			log.warn("{} - Prvovider {} is not a provider, trying next provider.", om.getuNaDaInfo().getUnadaID(), providers.iterator().next().getUnadaID());
@@ -89,9 +97,13 @@ public class ContentDownloadHandler implements IFutureDownload{
 			sendRequest();			
 		}
 		this.content.setSize(content.getSize());
-		
+		if(this.content.getPath() == null){
+			String p = content.getPath().split("unada")[1];
+			this.content.setPath(CacheConstants.cachePath + p);
+		}
+		createStream();
 	}
-	
+
 	private void sendRequest() throws DownloadException{
 		DownloadRequestMessage msg = new DownloadRequestMessage();
 		msg.setContentID(content.getContentID());
@@ -104,65 +116,59 @@ public class ContentDownloadHandler implements IFutureDownload{
 		}
 		throw new DownloadException("No providers reachable or none responding.");
 	}
-	
-	public synchronized void receiveChunk(byte[] data, int chunkNo) {
+
+	public void receiveChunk(byte[] data, int chunkNo) {
 		log.debug("Received chunk {} of file {}", chunkNo, content.getPath());
-		Chunk c = new Chunk(chunkNo, data);
-		if (lastChunk + 1 == chunkNo) {
-			write(c);
-			
-		} else {
-			chunkBacklog.add(c);
-		}
+		chunkBacklog.add(new Chunk(chunkNo, data));
+		writeAsManyChunksAsPossible();
+	}
+
+	private synchronized void writeAsManyChunksAsPossible(){
 		while(!chunkBacklog.isEmpty() && lastChunk + 1 == chunkBacklog.peek().getChunkNo()){
-			write(chunkBacklog.remove());
+			Chunk c = chunkBacklog.remove();
+			try {
+				writer.write(c.getBuf());
+				bytesDownloaded += c.getBuf().length;
+				log.debug("Chunk {} written to file {}.\n Digest: {}", c.getChunkNo(), content.getPath(), MessageDigest.getInstance("MD5").digest(c.getBuf()));
+				lastChunk = c.getChunkNo();
+			} catch (IOException e) {
+				log.error("Can not write to file {}", content.getPath(), e);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
 		}
 	}
-	
+
 	public void receiveDownloadComplete(byte[] checksum){
 		log.debug("Download completed message received, writing remaining chunks.");
-		while(!chunkBacklog.isEmpty()){
-			Chunk c = chunkBacklog.remove();
-			write(c);
+		writeAsManyChunksAsPossible();
+		if(!chunkBacklog.isEmpty()){
+			log.error("Error not all chunks received before end of transfer was signalled.");
 		}
 		byte[] localdigest =  md.digest();
 		log.debug("Received digest: {} \n\t local digest: {}", checksum, localdigest);
-		
+
 		if(!Arrays.equals(localdigest, checksum)){
 			log.warn("File hash did not match the received hash.");
 			success.set(false);
 		}else{
 			success.set(true);
 		}
-		
+
 		try {
 			writer.close();
 		} catch (IOException e) {
 			log.error("Error while closing byte channel to file.", e);
 		}
-		
+
 		log.debug("{} - Download complete. Reported size: {}, bytes written {}.", om.getuNaDaInfo().getUnadaID(), content.getSize(), bytesDownloaded);
 		completed.set(true);
 		log.debug("{} - Notifying waiting threads.", om.getuNaDaInfo().getUnadaID());
-			barrier.countDown();
+		barrier.countDown();
 		log.debug("{} - Notified.", om.getuNaDaInfo().getUnadaID());
 	}
-	
-	private synchronized void write(Chunk c){
-		try {
-			writer.write(c.getBuf());
-			bytesDownloaded += c.getBuf().length;
-			log.debug("Chunk {} written to file {}.\n Digest: {}", c.getChunkNo(), content.getPath(), MessageDigest.getInstance("MD5").digest(c.getBuf()));
-			lastChunk = c.getChunkNo();
-		} catch (IOException e) {
-			log.error("Can not write to file {}", content.getPath(), e);
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-			
+
+
 	@Override
 	public boolean isSuccess() {
 		return success.get();
@@ -177,11 +183,11 @@ public class ContentDownloadHandler implements IFutureDownload{
 	public  Content get() {
 		log.debug("{} - Waiting for download to complete.", om.getuNaDaInfo().getUnadaID());
 		while(!completed.get()){
-			 try {
-		            barrier.await();
-		            log.debug("{} - Woken up.", om.getuNaDaInfo().getUnadaID());
-		        } catch (InterruptedException e) {
-		        	log.info("{} - Got interrupted before completion.", om.getuNaDaInfo().getUnadaID());}
+			try {
+				barrier.await();
+				log.debug("{} - Woken up.", om.getuNaDaInfo().getUnadaID());
+			} catch (InterruptedException e) {
+				log.info("{} - Got interrupted before completion.", om.getuNaDaInfo().getUnadaID());}
 		}
 		return content;
 	}
@@ -189,12 +195,18 @@ public class ContentDownloadHandler implements IFutureDownload{
 	@Override
 	public Content get(long timeout, TimeUnit unit) throws TimeoutException{
 		while(!completed.get()){
-			 try {
-		            if(!barrier.await(timeout, unit)){
-		            	throw new TimeoutException();
-		            }
-		        } catch (InterruptedException e) {}
+			try {
+				if(!barrier.await(timeout, unit)){
+					throw new TimeoutException();
+				}
+			} catch (InterruptedException e) {}
 		}
 		return content;
+	}
+
+	public void cancelDownload(){
+		success.set(false);
+		completed.set(true);
+		barrier.countDown();
 	}
 }

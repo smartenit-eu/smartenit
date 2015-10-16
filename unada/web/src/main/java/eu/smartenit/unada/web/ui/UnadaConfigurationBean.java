@@ -36,46 +36,46 @@ import javax.faces.bean.RequestScoped;
 @RequestScoped
 public class UnadaConfigurationBean {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(UnadaConfigurationBean.class);
-	
-	public UNaDaConfiguration unadaConfiguration;
+    private static final Logger logger = LoggerFactory
+            .getLogger(UnadaConfigurationBean.class);
 
-	public UNaDaConfiguration getUnadaConfiguration() {
-		return unadaConfiguration;
-	}
+    public UNaDaConfiguration unadaConfiguration;
 
-	public void setUnadaConfiguration(UNaDaConfiguration unadaConfiguration) {
-		this.unadaConfiguration = unadaConfiguration;
-	}
+    public UNaDaConfiguration getUnadaConfiguration() {
+        return unadaConfiguration;
+    }
 
-	/**
-	 * The init() method that initializes the UnadaConfigurationBean.
-	 * It retrieves stored uNaDa configuration parameters.
-	 * 
-	 */
-	@PostConstruct
-	public void init() {
-		
-		unadaConfiguration = DAOFactory.getuNaDaConfigurationDAO().findLast();
-		if (unadaConfiguration == null) {
-			unadaConfiguration = new UNaDaConfiguration();
-		}
-	}
-	
-	/**
-	 * The method that inserts new configuration parameters.
-	 * 
-	 * @return It returns to the current page.
-	 */
-	public String updateUnadaConfiguration() {
-		try {
-			DAOFactory.getuNaDaConfigurationDAO().insert(unadaConfiguration);
+    public void setUnadaConfiguration(UNaDaConfiguration unadaConfiguration) {
+        this.unadaConfiguration = unadaConfiguration;
+    }
+
+    /**
+     * The init() method that initializes the UnadaConfigurationBean. It
+     * retrieves stored uNaDa configuration parameters.
+     * 
+     */
+    @PostConstruct
+    public void init() {
+
+        unadaConfiguration = DAOFactory.getuNaDaConfigurationDAO().findLast();
+        if (unadaConfiguration == null) {
+            unadaConfiguration = new UNaDaConfiguration();
+        }
+    }
+
+    /**
+     * The method that inserts new configuration parameters.
+     * 
+     * @return It returns to the current page.
+     */
+    public String updateUnadaConfiguration() {
+        try {
+            DAOFactory.getuNaDaConfigurationDAO().insert(unadaConfiguration);
             logger.debug("Inserted " + unadaConfiguration);
-		} catch (Exception e) {
-			logger.error("Error while updating unada's configuration to the database.");
-		}
-		return null;
-	}
+        } catch (Exception e) {
+            logger.error("Error while updating unada's configuration to the database.");
+        }
+        return null;
+    }
 
 }

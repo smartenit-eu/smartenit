@@ -17,8 +17,6 @@ package eu.smartenit.unada.om;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -55,8 +53,6 @@ import eu.smartenit.unada.tpm.TopologyProximityMonitor;
 import eu.smartenit.unada.tpm.TopologyProximityMonitorImpl;
 
 
-
-
 /**
  * This is the main class of the Overlay Manager component. To use the Overlay
  * Manager this class needs to be instantiated.
@@ -84,17 +80,17 @@ public class OverlayManager implements IOverlayManager {
 	
 	private Overlay overlay;
 	
-	InetSocketAddress addr2 = new InetSocketAddress("emanicslab2.man.poznan.pl", 4001);
-	InetSocketAddress addr3 = new InetSocketAddress("emanicslab2.ps.tu-darmstadt.de", 4001);
-	InetSocketAddress addr4 = new InetSocketAddress("emanicslab2.ewi.utwente.nl", 4001);
-	InetSocketAddress addr5 = new InetSocketAddress("emanicslab2.eecs.jacobs-university.de", 4001);
-	InetSocketAddress addr6 = new InetSocketAddress("moscu.upc.es", 4001);
-	InetSocketAddress addr7 = new InetSocketAddress("emanicslab1.ps.tu-darmstadt.de", 4001);
-	InetSocketAddress addr8 = new InetSocketAddress("emanicslab1.man.poznan.pl", 4001);
-	InetSocketAddress addr9 = new InetSocketAddress("emanicslab1.informatik.unibw-muenchen.de", 4001);
-	InetSocketAddress addr10 = new InetSocketAddress("emanicslab1.csg.uzh.ch", 4001);
-	InetSocketAddress addr11 = new InetSocketAddress("planck232ple.test.iminds.be", 4001);
-	InetSocketAddress addr12 = new InetSocketAddress("emanicslab1.ewi.utwente.nl",4001);
+//	InetSocketAddress addr2 = new InetSocketAddress("emanicslab2.man.poznan.pl", 4001);
+//	InetSocketAddress addr3 = new InetSocketAddress("emanicslab2.ps.tu-darmstadt.de", 4001);
+//	InetSocketAddress addr4 = new InetSocketAddress("emanicslab2.ewi.utwente.nl", 4001);
+//	InetSocketAddress addr5 = new InetSocketAddress("emanicslab2.eecs.jacobs-university.de", 4001);
+//	InetSocketAddress addr6 = new InetSocketAddress("moscu.upc.es", 4001);
+//	InetSocketAddress addr7 = new InetSocketAddress("emanicslab1.ps.tu-darmstadt.de", 4001);
+//	InetSocketAddress addr8 = new InetSocketAddress("emanicslab1.man.poznan.pl", 4001);
+//	InetSocketAddress addr9 = new InetSocketAddress("emanicslab1.informatik.unibw-muenchen.de", 4001);
+//	InetSocketAddress addr10 = new InetSocketAddress("emanicslab1.csg.uzh.ch", 4001);
+//	InetSocketAddress addr11 = new InetSocketAddress("planck232ple.test.iminds.be", 4001);
+//	InetSocketAddress addr12 = new InetSocketAddress("emanicslab1.ewi.utwente.nl",4001);
 
 	public OverlayManager(String uNadaId) {
 		getuNaDaInfo().setUnadaID(uNadaId);
@@ -123,9 +119,8 @@ public class OverlayManager implements IOverlayManager {
 		
 		InetSocketAddress addr = new InetSocketAddress(bootstrapNode, port);
 		
-		getOverlay().joinOverlay(new Bindings(), addr, addr2, addr3, addr4, addr5, addr6, addr7, addr8, addr9, addr10, addr11, addr12);
+		getOverlay().joinOverlay(new Bindings(), addr);//, addr2, addr3, addr4, addr5, addr6, addr7, addr8, addr9, addr10, addr11, addr12);
 	}
-	
 	
 	/* (non-Javadoc)
 	 * @see eu.smartenit.unada.om.IOverlayManager#createOverlay()
@@ -157,7 +152,7 @@ public class OverlayManager implements IOverlayManager {
 	
 	private boolean tryBootstrapNodes(Bindings bindings){
 		try {
-			getOverlay().joinOverlay(bindings, addr2, addr3, addr4, addr5, addr6, addr7, addr8, addr9, addr10, addr11, addr12);
+			getOverlay().joinOverlay(bindings);//, addr2, addr3, addr4, addr5, addr6, addr7, addr8, addr9, addr10, addr11, addr12);
 			return true;
 		}catch(OverlayException e){
 			log.warn("No default bootstrap node could be reached. Message: {}", e.getMessage());
@@ -166,17 +161,6 @@ public class OverlayManager implements IOverlayManager {
 	}
 
 	
-
-	/* (non-Javadoc)
-	 * @see eu.smartenit.unada.om.IOverlayManager#updateOverlay(java.net.InetAddress, int)
-	 */
-	public void updateOverlay(InetAddress newAddress, int port)	throws OverlayException {
-		getOverlay().updateOverlay(newAddress, port);
-	}
-
-	
-
-
 	public void shutDown(){
 		overlay.shutDown();
 	}
@@ -354,6 +338,11 @@ public class OverlayManager implements IOverlayManager {
 	public boolean sendMessage(UnadaInfo destination, BaseMessage message) {
 		return overlay.sendMessage(destination, message);
 	}
+	
+	@Override
+	public int getOverlayStatus(){
+		return overlay.getOverlayStatus();
+	}
 
 	public void sendRemoteTracerouteRequest(UnadaInfo dst) {
 		TracerouteRequestMessage msg = new TracerouteRequestMessage();
@@ -400,6 +389,12 @@ public class OverlayManager implements IOverlayManager {
 		neighborDatabase.addProviders(contentID, info);
 		log.info("Provider {} added for content id {}", info, contentID);
 	}
+	
+	@Override
+	public void deleteContents(long... contents) {
+		overlay.deleteContents();
+		
+	}
 
 	//Internal Methods
 
@@ -421,8 +416,17 @@ public class OverlayManager implements IOverlayManager {
 			log.debug("{} - Not enough providers for {}, query for more.", uNaDaInfo.getUnadaID(), contentID);
 			list = this.queryProviders(contentID, filter);
 		}
-
+		
 		return list;
+	}
+	
+	@Override
+	public int getHopCount(Content content) {
+		Set<UnadaInfo> providers = getCloseProviders(content.getContentID());
+		for(UnadaInfo info : providers){
+			return info.getHopCount();
+		}
+		return Integer.MAX_VALUE;
 	}
 	
 	void logNeighbors(){
@@ -502,6 +506,11 @@ public class OverlayManager implements IOverlayManager {
 
 	public void setOverlay(Overlay overlay) {
 		this.overlay = overlay;
+	}
+
+	@Override
+	public void clearNeighborDB() {
+		neighborDatabase = new NeighborDatabase(tpm);
 	}
 
 }
