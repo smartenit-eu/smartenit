@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,6 +111,7 @@ public class ComplexQueriesTest {
 		Link l = as1.getBgRouters().get(0).getInterDomainLinks().get(0);
 		assertEquals(l.getAddress().getPrefix(), "1.1.1.6");
 		assertEquals(l.getVlan(), 3);
+		assertEquals(l.getAggregateLeakageFactor(), 0.1, 0.001);
 
 		// checking bgrouter for first link
 		assertEquals(l.getBgRouter().getManagementAddress().getPrefix(),
@@ -136,6 +137,7 @@ public class ComplexQueriesTest {
 		l = as1.getBgRouters().get(1).getInterDomainLinks().get(0);
 		assertEquals(l.getAddress().getPrefix(), "1.1.1.7");
 		assertEquals(l.getVlan(), 23);
+		assertEquals(l.getPolicerBandwidthLimitFactor(), 0.2, 0.001);
 
 		// checking bgrouter for second link
 		assertEquals(l.getBgRouter().getManagementAddress().getPrefix(),
@@ -309,6 +311,7 @@ public class ComplexQueriesTest {
 		assertEquals(dc2.getConnectingTunnels().get(0).getLink().getAddress()
 				.getPrefix(), "1.1.1.7");
 		assertEquals(dc2.getConnectingTunnels().get(0).getLink().getVlan(), 23);
+		assertEquals(dc2.getConnectingTunnels().get(0).getLink().getFilterInterfaceName(), "filter2");
 		assertEquals(dc2.getConnectingTunnels().get(0).getLink()
 				.getCostFunction().getSegments().size(), 2);
 		assertEquals(dc2.getConnectingTunnels().get(0).getLink()
@@ -378,6 +381,9 @@ public class ComplexQueriesTest {
 		l1.setVlan(3);
 		l1.setTunnelEndPrefix(new NetworkAddressIPv4("1.1.1.0", 8));
 		l1.setBgRouter(bg1);
+		l1.setAggregateLeakageFactor(0.1);
+		l1.setFilterInterfaceName("filter");
+		l1.setPolicerBandwidthLimitFactor(0.1);
 		CostFunction c = new CostFunction("cost", "subtype", "bw", "cost", null);
 		List<Segment> segments = new ArrayList<Segment>();
 		segments.add(new Segment(0, 2000, (float) 0.5, (float) 0.8));
@@ -394,6 +400,9 @@ public class ComplexQueriesTest {
 		l2.setVlan(23);
 		l2.setTunnelEndPrefix(new NetworkAddressIPv4("1.1.2.0", 8));
 		l2.setBgRouter(bg2);
+		l2.setAggregateLeakageFactor(0.2);
+		l2.setFilterInterfaceName("filter2");
+		l2.setPolicerBandwidthLimitFactor(0.2);
 		c = new CostFunction("cost", "subtype", "bw", "cost", null);
 		segments = new ArrayList<Segment>();
 		segments.add(new Segment(0, 1000, (float) 2.5, (float) 2.6));

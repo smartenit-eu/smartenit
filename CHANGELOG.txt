@@ -1,3 +1,9 @@
+SmartenIT v3.2 - 30/10/2015
+==========================
+
+* Fixed bugs from DTM++ and RB-HORST experiments.
+
+
 SmartenIT v3.1 - 30/04/2015
 ==========================
 

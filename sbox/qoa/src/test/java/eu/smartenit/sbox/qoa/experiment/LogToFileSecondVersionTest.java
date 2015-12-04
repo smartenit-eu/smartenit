@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,6 +103,17 @@ public class LogToFileSecondVersionTest {
 		assertEquals(removeTimestamp(log.toString()), removeTimestamp(getLogFromFile()));
 	}
 	
+	@Test
+	public void shouldLogToFileWithMissingValues() throws IOException {
+		ExtendedCounterValues incompleteValues = prepareIncompleteValues(100, 1000);
+		
+		StringBuilder fixedLog = new StringBuilder();
+		fixedLog.append(extendedSNMPTrafficCollector2.logToFileSecondVersion(AS_NUMBER, incompleteValues));
+		
+		extendedSNMPTrafficCollector.notifyNewCounterValues(AS_NUMBER, incompleteValues);
+		assertEquals(removeTimestamp(fixedLog.toString()), removeTimestamp(getLogFromFile()));
+	}
+	
 	private String removeTimestamp(String log) {
 		final StringBuilder response = new StringBuilder();
 		String[] lines = log.split("\n");
@@ -182,6 +193,49 @@ public class LogToFileSecondVersionTest {
 		values.storeReceivedPackets(tunnelID7, new ReceivedPackets(tunnelPackets + 7 + 5L, tunnelPackets + 7 + 10L, tunnelPackets + 7 + 15L));
 		values.storeCounterValue(tunnelID8, tunnelPackets + 8);
 		values.storeReceivedPackets(tunnelID8, new ReceivedPackets(tunnelPackets + 8 + 5L, tunnelPackets + 8 + 10L, tunnelPackets + 8 + 15L));
+		
+		return values;
+	}
+	
+	protected ExtendedCounterValues prepareIncompleteValues(int linkPackets, int tunnelPackets) {
+		ExtendedCounterValues values = new ExtendedCounterValues();
+		values.storeCounterValue(new SimpleLinkID("111", "isp1"), linkPackets + 1);
+		values.storeReceivedPackets(new SimpleLinkID("111", "isp1"), new ReceivedPackets(linkPackets + 1 + 50L, linkPackets + 1 + 100L, linkPackets + 1 + 150L));
+		values.storeCounterValue(new SimpleLinkID("121", "isp1"), linkPackets + 3);
+		values.storeReceivedPackets(new SimpleLinkID("121", "isp1"), new ReceivedPackets(linkPackets + 3 + 50L, linkPackets + 3 + 100L, linkPackets + 3 + 150L));
+		values.storeCounterValue(new SimpleLinkID("122", "isp1"), linkPackets + 4);
+		values.storeReceivedPackets(new SimpleLinkID("122", "isp1"), new ReceivedPackets(linkPackets + 4 + 50L, linkPackets + 4 + 100L, linkPackets + 4 + 150L));
+		
+		final EndAddressPairTunnelID tunnelID1 = new EndAddressPairTunnelID("tunnel1111", 
+				new NetworkAddressIPv4("10.1.1.1", 32), 
+				new NetworkAddressIPv4("10.1.1.2", 32));
+		final EndAddressPairTunnelID tunnelID2 = new EndAddressPairTunnelID("tunnel1121", 
+				new NetworkAddressIPv4("10.1.2.1", 32), 
+				new NetworkAddressIPv4("10.1.2.2", 32));
+		final EndAddressPairTunnelID tunnelID3 = new EndAddressPairTunnelID("tunnel1211", 
+				new NetworkAddressIPv4("10.2.1.1", 32), 
+				new NetworkAddressIPv4("10.2.1.2", 32));
+		final EndAddressPairTunnelID tunnelID4 = new EndAddressPairTunnelID("tunnel1212", 
+				new NetworkAddressIPv4("10.2.1.2", 32), 
+				new NetworkAddressIPv4("10.2.1.3", 32));
+		final EndAddressPairTunnelID tunnelID6 = new EndAddressPairTunnelID("tunnel1222", 
+				new NetworkAddressIPv4("10.2.2.2", 32), 
+				new NetworkAddressIPv4("10.2.2.3", 32));
+		final EndAddressPairTunnelID tunnelID7 = new EndAddressPairTunnelID("tunnel1223", 
+				new NetworkAddressIPv4("10.2.2.4", 32), 
+				new NetworkAddressIPv4("10.2.2.5", 32));
+		values.storeCounterValue(tunnelID1, tunnelPackets + 1);
+		values.storeReceivedPackets(tunnelID1, new ReceivedPackets(tunnelPackets + 1 + 5L, tunnelPackets + 1 + 10L, tunnelPackets + 1 + 15L));
+		values.storeCounterValue(tunnelID2, tunnelPackets + 2);
+		values.storeReceivedPackets(tunnelID2, new ReceivedPackets(tunnelPackets + 2 + 5L, tunnelPackets + 2 + 10L, tunnelPackets + 2 + 15L));
+		values.storeCounterValue(tunnelID3, tunnelPackets + 3);
+		values.storeReceivedPackets(tunnelID3, new ReceivedPackets(tunnelPackets + 3 + 5L, tunnelPackets + 3 + 10L, tunnelPackets + 3 + 15L));
+		values.storeCounterValue(tunnelID4, tunnelPackets + 4);
+		values.storeReceivedPackets(tunnelID4, new ReceivedPackets(tunnelPackets + 4 + 5L, tunnelPackets + 4 + 10L, tunnelPackets + 4 + 15L));
+		values.storeCounterValue(tunnelID6, tunnelPackets + 6);
+		values.storeReceivedPackets(tunnelID6, new ReceivedPackets(tunnelPackets + 6 + 5L, tunnelPackets + 6 + 10L, tunnelPackets + 6 + 15L));
+		values.storeCounterValue(tunnelID7, tunnelPackets + 7);
+		values.storeReceivedPackets(tunnelID7, new ReceivedPackets(tunnelPackets + 7 + 5L, tunnelPackets + 7 + 10L, tunnelPackets + 7 + 15L));
 		
 		return values;
 	}

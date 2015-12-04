@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import eu.smartenit.sbox.db.dto.BGRouter;
 import eu.smartenit.sbox.db.dto.ChargingRule;
 import eu.smartenit.sbox.db.dto.DARouter;
 import eu.smartenit.sbox.db.dto.DC2DCCommunication;
+import eu.smartenit.sbox.db.dto.EndAddressPairTunnelID;
 import eu.smartenit.sbox.db.dto.Link;
 import eu.smartenit.sbox.db.dto.LinkID;
 import eu.smartenit.sbox.db.dto.SimpleLinkID;
@@ -164,7 +165,7 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 	}
 	
 	protected String logToFileSecondVersion(int asNumber, ExtendedCounterValues counterValues) {
-		logger.debug("Writing traffic details to file...");
+		logger.info("Writing traffic details to file...");
 		final StringBuilder record = new StringBuilder();
 		
 		//HEADLINE
@@ -187,13 +188,35 @@ public class ExtendedSNMPTrafficCollector extends SNMPTrafficCollector {
 		record.append(System.currentTimeMillis());
 		
 		for(LinkID linkId : linkIds) {
-			record.append("\t").append(counterValues.getCounterValue(linkId));
-			record.append("\t").append(counterValues.getReceivedPackets(linkId).aggregate());
+			if (counterValues.getCounterValue(linkId) != null)
+				record.append("\t").append(counterValues.getCounterValue(linkId));
+			else {
+				logger.error("No byte counter value available for link: " + ((SimpleLinkID)linkId).toString());
+				record.append("\t").append(0);
+			}
+				
+			if (counterValues.getReceivedPackets(linkId) != null)
+				record.append("\t").append(counterValues.getReceivedPackets(linkId).aggregate());
+			else {
+				logger.error("No packet counter value available for link: " + ((SimpleLinkID)linkId).toString());
+				record.append("\t").append(0);
+			}
 		}
 		
 		for(TunnelID tunnelId : tunnelIds) {
-			record.append("\t").append(counterValues.getCounterValue(tunnelId));
-			record.append("\t").append(counterValues.getReceivedPackets(tunnelId).aggregate());
+			if (counterValues.getCounterValue(tunnelId) != null)
+				record.append("\t").append(counterValues.getCounterValue(tunnelId));
+			else {
+				logger.error("No byte counter value available for tunnel: " + ((EndAddressPairTunnelID)tunnelId).toString());
+				record.append("\t").append(0);
+			}
+			
+			if (counterValues.getReceivedPackets(tunnelId) != null)
+				record.append("\t").append(counterValues.getReceivedPackets(tunnelId).aggregate());
+			else {
+				logger.error("No packet counter value available for tunnel: " + ((EndAddressPairTunnelID)tunnelId).toString());
+				record.append("\t").append(0);
+			}
 		}
 		
 		reportingIteratorTrafficDetails++;

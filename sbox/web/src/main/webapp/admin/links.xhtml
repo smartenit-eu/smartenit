@@ -41,8 +41,9 @@
 						<ul class="nav navbar-nav navbar-right">
 							<li><a href="index.xhtml">Home</a></li>
 							<li><a href="isp.xhtml">ISP</a></li>
-							<li class="dropdown active"><a href="#" class="dropdown-toggle"
-								data-toggle="dropdown">Network <b class="caret"></b></a>
+							<li class="dropdown active"><a href="#"
+								class="dropdown-toggle" data-toggle="dropdown">Network <b
+									class="caret"></b></a>
 								<ul class="dropdown-menu">
 									<li><a href="routers.xhtml">Routers</a></li>
 									<li><a href="sdncontrollers.xhtml">SDN Controllers</a></li>
@@ -125,16 +126,6 @@
 					</div>
 				</div>
 
-
-				<div class="form-group">
-					<label for="vlan" class="col-xs-4 control-label">VLAN
-						number</label>
-					<div class="col-xs-4">
-						<h:inputText type="text" class="form-control" id="vlan"
-							placeholder="VLAN number" value="#{linksBean.link.vlan}" />
-					</div>
-				</div>
-
 				<div class="form-group">
 					<label for="bgRouters" class="col-xs-4 control-label">BG
 						Router</label>
@@ -161,13 +152,34 @@
 							value="#{linksBean.link.tunnelEndPrefix.prefixLength}" />
 					</div>
 				</div>
-				
+
 				<div class="form-group">
-					<label for="policerBandwidthLimitFactor" class="col-xs-4 control-label">Limit 
-						Factor</label>
+					<label for="policerBandwidthLimitFactor"
+						class="col-xs-4 control-label">Bandwidth Limit Factor</label>
 					<div class="col-xs-4">
-						<h:inputText type="text" class="form-control" id="policerBandwidthLimitFactor"
+						<h:inputText type="text" class="form-control"
+							id="policerBandwidthLimitFactor"
 							value="#{linksBean.link.policerBandwidthLimitFactor}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="filterInterfaceName" class="col-xs-4 control-label">Filter
+						Interface Name</label>
+					<div class="col-xs-4">
+						<h:inputText type="text" class="form-control"
+							id="filterInterfaceName"
+							value="#{linksBean.link.filterInterfaceName}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="aggregateLeakageFactor" class="col-xs-4 control-label">Aggregate
+						Leakage Factor</label>
+					<div class="col-xs-4">
+						<h:inputText type="text" class="form-control"
+							id="aggregateLeakageFactor"
+							value="#{linksBean.link.aggregateLeakageFactor}" />
 					</div>
 				</div>
 
@@ -276,20 +288,12 @@
 								#{l.address.prefix}
 							</h:column>
 						<h:column>
-							<f:facet name="header">VLAN</f:facet>
-								#{l.vlan}
-							</h:column>
-						<h:column>
 							<f:facet name="header">BG Router</f:facet>
 								#{l.bgRouter.managementAddress.prefix}
 							</h:column>
 						<h:column>
 							<f:facet name="header">Tunnel End Prefix</f:facet>
 								#{l.tunnelEndPrefix.prefix}/#{l.tunnelEndPrefix.prefixLength}
-							</h:column>
-						<h:column>
-							<f:facet name="header">Limit Factor</f:facet>
-								#{l.policerBandwidthLimitFactor}
 							</h:column>
 						<h:column>
 							<f:facet name="header">Actions</f:facet>
@@ -423,6 +427,22 @@
 																min : 0,
 																max : 1,
 																message : 'The Bandwidth Limit Factor must be between 0 and 1.'
+															}
+														}
+													},
+													'links:filterInterfaceName' : {
+														validators : {
+															notEmpty : {
+																message : 'The Filter Interface Name must not be empty.'
+															}
+														}
+													},
+													'links:aggregateLeakageFactor' : {
+														validators : {
+															between : {
+																min : 0,
+																max : 1,
+																message : 'The Aggregate Leakage Factor must be between 0 and 1.'
 															}
 														}
 													}

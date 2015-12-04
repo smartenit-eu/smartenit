@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,8 @@ public class ZVectorCalculator extends VectorCalculator {
 						"This is incorrect. Will set it to zero. Affected tunnel: {}", ((EndAddressPairTunnelID)tunnelID).toString());
 				periodCounterValue = 0;
 			}
-			latestCounterValues.storeCounterValue(tunnelID, currentCounterValue);
+			if (currentCounterValue !=0 && currentCounterValue !=-1)
+				latestCounterValues.storeCounterValue(tunnelID, currentCounterValue);
 			updateVectorValues(localVectorValues, monitoredTunnels.getTunnel(tunnelID, asNumber), periodCounterValue);
 		}
 		return localVectorValues;

@@ -1,17 +1,17 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package eu.smartenit.sdn.floodlight090.dtm;
 
@@ -171,7 +171,7 @@ public class DTM {
 
     Map<NetworkAddressIPv4, Long> cVectorMap = new HashMap<>();
     Map<Short, Long> daRouterCVectorMap = new HashMap<>();
-    Map<NetworkAddressIPv4, Long> rVectorMap = new HashMap<>();
+    HashMap<NetworkAddressIPv4, Long> rVectorMap = new HashMap<>();
     Map<Short, Long> daRouterRVectorMap = new HashMap<>();
     Map<Short, Long> transmittedBytesMap = new HashMap<>();
     Map<Short, Long> transmittedBytesStartMap = new HashMap<>();
@@ -216,19 +216,21 @@ public class DTM {
     public static void resetInstance() {
         singleton = null;
     }
-    
+
     /**
      * Returns {@link IFloodlightProviderService}
+     *
      * @return floodlightProvider
      */
     public IFloodlightProviderService getFloodlightProvider() {
         return floodlightProvider;
     }
-    
+
     /**
-    * Updates {@link IFloodlightProviderService}
-    * @param IFloodlightProviderService floodlightProvider
-    */
+     * Updates {@link IFloodlightProviderService}
+     *
+     * @param IFloodlightProviderService floodlightProvider
+     */
     public void setFloodlightProvider(IFloodlightProviderService floodlightProvider) {
         this.floodlightProvider = floodlightProvider;
     }
@@ -322,7 +324,8 @@ public class DTM {
 
         this.referenceVector = referenceVector;
         for (VectorValue vectorValue : referenceVector.getVectorValues()) {
-            rVectorMap.put(vectorValue.getTunnelEndPrefix(), vectorValue.getValue());
+            Long previous = rVectorMap.put(vectorValue.getTunnelEndPrefix(), vectorValue.getValue());
+            logger.debug("Setting reference vector value for tunnel {}: {} (previous value was {})", vectorValue.getTunnelEndPrefix(), vectorValue.getValue(), previous);
         }
 
         for (VectorValue vectorValue : referenceVector.getVectorValues()) {
@@ -350,6 +353,10 @@ public class DTM {
     public RVector getReferenceVector() {
         logger.debug("getReferenceVector() one-liner");
         return referenceVector;
+    }
+
+    public HashMap<NetworkAddressIPv4, Long> getReferenceVectorMap() {
+        return rVectorMap;
     }
 
     /**
@@ -510,10 +517,11 @@ public class DTM {
             logger.debug("transmittedBytesMapUpdated() end");
         }
     }
-    
+
     /**
      * Calculates map of inverted {@link RVector}
-     * @param referenceVector 
+     *
+     * @param referenceVector
      */
     private synchronized void calculateRInvMap(RVector referenceVector) {
         long R[] = new long[2];
@@ -615,20 +623,24 @@ public class DTM {
                 + ((i >> 8) & 0xFF) + "."
                 + (i & 0xFF);
     }
-    
+
     /**
-     * Sends static flow rule to switch mapping output IP address to switch output port
-     * @param dcPrefixOutOfPortMap 
+     * Sends static flow rule to switch mapping output IP address to switch
+     * output port
+     *
+     * @param dcPrefixOutOfPortMap
      */
     public void sendStaticFlowRule(Map<NetworkAddressIPv4, Short> dcPrefixOutOfPortMap) {
         for (NetworkAddressIPv4 netAddr : dcPrefixOutOfPortMap.keySet()) {
             Flows.mod(sw, floodlightProvider, null, netAddr.getPrefix(), netAddr.getPrefixLength(), dcPrefixOutOfPortMap.get(netAddr));
         }
     }
-    
+
     /**
-     * Returns map of destination IP address with output OF port in {@link proactiveWithoutReference} mode
-     * @return 
+     * Returns map of destination IP address with output OF port in
+     * {@link proactiveWithoutReference} mode
+     *
+     * @return
      */
     public synchronized Map<NetworkAddressIPv4, Short> getProactiveOutOfPortNumber() {
         logger.debug("getOutOfPortNumberProactiveWithoutReference() begin");
@@ -659,7 +671,8 @@ public class DTM {
     }
 
     /**
-     * Returns output port of switch for a new flow in {@link reactiveWithReference} mode.
+     * Returns output port of switch for a new flow in
+     * {@link reactiveWithReference} mode.
      *
      * @return output port number
      */
@@ -774,9 +787,10 @@ public class DTM {
         logger.debug("getOutOfPortNumberReactiveWithReference() end");
         return (short) daRouterOfPortNumber;
     }
-    
-     /**
-     * Returns output port of switch for a new flow in {@link reactiveWithoutReference} mode.
+
+    /**
+     * Returns output port of switch for a new flow in
+     * {@link reactiveWithoutReference} mode.
      *
      * @return output port number
      */
@@ -833,11 +847,12 @@ public class DTM {
         logger.debug("getOutOfPortNumberReactiveWithoutReference() end");
         return (short) daRouterOfPortNumber;
     }
-    
+
     /**
      * Validates {@link ConfigData}
+     *
      * @param configData
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     private void validateConfigData(ConfigData configData) throws IllegalArgumentException {
         if (configData == null) {
@@ -884,11 +899,12 @@ public class DTM {
 
         }
     }
-    
+
     /**
      * Validates {@link RVector}
+     *
      * @param referenceVector
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     private void validateReferenceVector(RVector referenceVector) throws IllegalArgumentException {
         if (referenceVector.getVectorValues() == null) {
@@ -906,10 +922,11 @@ public class DTM {
             }
         }
     }
-    
+
     /**
      * Validates {@link CVector}
-     * @param compensationVector 
+     *
+     * @param compensationVector
      */
     private void validateCompensationVector(CVector compensationVector) {
         if (compensationVector == null) {

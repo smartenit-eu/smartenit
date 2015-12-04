@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,8 @@ public class LinkMapper implements ResultSetMapper<Link> {
 		l.setTunnelEndPrefix(new NetworkAddressIPv4(r.getString("TUNNELENDPREFIX"), 
 				r.getInt("TUNNELENDPREFIXLENGTH")));
 		l.setPolicerBandwidthLimitFactor(r.getDouble("POLICERBANDWIDTHLIMITFACTOR"));
+		l.setAggregateLeakageFactor(r.getDouble("AGGREGATELEAKAGEFACTOR"));
+		l.setFilterInterfaceName(r.getString("FILTERINTERFACENAME"));
 		return l;
 
 	}

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,8 @@ public class LinkTest {
 		c.setSegments(segments);
 		l.setCostFunction(c);
 		l.setBgRouter(bg);
+		l.setAggregateLeakageFactor(0.1);
+		l.setFilterInterfaceName("filter");
 		ldao.insert(l);
 
 		list = ldao.findAll();
@@ -121,6 +123,8 @@ public class LinkTest {
 		assertEquals(stored.getCostFunction().getSegments().get(1).getB(), 4.3, 0.01);
 		assertEquals(stored.getPolicerBandwidthLimitFactor(), 1, 0.001);
 		assertEquals(stored.getBgRouter().getManagementAddress().getPrefix(), "5.5.5.5");
+		assertEquals(stored.getAggregateLeakageFactor(), 0.1, 0.001);
+		assertEquals(stored.getFilterInterfaceName(), "filter");
 		
 		l = new Link();
 		l.setLinkID(new SimpleLinkID("link2", "ote"));
@@ -138,6 +142,8 @@ public class LinkTest {
 		c.setSegments(segments);
 		l.setCostFunction(c);
 		l.setBgRouter(bg);
+		l.setAggregateLeakageFactor(0.2);
+		l.setFilterInterfaceName("filter2");
 		ldao.insert(l);
 
 		list = ldao.findAll();
@@ -157,10 +163,14 @@ public class LinkTest {
 		assertEquals(l.getPolicerBandwidthLimitFactor(), 0.5, 0.001);
 		assertEquals(l.getBgRouter().getManagementAddress().getPrefix(), "5.5.5.5");
 		assertEquals(l.getBgRouter().getNetconfUsername(), "admin");
+		assertEquals(l.getAggregateLeakageFactor(), 0.2, 0.001);
+		assertEquals(l.getFilterInterfaceName(), "filter2");
 		
 		l.setVlan(4242);
 		l.setTunnelEndPrefix(new NetworkAddressIPv4("2.2.0.0", 16));
 		l.setPolicerBandwidthLimitFactor(0.7);
+		l.setAggregateLeakageFactor(0.5);
+		l.setFilterInterfaceName("filter3");
 		ldao.update(l);
 		l = ldao.findById(new SimpleLinkID("link2", "ote"));
 		assertNotNull(l);
@@ -168,6 +178,8 @@ public class LinkTest {
 		assertEquals(l.getTunnelEndPrefix().getPrefix(), "2.2.0.0");
 		assertEquals(l.getTunnelEndPrefix().getPrefixLength(), 16);
 		assertEquals(l.getPolicerBandwidthLimitFactor(), 0.7, 0.001);
+		assertEquals(l.getAggregateLeakageFactor(), 0.5, 0.001);
+		assertEquals(l.getFilterInterfaceName(), "filter3");
 		
 		ldao.deleteById(new SimpleLinkID("link2", "ote"));
 		list = ldao.findAll();
@@ -228,6 +240,8 @@ public class LinkTest {
 		assertEquals(list.get(0).getBgRouter().getManagementAddress().getPrefix(), "5.5.5.5");
 		assertEquals(list.get(0).getCostFunction().getSegments().size(), 4);
 		assertEquals(list.get(0).getPolicerBandwidthLimitFactor(), 1, 0.001);
+		assertEquals(list.get(0).getAggregateLeakageFactor(), 0.1, 0.001);
+		assertEquals(list.get(0).getFilterInterfaceName(), "filter");
 		
 		l.getCostFunction().setSegments(new ArrayList<Segment>());
 		ldao.update(l);

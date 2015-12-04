@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,14 +94,14 @@ public class TrafficCollectorTaskFailureScenarioTest {
 		
 		boolean allZeros = true;
 		for (LinkID linkId : counterValuesArgument.getValue().getAllLinkIds()) {
-			if(counterValuesArgument.getValue().getLinkCounterValues().get(linkId) != 0) {
+			if(counterValuesArgument.getValue().getLinkCounterValues().get(linkId) != -1) {
 				allZeros = false;
 				break;
 			}
 		}
 		
 		for (TunnelID tunnelId : counterValuesArgument.getValue().getAllTunnelsIds()) {
-			if(counterValuesArgument.getValue().getTunnelCounterValues().get(tunnelId) != 0) {
+			if(counterValuesArgument.getValue().getTunnelCounterValues().get(tunnelId) != -1) {
 				allZeros = false;
 				break;
 			}

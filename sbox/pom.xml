@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+    Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>eu.smartenit</groupId>
 		<artifactId>smartenit</artifactId>
-		<version>3.1</version>
+		<version>3.2</version>
 	</parent>
 
 	<groupId>eu.smartenit.sbox</groupId>
@@ -40,12 +40,8 @@
 		<module>main</module>
 		<module>interfaces</module>
 		<module>db</module>
-		<module>ctm</module>
 		<module>ntm</module>
-		<module>na</module>
 		<module>qoa</module>
-		<module>eca</module>
-		<module>alto</module>
 		<module>web</module>
 		<module>commons</module>
 	</modules>

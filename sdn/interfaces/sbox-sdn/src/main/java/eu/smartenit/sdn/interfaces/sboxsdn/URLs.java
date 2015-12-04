@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ public class URLs {
      * {@link RCVectors}, i.e., {@link RVector} and {@link CVector}.
      */
     public static final String DTM_R_C_VECTORS_PATH = "/dtm/r-c-vectors";
+
+    public static final String DTM_R_VECTORS_MAP_PATH = "/dtm/r-vectors-map";
 
     /**
      * Path used by server-side resource used for editing and retrieving

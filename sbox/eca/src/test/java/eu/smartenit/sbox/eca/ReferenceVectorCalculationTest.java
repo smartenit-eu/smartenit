@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,9 @@ public class ReferenceVectorCalculationTest {
 	private static final CostFunction costFunction3;
 	private static final CostFunction costFunction4;
 	private static final List<CostFunction> costFunctions;
-
+        private static final CostFunction costFunction5;
+        private static final CostFunction costFunction6;
+        
 	private final static DTMTrafficManager dtm = mock(DTMTrafficManager.class);
 	private final static CostFunctionDAO dao = mock(CostFunctionDAO.class);
 	private final static TimeScheduleParametersDAO tspdao = mock(TimeScheduleParametersDAO.class);
@@ -100,6 +102,18 @@ public class ReferenceVectorCalculationTest {
 		segments2.add(new Segment(14, 30, 20.5f, 0.25f));
 		segments2.add(new Segment(30, -1, -2, 1));
 		costFunction4 = new CostFunction("type", "piecewiselinear", "byte", "Euro", segments2);
+                
+                List<Segment> segments5 = new ArrayList<Segment>();
+		segments5.add(new Segment(0, 42240000000L, 0, 1.04167E-08f));
+		segments5.add(new Segment(42240000000L, 61440000000L, -990, 3.38542E-08f));
+		segments5.add(new Segment(61440000000L, -1, -5310, 1.04167E-07f));
+                costFunction5 = new CostFunction("type", "piecewiselinear", "byte", "Euro", segments5);
+                
+                List<Segment> segments6 = new ArrayList<Segment>();
+		segments6.add(new Segment(0, 19200000000L, 200, 0));
+		segments6.add(new Segment(19200000000L, 96000000000L, -300, 2.60417E-08f));
+		segments6.add(new Segment(96000000000L, -1, -5300, 7.8125E-08f));
+                costFunction6 = new CostFunction("type", "piecewiselinear", "byte", "Euro", segments6);
 	}
 	
 	@Before
@@ -257,9 +271,9 @@ public class ReferenceVectorCalculationTest {
 				ea.calculator.calculate(ea.trafficContainer.getTrafficValuesForLinks(), ea.trafficContainer.getTrafficValuesForTunnels(), 2);
 		
 		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
-		// The values 6, 30 would also be ok (i.e. all values on the line 4/32 - 6/30)
-		assertEquals(4, vectorValueList.get(0).getValue());
-		assertEquals(32, vectorValueList.get(1).getValue());
+		// The values 4/32 would also be ok (i.e. all values on the line 4/32 - 6/30)
+		assertEquals(6, vectorValueList.get(0).getValue());
+		assertEquals(30, vectorValueList.get(1).getValue());
 	}
 	
 	/**
@@ -278,9 +292,9 @@ public class ReferenceVectorCalculationTest {
 				ea.calculator.calculate(ea.trafficContainer.getTrafficValuesForLinks(), ea.trafficContainer.getTrafficValuesForTunnels(), 2);
 		
 		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
-		// The values 6, 30 would also be ok (i.e. all values on the line 5/31 - 6/30)
-		assertEquals(5, vectorValueList.get(0).getValue());
-		assertEquals(31, vectorValueList.get(1).getValue());
+		// The values 5/31 would also be ok (i.e. all values on the line 5/31 - 6/30)
+		assertEquals(6, vectorValueList.get(0).getValue());
+		assertEquals(30, vectorValueList.get(1).getValue());
 	}	
 	
 	/**
@@ -342,5 +356,39 @@ public class ReferenceVectorCalculationTest {
 		assertEquals(20, vectorValueList.get(0).getValue());
 		assertEquals(16, vectorValueList.get(1).getValue());
 	}
+        
+        @Test
+        public void twelvethTestData(){
+            when(dao.findByLinkId(id1)).thenReturn(costFunction5);
+		when(dao.findByLinkId(id2)).thenReturn(costFunction6);
+		DAOFactory.setCostFunctionDAOInstance(dao);
+		
+		EconomicAnalyzerInternal ea = new EconomicAnalyzerInternal(dtm, id1, id2);
+		ea.trafficContainer.storeTrafficValues(createXVector(67115407122L, 97571439721L, id1, id2, 2), createZVectorList(13112002694L, 19749182206L, id1, id2, 2));
+		
+		LocalVector referenceVector = 
+				ea.calculator.calculate(ea.trafficContainer.getTrafficValuesForLinks(), ea.trafficContainer.getTrafficValuesForTunnels(), 2);
+		
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
+		assertEquals(61440000000L, vectorValueList.get(0).getValue());
+		assertEquals(103246846843L, vectorValueList.get(1).getValue());
+        }
+        
+        @Test
+        public void thirteenthTestData(){
+            when(dao.findByLinkId(id1)).thenReturn(costFunction6);
+		when(dao.findByLinkId(id2)).thenReturn(costFunction5);
+		DAOFactory.setCostFunctionDAOInstance(dao);
+		
+		EconomicAnalyzerInternal ea = new EconomicAnalyzerInternal(dtm, id1, id2);
+		ea.trafficContainer.storeTrafficValues(createXVector(97571439721L, 67115407122L, id1, id2, 2), createZVectorList(19749182206L, 13112002694L, id1, id2, 2));
+		
+		LocalVector referenceVector = 
+				ea.calculator.calculate(ea.trafficContainer.getTrafficValuesForLinks(), ea.trafficContainer.getTrafficValuesForTunnels(), 2);
+		
+		List<LocalVectorValue> vectorValueList = referenceVector.getVectorValues();
+		assertEquals(61440000000L, vectorValueList.get(1).getValue());
+		assertEquals(103246846843L, vectorValueList.get(0).getValue());
+        }
 	
 }

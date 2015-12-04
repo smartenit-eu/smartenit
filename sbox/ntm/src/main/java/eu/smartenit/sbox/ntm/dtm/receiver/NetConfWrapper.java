@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,10 +134,12 @@ public class NetConfWrapper {
 	 *            ge-2/0/4
 	 * @param bandwidthLimit
 	 *            bandwidth limit value in bits per second
+	 * @param bandwidthLimitPremium
+	 *            bandwidth limit value in bits per second
 	 * @return <code>true</code> if operation was executed without errors
 	 */
-	public boolean updatePolicerConfig(String interfaceName, long bandwidthLimit) {
-		return updatePolicerConfig(interfaceName, bandwidthLimit, DEFAULT_BURST_SIZE_LIMIT);
+	public boolean updatePolicerConfig(String interfaceName, long bandwidthLimit, long bandwidthLimitPremium) {
+		return updatePolicerConfig(interfaceName, bandwidthLimit, DEFAULT_BURST_SIZE_LIMIT, bandwidthLimitPremium, DEFAULT_BURST_SIZE_LIMIT);
 	}
 	
 	/**
@@ -151,24 +153,31 @@ public class NetConfWrapper {
 	 *            bandwidth limit value in bits per second
 	 * @param burstSizeLimit
 	 *            burst size limit value in bits per second
+	 * @param bandwidthLimitPremium
+	 *            bandwidth limit value in bits per second
+	 * @param burstSizeLimitPremium
+	 *            burst size limit value in bits per second
 	 * @return <code>true</code> if operation was executed without errors
 	 */
-	public boolean updatePolicerConfig(String interfaceName, long bandwidthLimit, long burstSizeLimit) {
+	public boolean updatePolicerConfig(String interfaceName, 
+			long bandwidthLimit, long burstSizeLimit, 
+			long bandwidthLimitPremium, long burstSizeLimitPremium) {
+		
 		if (checkIfDeviceIsNull()) 
 			return false;
 		
 		String firstOperation = POLICER_CONFIG
 				.replaceAll("<POLICER_NAME>", POLICER_NAME_TEMPLATE.replaceAll("<IFACE_NAME>", interfaceName.toUpperCase()))
-				.replaceAll("<BANDWIDTH-LIMIT>", Long.toString(bandwidthLimit))
-				.replaceAll("<BURST-SIZE-LIMIT>", Long.toString(burstSizeLimit));
+				.replaceAll("<BANDWIDTH-LIMIT>", Long.toString(bandwidthLimitPremium))
+				.replaceAll("<BURST-SIZE-LIMIT>", Long.toString(burstSizeLimitPremium));
 		String secondOperation = HIERARCHICAL_POLICER_AGGREGATE_CONFIG
 				.replaceAll("<HIERARCHICAL_POLICER_NAME>", HIERARCHICAL_POLICER_NAME_TEMPLATE.replaceAll("<IFACE_NAME>", interfaceName.toUpperCase()))
 				.replaceAll("<BANDWIDTH-LIMIT>", Long.toString(bandwidthLimit))
 				.replaceAll("<BURST-SIZE-LIMIT>", Long.toString(burstSizeLimit));
 		String thirdOperation = HIERARCHICAL_POLICER_PREMIUM_CONFIG
 				.replaceAll("<HIERARCHICAL_POLICER_NAME>", HIERARCHICAL_POLICER_NAME_TEMPLATE.replaceAll("<IFACE_NAME>", interfaceName.toUpperCase()))
-				.replaceAll("<BANDWIDTH-LIMIT>", Long.toString(bandwidthLimit))
-				.replaceAll("<BURST-SIZE-LIMIT>", Long.toString(burstSizeLimit));
+				.replaceAll("<BANDWIDTH-LIMIT>", Long.toString(bandwidthLimitPremium))
+				.replaceAll("<BURST-SIZE-LIMIT>", Long.toString(burstSizeLimitPremium));
 		
 		return connectAndExecuteOperation(
 				MESSAGE_TEMPLATE.replaceAll("<OPERATION-STRING>", firstOperation)
@@ -217,8 +226,10 @@ public class NetConfWrapper {
 	private boolean connectAndExecuteOperation(String... messages) {
 		try {
 			device.connect();
-			for (String message : messages)
+			for (String message : messages) {
+				logger.debug("NETCONF (configuration sent to device " + device.gethostName() + "): " + message);
 				device.executeRPC(message);
+			}
 			device.commit();
 			return true;
 			

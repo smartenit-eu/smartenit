@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,10 +58,13 @@ public class DelayTolerantTrafficManager {
 					link.getPhysicalInterfaceName(),
 					bgRouter.getManagementAddress().getPrefix(),
 					vectorValue.getValue());
+			logger.debug("Configuration parameters for that interface: " +
+					"PolicerBandwidthLimitFactor = " + link.getPolicerBandwidthLimitFactor() + " and " + 
+					"AggregateLeakageFactor = " + link.getAggregateLeakageFactor());
+			long bandwidthLimit = calculateBandwidthLimit(vectorValue.getValue(), link.getPolicerBandwidthLimitFactor());
+			long bandwidthLimitPremium = (long)((1 - link.getAggregateLeakageFactor()) * bandwidthLimit);
 			boolean success = NetConfWrapper.build(bgRouter)
-					.updatePolicerConfig(
-							link.getPhysicalInterfaceName(), 
-							calculateBandwidthLimit(vectorValue.getValue(), link.getPolicerBandwidthLimitFactor()));
+					.updatePolicerConfig(link.getPhysicalInterfaceName(), bandwidthLimit, bandwidthLimitPremium);
 			if (!success)
 				logger.warn("Configuration action was not executed correctly.");
 		}
@@ -94,10 +97,10 @@ public class DelayTolerantTrafficManager {
 			SimpleLinkID simpleLinkID = (SimpleLinkID)linkID;
 			if (!linksWithDeactivatedFilters.contains(simpleLinkID)) {
 				Link link = DAOFactory.getLinkDAOInstance().findById(simpleLinkID);
-				logger.debug("Deacvtivating filter on link {}", simpleLinkID);
+				logger.info("Deactivating filter on link/interface " + simpleLinkID + "/" + link.getFilterInterfaceName());
 				boolean success = NetConfWrapper
 						.build(link.getBgRouter())
-						.deactivateHierarchicalFilter(link.getPhysicalInterfaceName());
+						.deactivateHierarchicalFilter(link.getFilterInterfaceName());
 				if (!success)
 					logger.warn("Configuration action was not executed correctly.");
 				else
@@ -113,10 +116,10 @@ public class DelayTolerantTrafficManager {
 	public void activateFiltersOnAllLinks() {
 		for (SimpleLinkID simpleLinkID : linksWithDeactivatedFilters) {
 			Link link = DAOFactory.getLinkDAOInstance().findById(simpleLinkID);
-			logger.debug("Activating filter on link {}", simpleLinkID);
+			logger.info("Activating filter on link/interface " + simpleLinkID + "/" + link.getFilterInterfaceName());
 			boolean success = NetConfWrapper
 					.build(link.getBgRouter())
-					.activateHierarchicalFilter(link.getPhysicalInterfaceName());
+					.activateHierarchicalFilter(link.getFilterInterfaceName());
 			if (!success)
 				logger.warn("Configuration action was not executed correctly.");
 		}

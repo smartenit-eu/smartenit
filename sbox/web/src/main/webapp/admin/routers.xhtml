@@ -41,8 +41,9 @@
 						<ul class="nav navbar-nav navbar-right">
 							<li><a href="index.xhtml">Home</a></li>
 							<li><a href="isp.xhtml">ISP</a></li>
-							<li class="dropdown active"><a href="#" class="dropdown-toggle"
-								data-toggle="dropdown">Network <b class="caret"></b></a>
+							<li class="dropdown active"><a href="#"
+								class="dropdown-toggle" data-toggle="dropdown">Network <b
+									class="caret"></b></a>
 								<ul class="dropdown-menu">
 									<li><a href="routers.xhtml">Routers</a></li>
 									<li><a href="sdncontrollers.xhtml">SDN Controllers</a></li>
@@ -87,7 +88,7 @@
 							value="#{routersBean.bgRouter.managementAddress.prefix}" />
 					</div>
 				</div>
-				
+
 				<div class="form-group">
 					<label for="ases" class="col-xs-4 control-label">AS</label>
 					<div class="col-xs-3">
@@ -98,35 +99,35 @@
 						</h:selectOneMenu>
 					</div>
 				</div>
-				
+
 				<div class="form-group">
-					<label for="bgRouterSnmpCommunity" class="col-xs-4 control-label">SNMP 
+					<label for="bgRouterSnmpCommunity" class="col-xs-4 control-label">SNMP
 						Community</label>
 					<div class="col-xs-6">
 						<h:inputText type="text" class="form-control"
-							id="bgRouterSnmpCommunity" 
+							id="bgRouterSnmpCommunity"
 							value="#{routersBean.bgRouter.snmpCommunity}" />
 					</div>
 				</div>
-								
+
 				<div class="form-group">
-					<label for="netconfUsername" class="col-xs-4 control-label">NetConf Username</label>
+					<label for="netconfUsername" class="col-xs-4 control-label">NetConf
+						Username</label>
 					<div class="col-xs-6">
-						<h:inputText type="text" class="form-control"
-							id="netconfUsername" 
+						<h:inputText type="text" class="form-control" id="netconfUsername"
 							value="#{routersBean.bgRouter.netconfUsername}" />
 					</div>
 				</div>
-				
+
 				<div class="form-group">
-					<label for="netconfPassword" class="col-xs-4 control-label">NetConf Password</label>
+					<label for="netconfPassword" class="col-xs-4 control-label">NetConf
+						Password</label>
 					<div class="col-xs-6">
-						<h:inputText type="text" class="form-control"
-							id="netconfPassword" 
+						<h:inputText type="text" class="form-control" id="netconfPassword"
 							value="#{routersBean.bgRouter.netconfPassword}" />
 					</div>
 				</div>
-				
+
 
 				<div class="form-group">
 					<div class="btn-group col-xs-6 col-xs-offset-4">
@@ -180,36 +181,36 @@
 							value="#{routersBean.daRouter.managementAddress.prefix}" />
 					</div>
 				</div>
-				
+
 				<div class="form-group">
-					<label for="daRouterSnmpCommunity" class="col-xs-4 control-label">SNMP 
+					<label for="daRouterSnmpCommunity" class="col-xs-4 control-label">SNMP
 						Community</label>
 					<div class="col-xs-6">
 						<h:inputText type="text" class="form-control"
-							id="daRouterSnmpCommunity" 
+							id="daRouterSnmpCommunity"
 							value="#{routersBean.daRouter.snmpCommunity}" />
 					</div>
 				</div>
-				
+
 				<div class="form-group">
-					<label for="daRouterOfSwitchDPID" class="col-xs-4 control-label">OF Switch 
-						ID</label>
+					<label for="daRouterOfSwitchDPID" class="col-xs-4 control-label">OF
+						Switch ID</label>
 					<div class="col-xs-6">
 						<h:inputText type="text" class="form-control"
-							id="daRouterOfSwitchDPID" 
+							id="daRouterOfSwitchDPID"
 							value="#{routersBean.daRouter.ofSwitchDPID}" />
 					</div>
 				</div>
-				
+
 				<div class="form-group">
-					<label for="localDCOfSwitchPortNumbers" class="col-xs-4 control-label"> Switch 
-						Port Numbers</label>
+					<label for="localDCOfSwitchPortNumbers"
+						class="col-xs-4 control-label"> OF Switch Ports</label>
 					<div class="col-xs-6">
 						<h:inputText type="text" class="form-control"
-							id="localDCOfSwitchPortNumbers" 
-							value="#{routersBean.daRouter.localDCOfSwitchPortNumbers}" >
-								<f:converter
-									converterId="eu.smartenit.sbox.web.util.IntegerListConverter" />
+							id="localDCOfSwitchPortNumbers"
+							value="#{routersBean.daRouter.localDCOfSwitchPortNumbers}">
+							<f:converter
+								converterId="eu.smartenit.sbox.web.util.IntegerListConverter" />
 						</h:inputText>
 					</div>
 				</div>
@@ -240,13 +241,13 @@
 								#{da.ofSwitchDPID}
 							</h:column>
 						<h:column>
-							<f:facet name="header">Switch Ports</f:facet>
-								<h:outputText type="text"
-									value="#{da.localDCOfSwitchPortNumbers}" >
-									<f:converter converterId=
-										"eu.smartenit.sbox.web.util.IntegerListConverter" />
-								</h:outputText>
-							</h:column>
+							<f:facet name="header">OF Switch Ports</f:facet>
+							<h:outputText type="text"
+								value="#{da.localDCOfSwitchPortNumbers}">
+								<f:converter
+									converterId="eu.smartenit.sbox.web.util.IntegerListConverter" />
+							</h:outputText>
+						</h:column>
 						<h:column>
 							<f:facet name="header">Actions</f:facet>
 							<div class="btn-group">
@@ -375,12 +376,12 @@
 													'darouters:localDCOfSwitchPortNumbers' : {
 														validators : {
 															notEmpty : {
-																message : 'The list of switch port numbers must not be empty.'
+																message : 'The list of OF Switch Ports must not be empty.'
 															},
-															regexp: {
-																	regexp: /^\[( *\d+,)*( *\d+)\]$/ ,
-											                        message: 'The list of switch port numbers must be a comma-delimitered list of integers inside brackets, e.g. [], [1], [1,2, 33].'
-											                    }
+															regexp : {
+																regexp : /^\[( *\d+,)*( *\d+)\]$/,
+																message : 'The list of OF Switch Ports must be a comma-delimitered list of integers inside brackets, e.g. [], [1], [1,2, 33].'
+															}
 														}
 													}
 												}

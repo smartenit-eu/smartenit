@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,6 +115,30 @@ public class XVectorCalculationTest {
 		assertEquals(2, result.getVectorValues().size());
 		assertEquals(10, result.getVectorValueForLink(linkID1));
 		assertEquals(0, result.getVectorValueForLink(linkID2));
+	}
+	
+	@Test
+	public void shouldCalculateXVectorEvenIfCounterValueIsZero() {
+		linkID1 = new SimpleLinkID("link1", "isp1");
+		linkID2 = new SimpleLinkID("link2", "isp1");
+		values1 = new CounterValues();
+		values1.storeCounterValue(linkID1, 100);
+		values1.storeCounterValue(linkID2, 200);
+		values2 = new CounterValues();
+		values2.storeCounterValue(linkID1, 0);
+		values2.storeCounterValue(linkID2, 210);
+		values3 = new CounterValues();
+		values3.storeCounterValue(linkID1, 300);
+		values3.storeCounterValue(linkID2, 220);
+		
+		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, null);
+		processor.calculateXVector(1, null, values1);
+		processor.calculateXVector(1, null, values2);
+		XVector result = processor.calculateXVector(1, null, values3);
+		
+		assertEquals(2, result.getVectorValues().size());
+		assertEquals(200, result.getVectorValueForLink(linkID1));
+		assertEquals(10, result.getVectorValueForLink(linkID2));
 	}
 	
 	@Test

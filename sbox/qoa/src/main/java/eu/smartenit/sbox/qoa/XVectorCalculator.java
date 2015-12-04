@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,8 @@ public class XVectorCalculator extends VectorCalculator {
 				xVectorValue = 0;
 			}
 			newXVector.addVectorValueForLink(linkID, xVectorValue);
-			latestCounterValues.storeCounterValue(linkID, currentCounterValue);
+			if (currentCounterValue != -1 && currentCounterValue != 0)
+				latestCounterValues.storeCounterValue(linkID, currentCounterValue);
 		}
 		
 		return newXVector;

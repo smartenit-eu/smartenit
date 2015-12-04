@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,8 @@ public @interface BindLink {
 					q.bind("tunnelEndPrefix", arg.getTunnelEndPrefix().getPrefix());
 					q.bind("tunnelEndPrefixLength", arg.getTunnelEndPrefix().getPrefixLength());
 					q.bind("policerBandwidthLimitFactor", arg.getPolicerBandwidthLimitFactor());
+					q.bind("filterInterfaceName", arg.getFilterInterfaceName());
+					q.bind("aggregateLeakageFactor", arg.getAggregateLeakageFactor());
 				}
 			};
 		}

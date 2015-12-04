@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,8 +100,12 @@ public class DelayTolerantTrafficManagementTest {
     	BGRouter bgRouterForLinkID2 = new BGRouter(new NetworkAddressIPv4("192.168.2.1", 32), "", null);
     	Link link1 = new Link(linkID1, null, "ethOnLink1", 0, null, null, null, bgRouterForLinkID1, null, new NetworkAddressIPv4("10.10.10.10", 24));
     	link1.setPolicerBandwidthLimitFactor(0.8);
+    	link1.setFilterInterfaceName("eth1OnLink1");
+    	link1.setAggregateLeakageFactor(0.05);
     	Link link2 = new Link(linkID2, null, "ethOnLink2", 0, null, null, null, bgRouterForLinkID2, null, new NetworkAddressIPv4("20.20.20.20", 24));
     	link2.setPolicerBandwidthLimitFactor(0.0);
+    	link2.setFilterInterfaceName("eth1OnLink2");
+    	link2.setAggregateLeakageFactor(0.10);
     	when(dao.findById(linkID1)).thenReturn(link1);
     	when(dao.findById(linkID2)).thenReturn(link2);
 
@@ -136,10 +140,11 @@ public class DelayTolerantTrafficManagementTest {
 		manager.updateRVector(rVector);
 		
 		ArgumentCaptor<Long> bandwidthLimit = ArgumentCaptor.forClass(Long.class);
-
+		ArgumentCaptor<Long> bandwidthLimitPremium = ArgumentCaptor.forClass(Long.class);
+		
 		Thread.sleep(1000);
 		verify(client, times(2)).send(any(String.class), anyInt(), any(CVector.class), any(RVector.class));
-		verify(netconf, times(4)).updatePolicerConfig(anyString(), bandwidthLimit.capture());
+		verify(netconf, times(4)).updatePolicerConfig(anyString(), bandwidthLimit.capture(), bandwidthLimitPremium.capture());
 		assertEquals(212L, bandwidthLimit.getAllValues().get(0).longValue());
 		assertEquals(533L, bandwidthLimit.getAllValues().get(1).longValue());
 		assertEquals(212L, bandwidthLimit.getAllValues().get(2).longValue());
@@ -196,8 +201,8 @@ public class DelayTolerantTrafficManagementTest {
 		
 		Thread.sleep(1000);
 		verify(netconf, times(2)).deactivateHierarchicalFilter(deactivatedIfaceName.capture());
-		assertEquals("ethOnLink1", deactivatedIfaceName.getAllValues().get(0));
-		assertEquals("ethOnLink2", deactivatedIfaceName.getAllValues().get(1));
+		assertEquals("eth1OnLink1", deactivatedIfaceName.getAllValues().get(0));
+		assertEquals("eth1OnLink2", deactivatedIfaceName.getAllValues().get(1));
 		verify(netconf, times(2)).activateHierarchicalFilter(activatedIfaceName.capture());
 	}
 	

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,6 +154,49 @@ public class ZVectorCalculationTest {
 		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, monitoredTunnels);
 		processor.calculateZVectors(1, null, values);
 		List<ZVector> result = processor.calculateZVectors(1, null, values2);
+		
+		assertNotNull(result);
+		assertEquals(2, result.size());
+		assertEquals(1, result.get(0).getSourceAsNumber());
+		ZVector zVector = getZVectorForDC2DCCommunicationID(result, com1ID);
+		assertEquals(0, zVector.getVectorValueForLink(link111ID));
+		zVector = getZVectorForDC2DCCommunicationID(result, com2ID);
+		assertEquals(200, zVector.getVectorValueForLink(link121ID));
+	}
+	
+	@Test
+	public void shouldCalculateZVectorsEvenIfCounterValueIsZero() {
+		values = new CounterValues();
+		values.storeCounterValue(tunnel1111ID, 120);
+		values.storeCounterValue(tunnel1121ID, 200);
+		values.storeCounterValue(tunnel1211ID, 145);
+		values.storeCounterValue(tunnel1212ID, 325);
+		values.storeCounterValue(tunnel1221ID, 210);
+		values.storeCounterValue(tunnel1222ID, 50);
+		values.storeCounterValue(tunnel1223ID, 80);
+		
+		values2 = new CounterValues();
+		values2.storeCounterValue(tunnel1111ID, 120);
+		values2.storeCounterValue(tunnel1121ID, 220);
+		values2.storeCounterValue(tunnel1211ID, 345);
+		values2.storeCounterValue(tunnel1212ID, 0);
+		values2.storeCounterValue(tunnel1221ID, 254);
+		values2.storeCounterValue(tunnel1222ID, 376);
+		values2.storeCounterValue(tunnel1223ID, 2352);
+		
+		values3 = new CounterValues();
+		values3.storeCounterValue(tunnel1111ID, 120);
+		values3.storeCounterValue(tunnel1121ID, 220);
+		values3.storeCounterValue(tunnel1211ID, 345);
+		values3.storeCounterValue(tunnel1212ID, 525);
+		values3.storeCounterValue(tunnel1221ID, 254);
+		values3.storeCounterValue(tunnel1222ID, 376);
+		values3.storeCounterValue(tunnel1223ID, 2352);
+		
+		MonitoringDataProcessor processor = new MonitoringDataProcessor(null, monitoredTunnels);
+		processor.calculateZVectors(1, null, values);
+		processor.calculateZVectors(1, null, values2);
+		List<ZVector> result = processor.calculateZVectors(1, null, values3);
 		
 		assertNotNull(result);
 		assertEquals(2, result.size());

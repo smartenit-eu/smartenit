@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.mockito.ArgumentCaptor;
 import org.xml.sax.SAXException;
 
 import eu.smartenit.sbox.db.dto.BGRouter;
+import eu.smartenit.sbox.db.dto.Link;
 import eu.smartenit.sbox.db.dto.NetworkAddressIPv4;
 
 /**
@@ -107,7 +108,7 @@ public class NetConfWrapperTest {
 				"<load-configuration action=\"set\" format=\"text\">" +
 					"<configuration-set>" +
 						"set firewall policer POLICER_EF_GE-2/0/4" + 
-						" if-exceeding bandwidth-limit 100000 burst-size-limit 625000" +
+						" if-exceeding bandwidth-limit 150000 burst-size-limit 625000" +
 					"</configuration-set>" +
 				"</load-configuration>" +
 			"</rpc>";
@@ -127,14 +128,14 @@ public class NetConfWrapperTest {
 				"<load-configuration action=\"set\" format=\"text\">" +
 					"<configuration-set>" +
 						"set firewall hierarchical-policer POLICER_TOLERANT_TRAFFIC_GE-2/0/4" +
-	 					" premium if-exceeding bandwidth-limit 100000 burst-size-limit 625000" +
+	 					" premium if-exceeding bandwidth-limit 150000 burst-size-limit 625000" +
 					"</configuration-set>" +
 				"</load-configuration>" +
 			"</rpc>";
 	
 	@Test
 	public void shouldSetBandwidthLimit() throws SAXException, IOException {
-		NetConfWrapper.build(device).updatePolicerConfig(INTERFACE_NAME, 100000);
+		NetConfWrapper.build(device).updatePolicerConfig(INTERFACE_NAME, 100000, 150000);
 		verify(device, times(1)).connect();
 		ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
 		verify(device, times(3)).executeRPC(message.capture());
@@ -150,7 +151,7 @@ public class NetConfWrapperTest {
 		Device device = null;
 		assertFalse(NetConfWrapper.build(device).activateHierarchicalFilter(INTERFACE_NAME));
 		assertFalse(NetConfWrapper.build(device).deactivateHierarchicalFilter(INTERFACE_NAME));
-		assertFalse(NetConfWrapper.build(device).updatePolicerConfig(INTERFACE_NAME, 100000));
+		assertFalse(NetConfWrapper.build(device).updatePolicerConfig(INTERFACE_NAME, 100000, 150000));
 	}
 	
 	@After
@@ -173,13 +174,29 @@ public class NetConfWrapperTest {
 	@Ignore
 	@Test
 	public void shouldSetBandwidthLimitOnRealDevice() {
-		assertTrue(NetConfWrapper.build(bgRouter).updatePolicerConfig(INTERFACE_NAME, 250000));
+		assertTrue(NetConfWrapper.build(bgRouter).updatePolicerConfig(INTERFACE_NAME, 275000, 250000));
 	}
 	
 	@Ignore
 	@Test
 	public void shouldSetBandwidthLimitAndBurstSizeOnRealDevice() {
-		assertTrue(NetConfWrapper.build(bgRouter).updatePolicerConfig(INTERFACE_NAME, 120000, 125000));
+		assertTrue(NetConfWrapper.build(bgRouter).updatePolicerConfig(INTERFACE_NAME, 200000, 125000, 180000, 125000));
+	}
+	
+	@Test
+	public void bandwidthCalculationTest() {
+		long value = 333000000;
+		Link link = new Link();
+		link.setPolicerBandwidthLimitFactor(1.0);
+		link.setAggregateLeakageFactor(0.05);
+		
+		double factor = link.getPolicerBandwidthLimitFactor();
+		if (factor == 0) factor = 1;
+		long bandwidthLimit = (long)((value * 8 / 300) * link.getPolicerBandwidthLimitFactor());
+		long bandwidthLimitPremium = (long)((1 - link.getAggregateLeakageFactor()) * bandwidthLimit);
+		
+		assertEquals(8880000, bandwidthLimit);
+		assertEquals(8436000, bandwidthLimitPremium);
 	}
 	
 }

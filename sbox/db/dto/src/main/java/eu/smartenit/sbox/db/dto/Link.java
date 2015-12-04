@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,8 @@ public final class Link implements Serializable {
 		this.bgRouter = new BGRouter();
 		this.tunnelEndPrefix = new NetworkAddressIPv4();
 		this.policerBandwidthLimitFactor = 1.0;
+		this.vlan = 0;
+		this.aggregateLeakageFactor = 0;
 	}
 
 
@@ -84,6 +86,8 @@ public final class Link implements Serializable {
 		this.traversingTunnels = traversingTunnels;
 		this.tunnelEndPrefix = tunnelEndPrefix;
 		this.policerBandwidthLimitFactor = 1.0;
+		this.vlan = 0;
+		this.aggregateLeakageFactor = 0;
 	}
 
 
@@ -110,6 +114,10 @@ public final class Link implements Serializable {
 	private NetworkAddressIPv4 tunnelEndPrefix;
 	
 	private double policerBandwidthLimitFactor;
+	
+	private String filterInterfaceName;
+	
+	private double aggregateLeakageFactor;
 	
 	/* Extended to support packet counters*/
 	private String inboundInterfaceCounterOID_UcastPkts;
@@ -261,8 +269,24 @@ public final class Link implements Serializable {
 			String outboundInterfaceCounterOID_BroadcastPkts) {
 		this.outboundInterfaceCounterOID_BroadcastPkts = outboundInterfaceCounterOID_BroadcastPkts;
 	}
-
 	
+	public String getFilterInterfaceName() {
+		return filterInterfaceName;
+	}
+
+	public void setFilterInterfaceName(String filterInterfaceName) {
+		this.filterInterfaceName = filterInterfaceName;
+	}
+
+	public double getAggregateLeakageFactor() {
+		return aggregateLeakageFactor;
+	}
+
+	public void setAggregateLeakageFactor(double aggregateLeakageFactor) {
+		this.aggregateLeakageFactor = aggregateLeakageFactor;
+	}
+
+
 	@Override
 	public String toString() {
 		return "Link [linkID=" + linkID + ", address=" + address
@@ -274,7 +298,9 @@ public final class Link implements Serializable {
 				+ ", traversingTunnels=" + traversingTunnels
 				+ ", tunnelEndPrefix=" + tunnelEndPrefix
 				+ ", policerBandwidthLimitFactor="
-				+ policerBandwidthLimitFactor
+				+ policerBandwidthLimitFactor + ", filterInterfaceName="
+				+ filterInterfaceName + ", aggregateLeakageFactor="
+				+ aggregateLeakageFactor
 				+ ", inboundInterfaceCounterOID_UcastPkts="
 				+ inboundInterfaceCounterOID_UcastPkts
 				+ ", outboundInterfaceCounterOID_UcastPkts="

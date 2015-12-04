@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,13 +118,13 @@ public class TrafficCollectorTask implements Runnable {
 
 	protected void initilizeCollectedCounterValuesWithTunnels(BGRouter bgRouter) {
 		for (Tunnel tunnel : getTunnelsByBGRouter(bgRouter)) {
-			collectedCounterValues.storeCounterValue(tunnel.getTunnelID(), 0);
+			collectedCounterValues.storeCounterValue(tunnel.getTunnelID(), -1);
 		}
 	}
 
 	protected void initilizeCollectedCounterValuesWithLinks(BGRouter bgRouter) {
 		for (Link link : getLinksByBGRouter(bgRouter))
-			collectedCounterValues.storeCounterValue(link.getLinkID(), 0);
+			collectedCounterValues.storeCounterValue(link.getLinkID(), -1);
 	}
 	
 	protected List<ScheduledFuture<CounterValues>> createThreadsForDARouters() {
@@ -142,7 +142,7 @@ public class TrafficCollectorTask implements Runnable {
 
 	protected void initilizeCollectedCounterValuesWithTunnels(DARouter daRouter) {
 		for (Tunnel tunnel : getTunnelsByDARouter(daRouter)) {
-			collectedCounterValues.storeCounterValue(tunnel.getTunnelID(), 0);
+			collectedCounterValues.storeCounterValue(tunnel.getTunnelID(), -1);
 		}
 	}
 

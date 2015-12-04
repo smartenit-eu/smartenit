@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+    Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 
   <groupId>eu.smartenit</groupId>
   <artifactId>smartenit</artifactId>
-  <version>3.1</version>
+  <version>3.2</version>
   <packaging>pom</packaging>
 
   <name>SmartenIT Software</name>
@@ -70,7 +70,7 @@
     <clean.plugin.version>2.5</clean.plugin.version>
     <site.plugin.version>3.3</site.plugin.version>
 
-    <project.inceptionYear>2014</project.inceptionYear>
+    <project.inceptionYear>2015</project.inceptionYear>
   </properties>
 
   <dependencyManagement>
@@ -306,7 +306,6 @@
     <module>unada</module>
     <module>enduser</module>
     <module>sdn</module>
-    <module>network</module>
     <module>dist</module>
   </modules>
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The SmartenIT consortium (http://www.smartenit.eu)
+ * Copyright (C) 2015 The SmartenIT consortium (http://www.smartenit.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class DTMRestletRoutable implements RestletRoutable {
         logger.debug("Creating DTM restlet");
         Router router = new Router(context);
         router.attach(URLs.DTM_R_C_VECTORS_PATH, RCVectorsResource.class);
+        router.attach(URLs.DTM_R_VECTORS_MAP_PATH, RVectorsMapResource.class);
         router.attach(URLs.DTM_CONFIG_DATA_PATH, ConfigDataResource.class);
         logger.debug("getRestlet(Context) end");
         return router;
